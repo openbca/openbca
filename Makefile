@@ -7,10 +7,14 @@ init:
 	sqlmesh plan dev
 
 run:
-	sqlmesh --gateway duckdb plan dev --auto-apply
+	#sqlmesh --gateway duckdb plan dev --auto-apply
+	sqlmesh --gateway duckdb plan --auto-apply
 
 run_bq:
 	sqlmesh --gateway bigquery plan dev --auto-apply
 
 login:
 	sqlmesh login --gateway duckdb
+
+clean:
+	sqlmesh invalidate dev
