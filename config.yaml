@@ -1,0 +1,20 @@
+gateways:
+  duckdb:
+    connection:
+      type: duckdb
+      database: db.db
+  duckdb2:
+    connection:
+      type: duckdb
+      database: db2.db
+  bigquery:
+    connection:
+      type: bigquery
+      project: oeem-dev-loic
+
+
+default_gateway: duckdb
+
+model_defaults:
+  dialect: duckdb
+  start: 2025-04-01

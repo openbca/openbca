@@ -1,0 +1,26 @@
+test_example_full_model:
+  model: flexvalue.project_costs
+  inputs:
+    flexvalue.project:
+      rows:
+      - project_id: 1
+        utility: pge
+        region: ca
+        start_year: 2020
+        start_month: 1
+        start_quarter: 1
+        admin_cost: 2
+        ntg: 3
+        incentive_cost: 4
+        measure_cost: 5
+        discount_rate: 6
+        eul: 7
+        units: 8
+        mwh_savings: 9
+        therms_savings: 10
+  outputs:
+    partial: true
+    query:
+      rows:
+      - project_id: 1
+        trc_costs: 4.8
