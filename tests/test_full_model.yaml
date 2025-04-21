@@ -11,6 +11,7 @@ test_example_full_model:
         start_quarter: 1
         admin_cost: 2
         ntg: 3
+        value_curve_name: test
         incentive_cost: 4
         measure_cost: 5
         discount_rate: 6

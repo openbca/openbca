@@ -9,5 +9,6 @@ MODEL (
 select
     utility, region,
     year, quarter, month, datetime,
-    total, marginal_ghg
+    total, marginal_ghg,
+    market, t_d, environment, btm_methane, upstream_methane, value_curve_name
 from read_parquet('parquet/gas_av_costs/*.parquet')

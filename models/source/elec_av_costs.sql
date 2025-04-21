@@ -10,7 +10,10 @@ MODEL (
 select
     utility, region,
     datetime::TIMESTAMP,
-    total, marginal_ghg,
+    energy, losses, ancillary_services, capacity,
+    transmission, distribution, cap_and_trade, ghg_adder, ghg_rebalancing,
+    methane_leakage, ghg_adder_rebalancing,
+    total, marginal_ghg, value_curve_name,
     EXTRACT(year from datetime::TIMESTAMP) as year,
     EXTRACT(quarter from datetime::TIMESTAMP) as quarter,
     EXTRACT(month from datetime::TIMESTAMP) as month,

@@ -5,7 +5,7 @@ MODEL (
 );
 
 SELECT pcwdga.project_id
-, therms_profile.therms_profile
+, therms_profile.therms_profile_name
 , MAX(pcwdga.trc_costs) as trc_costs
 , MAX(pcwdga.pac_costs) as pac_costs
 , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * therms_profile.value * pcwdga.discount * pcwdga.total) as gas_benefits
@@ -15,7 +15,7 @@ SELECT pcwdga.project_id
 , pcwdga.datetime
 FROM flexvalue.project_costs_with_discounted_gas_av pcwdga
 JOIN flexvalue.therms_profile therms_profile
-    ON pcwdga.therms_profile = therms_profile.therms_profile
+    ON pcwdga.therms_profile = therms_profile.therms_profile_name
         AND therms_profile.utility = pcwdga.utility
         AND therms_profile.month = pcwdga.month
-GROUP BY pcwdga.project_id, eul, pcwdga.datetime, therms_profile.therms_profile
+GROUP BY pcwdga.project_id, eul, pcwdga.datetime, therms_profile.therms_profile_name
