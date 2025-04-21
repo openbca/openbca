@@ -10,7 +10,8 @@ Cons:
 
 TODO for the POC:
  - validate that SQLMesh can be used to run SQL queries locally and in BigQuery
- - illustrate how to work with different inputs/outputs and different granularity (without taking parametrizing the columns)
+ - validate we can use [Python models](https://sqlmesh.readthedocs.io/en/stable/concepts/models/python_models/)
+ - how to work with different inputs/outputs and different granularity (without parametrizing the columns)
 
 TODO to make it production ready:
  - load test with large datasets
