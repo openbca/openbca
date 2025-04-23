@@ -90,35 +90,25 @@ elec_calculations AS (
             ),
 gas_calculations AS (
     SELECT pcwdga.project_id
-    , therms_profile.therms_profile
+    , tpp.therms_profile
     , MAX(pcwdga.trc_costs) as trc_costs
     , MAX(pcwdga.pac_costs) as pac_costs
-    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * therms_profile.value * pcwdga.discount * pcwdga.total) as gas_benefits
-    , SUM((pcwdga.units * pcwdga.therms_savings * pcwdga.ntg * therms_profile.value) / CAST(pcwdga.eul AS FLOAT) ) as annual_net_therms_savings
-    , SUM(pcwdga.units * pcwdga.therms_savings * pcwdga.ntg * therms_profile.value) as lifecycle_net_therms_savings
-    , SUM(pcwdga.units * pcwdga.therms_savings * pcwdga.ntg * therms_profile.value * pcwdga.marginal_ghg) as lifecycle_gas_ghg_savings
-
-    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * therms_profile.value * pcwdga.discount * pcwdga.t_d) as t_d
-
-
-    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * therms_profile.value * pcwdga.discount * pcwdga.environment) as environment
-
-
-    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * therms_profile.value * pcwdga.discount * pcwdga.upstream_methane) as upstream_methane
-
-
-    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * therms_profile.value * pcwdga.discount * pcwdga.btm_methane) as btm_methane
-
-
-    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * therms_profile.value * pcwdga.discount * pcwdga.market) as market
-
+    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * tpp.value * pcwdga.discount * pcwdga.total) as gas_benefits
+    , SUM((pcwdga.units * pcwdga.therms_savings * pcwdga.ntg * tpp.value) / CAST(pcwdga.eul AS FLOAT) ) as annual_net_therms_savings
+    , SUM(pcwdga.units * pcwdga.therms_savings * pcwdga.ntg * tpp.value) as lifecycle_net_therms_savings
+    , SUM(pcwdga.units * pcwdga.therms_savings * pcwdga.ntg * tpp.value * pcwdga.marginal_ghg) as lifecycle_gas_ghg_savings
+    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * tpp.value * pcwdga.discount * pcwdga.t_d) as t_d
+    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * tpp.value * pcwdga.discount * pcwdga.environment) as environment
+    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * tpp.value * pcwdga.discount * pcwdga.upstream_methane) as upstream_methane
+    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * tpp.value * pcwdga.discount * pcwdga.btm_methane) as btm_methane
+    , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * tpp.value * pcwdga.discount * pcwdga.market) as market
     , pcwdga.datetime
     FROM project_costs_with_discounted_gas_av pcwdga
-    JOIN flexvalue.therms_profile_pivoted therms_profile
-        ON UPPER(pcwdga.therms_profile) = UPPER(therms_profile.therms_profile)
-            AND therms_profile.utility = pcwdga.utility
-            AND therms_profile.month = pcwdga.month
-    GROUP BY pcwdga.project_id, pcwdga.eul, pcwdga.datetime, therms_profile.therms_profile
+    JOIN flexvalue.therms_profile_pivoted tpp
+        ON UPPER(pcwdga.therms_profile) = UPPER(tpp.therms_profile)
+            AND tpp.utility = pcwdga.utility
+            AND tpp.month = pcwdga.month
+    GROUP BY pcwdga.project_id, pcwdga.eul, pcwdga.datetime, tpp.therms_profile
     )
 
 SELECT

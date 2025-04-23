@@ -10,6 +10,9 @@ run:
 	sqlmesh plan dev --auto-apply #--include-unmodified
 	#sqlmesh --gateway duckdb plan --auto-apply
 
+run-bq:
+	sqlmesh --gateway bigquery plan dev --auto-apply
+
 test:
 	sqlmesh test
 

@@ -1,5 +1,3 @@
--- state,utility,region,quarter,month,summer,annual,winter
-
 MODEL (
   name flexvalue.therms_profile_pivoted,
   kind FULL,
