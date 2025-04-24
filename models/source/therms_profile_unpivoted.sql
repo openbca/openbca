@@ -1,5 +1,5 @@
 MODEL (
-  name flexvalue.therms_profile_pivoted,
+  name flexvalue.therms_profile_unpivoted,
   kind FULL,
   grain (state, utility, quarter, month, therms_profile),
 );

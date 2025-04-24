@@ -14,6 +14,7 @@ run-bq:
 	sqlmesh --gateway bigquery plan dev --auto-apply
 
 test:
+	PYTHONPATH=. pytest tests/
 	sqlmesh test
 
 integration-test: init-test

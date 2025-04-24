@@ -9,7 +9,7 @@ Cons:
  - SQLMesh requires to store its state in a database.
 
 TODO for the POC:
- - validate that SQLMesh can be used to run SQL queries locally and in BigQuery
+ - validate that SQLMesh can be us ed to run SQL queries locally and in BigQuery
  - validate we can use [Python models](https://sqlmesh.readthedocs.io/en/stable/concepts/models/python_models/)
  - how to work with different inputs/outputs and different granularity (without parametrizing the columns)
 

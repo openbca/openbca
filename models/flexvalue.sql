@@ -62,7 +62,7 @@ elec_calculations AS (
     , pcwdea.admin_cost
     , pcwdea.incentive_cost
     FROM project_costs_with_discounted_elec_av pcwdea
-    JOIN flexvalue.elec_load_shape_pivoted elec_load_shape
+    JOIN flexvalue.elec_load_shape_unpivoted elec_load_shape
         ON UPPER(elec_load_shape.load_shape_name) = UPPER(pcwdea.load_shape_name)
             AND elec_load_shape.utility = pcwdea.utility
             AND elec_load_shape.hour_of_year = pcwdea.hour_of_year
@@ -104,7 +104,7 @@ gas_calculations AS (
     , SUM(pcwdga.units * pcwdga.ntg * pcwdga.therms_savings * tpp.value * pcwdga.discount * pcwdga.market) as market
     , pcwdga.datetime
     FROM project_costs_with_discounted_gas_av pcwdga
-    JOIN flexvalue.therms_profile_pivoted tpp
+    JOIN flexvalue.therms_profile_unpivoted tpp
         ON UPPER(pcwdga.therms_profile) = UPPER(tpp.therms_profile)
             AND tpp.utility = pcwdga.utility
             AND tpp.month = pcwdga.month

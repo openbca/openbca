@@ -1,3 +1,4 @@
 sqlmesh[web]
 duckdb
 sqlmesh[bigquery]
+pytest
