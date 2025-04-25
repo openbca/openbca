@@ -19,7 +19,7 @@ test:
 
 integration-test: init-test
 	sqlmesh --gateway test_real_data_calculations_aggregated plan dev --auto-apply --include-unmodified
-	sqlmesh table_diff flexvalue__dev.flexvalue:duckdb.flexvalue.rdc_output_table -o project_id --show-sample
+	sqlmesh table_diff flexvalue__dev.flexvalue:duckdb.flexvalue_test.rdc_output_table -o project_id --show-sample
 
 init-test:
 	rm -f tests/test_real_data_calculations_aggregated/duckdb.db

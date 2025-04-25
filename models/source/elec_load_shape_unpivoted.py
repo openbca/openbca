@@ -22,7 +22,7 @@ ID_COLUMNS = ['state', 'utility', 'region', 'quarter', 'month', 'hour_of_year', 
     }
 )
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
-    df = context.fetchdf(f"SELECT * FROM flexvalue.elec_load_shape")
+    df = context.fetchdf(f"SELECT * FROM flexvalue_input.elec_load_shape")
 
     return df.melt(
         id_vars=ID_COLUMNS,

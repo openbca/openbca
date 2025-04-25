@@ -1,7 +1,7 @@
 test_therms_profile_unpivoted:
   model: flexvalue.therms_profile_unpivoted
   inputs:
-      flexvalue.therms_profile:
+      flexvalue_input.therms_profile:
         rows:
         - state: CA
           utility: PG&E

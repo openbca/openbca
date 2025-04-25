@@ -1,5 +1,5 @@
 MODEL (
-  name flexvalue.project,
+  name flexvalue.project_info,
   kind FULL,
   grain project_id,
 );
@@ -17,5 +17,5 @@ from (
         UPPER(load_shape) as load_shape,
         UPPER(therms_profile) as therms_profile,
         make_timestamp(start_year, (start_quarter - 1) * 3 + 1, 1, 0, 0, 0) as project_start_quarter,
-    from flexvalue.source_project
+    from flexvalue_input.source_project
 )

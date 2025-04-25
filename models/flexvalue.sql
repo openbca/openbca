@@ -10,7 +10,7 @@ WITH project_costs AS (
         project_info.admin_cost + (((1 - project_info.ntg) * project_info.incentive_cost) + (project_info.ntg * project_info.measure_cost)) / (1 + (project_info.discount_rate / 4.0)) as trc_costs,
         project_info.admin_cost + (project_info.incentive_cost / (1 + (project_info.discount_rate / 4.0))) as pac_costs
     FROM
-    flexvalue.project project_info
+    flexvalue.project_info project_info
 ),
 project_costs_with_discounted_elec_av AS (
     SELECT
@@ -83,7 +83,7 @@ elec_calculations AS (
         , gas_av_costs.datetime
     FROM project_costs
     JOIN
-      flexvalue.gas_av_costs gas_av_costs
+      flexvalue.gas_av_costs_lol gas_av_costs
         ON gas_av_costs.utility = project_costs.utility
             AND gas_av_costs.datetime >= project_start_quarter
             AND gas_av_costs.datetime < project_end_quarter
