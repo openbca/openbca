@@ -1,5 +1,5 @@
 MODEL (
-  name flexvalue.flexvalue,
+  name flexvalue.flexvalue_legacy_one_query,
   kind FULL,
   grain id,
 );

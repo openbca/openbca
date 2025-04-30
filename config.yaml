@@ -8,7 +8,6 @@ gateways:
       type: bigquery
       project: oeem-dev-loic
 
-
 default_gateway: test_real_data_calculations_aggregated
 
 model_defaults:
