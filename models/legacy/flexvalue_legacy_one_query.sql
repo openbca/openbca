@@ -165,7 +165,8 @@ if(
 , COALESCE(SUM(gas_calculations.environment), 0) as environment
 , COALESCE(SUM(gas_calculations.upstream_methane), 0) as upstream_methane
 , COALESCE(SUM(gas_calculations.btm_methane), 0) as btm_methane
-, COALESCE(SUM(gas_calculations.market), 0) as market
+, COALESCE(SUM(gas_calculations.market), 0) as market,
+  'test' as test
 FROM
     elec_calculations
 FULL JOIN

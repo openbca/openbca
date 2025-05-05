@@ -2,7 +2,7 @@ install:
 	pip install -r requirements.txt
 
 init: install
-	sqlmesh init duckdb
+	#sqlmesh init duckdb
 	sqlmesh plan
 	sqlmesh plan dev
 
