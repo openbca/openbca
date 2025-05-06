@@ -1,1 +1,0 @@
-GET http://127.0.0.1:8000/calculate-electricity-benefit?utility=PGE&region=CZ12&start_datetime=2024-10-01&mwh_savings=13.5&load_shape_name=NONRES_HVAC_SPLIT_PACKAGE_AC
