@@ -1,9 +1,7 @@
 .cache
 .venv
 logs
-parquet
-db.db
+duckdb.db
 .idea
-/tests/test_real_data_calculations_aggregated/duckdb.db
-/tests/test_real_data_calculations_aggregated/duckdb.db.wal
-/tests/test_looker/
+/input/reference/full_ca_avoided_costs_2020acc.csv
+output/*.csv

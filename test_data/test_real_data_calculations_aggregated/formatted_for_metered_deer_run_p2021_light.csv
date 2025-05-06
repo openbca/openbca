@@ -1,0 +1,2 @@
+id,load_shape,start_year,start_quarter,utility,units,eul,ntg,discount_rate,admin_cost,measure_cost,incentive_cost,therms_profile,therms_savings,mwh_savings,region
+MAR101323,NONRES_INDOOR_CFL_LTG,2022,1,PGE,1.0,12,0.95,0.0766,8583.76,13193.17,0.0,annual,0.0,58.46898797340098,CZ12
