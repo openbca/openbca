@@ -1,0 +1,23 @@
+import pandas as pd
+
+from models.reference.load_shapes import elec_load_shape_unpivoted
+
+
+def test_unpivot_logic():
+    df = pd.DataFrame({
+        'state': ['CA'],
+        'utility': ['PG&E'],
+        'region': ['CA-N'],
+        'quarter': [1],
+        'month': [1],
+        'hour_of_year': [0],
+        'hour_of_day': [0],
+        'Res_Ltg': [1.1],
+        'NonRes_AC': [2.2]
+    })
+
+    result = elec_load_shape_unpivoted.unpivot(df)
+
+    assert len(result) == 2
+    assert set(result['load_shape_name']) == {'Res_Ltg', 'NonRes_AC'}
+    assert round(result['value'].sum(), 1) == 3.3

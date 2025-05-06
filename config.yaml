@@ -1,0 +1,10 @@
+gateways:
+  local_duckdb:
+    connection:
+      type: duckdb
+      database: output/duckdb.db
+
+default_gateway: local_duckdb
+
+model_defaults:
+  dialect: duckdb

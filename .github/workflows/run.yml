@@ -1,0 +1,27 @@
+name: Run
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  run:
+    environment: development
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Checkout LFS objects
+        run: git lfs pull
+      - id: build
+        name: Build FlexValue Docker image
+        run: |
+          make docker-build DUCKDB_ARCH=amd64
+      - id: run
+        name: Run FlexValue in SQLMesh locally
+        run: |
+          make docker-run DUCKDB_ARCH=amd64
