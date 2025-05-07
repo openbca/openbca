@@ -20,7 +20,7 @@ jobs:
       - id: build
         name: Build FlexValue Docker image
         run: |
-          make docker-build DUCKDB_ARCH=arm64
+          make docker-build DUCKDB_ARCH=amd64
       - id: run
         name: Run FlexValue in SQLMesh locally
         run: |
