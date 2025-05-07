@@ -1,5 +1,6 @@
 from typing import Any
 
+from pandas import DataFrame
 from sqlmesh import model, ExecutionContext
 import pandas as pd
 
@@ -25,8 +26,12 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     """
     Unpivot the elec_load_shape table to have a row for each load shape name and value.
     """
-    df = pd.read_csv('test_data/test_real_data_calculations_aggregated/ca_hourly_electric_load_shapes_horizontal_copy.csv')
+    return unpivot(
+        pd.read_csv('test_data/test_real_data_calculations_aggregated/ca_hourly_electric_load_shapes_horizontal_copy.csv')
+    )
 
+
+def unpivot(df: DataFrame) -> DataFrame:
     return df.melt(
         id_vars=ID_COLUMNS,
         value_vars=[col for col in df.columns if col not in ID_COLUMNS],

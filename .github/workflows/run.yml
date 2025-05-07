@@ -1,0 +1,27 @@
+name: Run
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  run:
+    environment: development
+    runs-on: ubuntu-latest
+
+    steps:
+      - id: build
+        name: Build FlexValue Docker image
+        run: |
+          make docker-build
+      - id: run
+        name: Run FlexValue in SQLMesh locally
+        run: |
+          make make docker-run
+      - id: test
+        name: Run FlexValue unit tests
+        run: |
+          make make docker-test
