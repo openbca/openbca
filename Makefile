@@ -19,8 +19,14 @@ clean:
 docker-build:
 	docker build -t open-bca -f Dockerfile .
 
+
+DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/test_data:/app/test_data -v $(shell pwd)/logs:/app/logs -v $(shell pwd)/tests:/app/tests open-bca
+
 docker-run: docker-build
-	docker run -it --rm -v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/test_data:/app/test_data -v $(shell pwd)/logs:/app/logs open-bca
+	docker run --rm ${DOCKER_RUN_ARGS}
+
+docker-shell: docker-build
+	docker run -it --rm ${DOCKER_RUN_ARGS} bash
 
 docker-test: docker-build
-	docker run -it --rm -v $(shell pwd)/input:/app/input -v $(shell pwd)/models:/app/models -v $(shell pwd)/test_data:/app/test_data -v $(shell pwd)/tests:/app/tests -v $(shell pwd)/logs:/app/logs open-bca bash -c "make test"
+	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make test"
