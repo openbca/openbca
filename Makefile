@@ -16,7 +16,7 @@ test:
 clean:
 	rm -f duckdb.db && rm -rf logs && rm -rf .cache && rm -rf output/*
 
-DUCKDB_ARCH=aarch64
+DUCKDB_ARCH?=aarch64
 docker-build:
 	docker build --build-arg DUCKDB_ARCH=${DUCKDB_ARCH} -t open-bca -f Dockerfile .
 

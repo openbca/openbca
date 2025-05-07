@@ -24,4 +24,4 @@ jobs:
       - id: run
         name: Run FlexValue in SQLMesh locally
         run: |
-          make docker-run
+          make docker-run DUCKDB_ARCH=amd64
