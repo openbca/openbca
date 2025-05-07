@@ -18,7 +18,7 @@ clean:
 
 DUCKDB_ARCH=aarch64
 docker-build:
-	docker build --build-arg ARCH=${DUCKDB_ARCH} -t open-bca -f Dockerfile .
+	docker build --build-arg DUCKDB_ARCH=${DUCKDB_ARCH} -t open-bca -f Dockerfile .
 
 DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/test_data:/app/test_data -v $(shell pwd)/logs:/app/logs -v $(shell pwd)/tests:/app/tests open-bca
 
