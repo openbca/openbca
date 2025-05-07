@@ -4,7 +4,7 @@ MODEL (
   grain (state, utility, quarter, month, therms_profile),
 );
 WITH therms_profile AS (
-    SELECT * FROM read_csv_auto('test_data/test_real_data_calculations_aggregated/ca_monthly_therms_load_profiles_copy.csv')
+    SELECT * FROM flexvalue_reference.therms_profile
 )
 -- Unpivoting therms profile data
 SELECT state, utility, quarter, month, 'summer' AS therms_profile, summer AS value FROM therms_profile
