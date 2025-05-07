@@ -7,3 +7,7 @@ duckdb.db
 output/*.csv
 __pycache__
 .DS_Store
+/output/*.db
+/output/*.db.wal
+
+
