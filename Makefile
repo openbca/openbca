@@ -32,8 +32,8 @@ docker-test: docker-build
 	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make test"
 
 check-output:
-	duckdb output/duckdb.db -c "CREATE OR REPLACE TABLE flexvalue.rdc_output_table AS SELECT * FROM read_csv_auto('test_data/test_real_data_calculations_aggregated/rdc_output_table.csv');"
-	sqlmesh table_diff flexvalue.flexvalue_legacy_one_query:duckdb.flexvalue.rdc_output_table -o project_id --show-sample
+	duckdb output/duckdb.db -c "DROP TABLE IF EXISTS flexvalue.rdc_output_table; CREATE OR REPLACE TABLE flexvalue.rdc_output_table AS SELECT * FROM read_csv_auto('test_data/test_real_data_calculations_aggregated/rdc_output_table.csv');"
+	sqlmesh table_diff flexvalue.flexvalue_legacy_one_query:flexvalue.rdc_output_table -o project_id --show-sample
 
-check-ref-output:
+reload-ref-output:
 	duckdb output/duckdb.db "COPY flexvalue.flexvalue_legacy_one_query TO 'test_data/test_real_data_calculations_aggregated/rdc_output_table.csv' (HEADER, DELIMITER ',');"
