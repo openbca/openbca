@@ -22,8 +22,8 @@ jobs:
       - id: run
         name: Run FlexValue in SQLMesh locally
         run: |
-          make make docker-run
+          make docker-run
       - id: test
         name: Run FlexValue unit tests
         run: |
-          make make docker-test
+          make docker-test
