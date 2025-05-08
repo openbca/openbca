@@ -18,7 +18,7 @@ FROM (
         SUM(btm_methane) as btm_methane,
         SUM(market) as market,
     FROM
-        flexvalue.project_gas_benefits_hourly
+        flexvalue.project_gas_benefits_monthly
     GROUP BY
         project_id
 ) bgbh
