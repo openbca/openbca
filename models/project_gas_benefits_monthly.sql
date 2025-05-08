@@ -4,7 +4,7 @@ MODEL (
     grain (project_id, year,  month),
 );
 WITH
-project_gas_hourly AS (      
+project_gas_monthly AS (
     SELECT
         pc.project_id,
         gac.*,
@@ -37,6 +37,6 @@ SELECT
     pc.gross_adjusted_savings * pgh.therms_profile_value * pgh.discount * pgh.btm_methane AS btm_methane,
     pc.gross_adjusted_savings * pgh.therms_profile_value * pgh.discount * pgh.market AS market,
     pc.gross_adjusted_savings * pgh.therms_profile_value * pgh.marginal_ghg as marginal_ghg
-FROM project_gas_hourly pgh
+FROM project_gas_monthly pgh
 LEFT JOIN flexvalue.project_costs pc
     ON pgh.project_id = pc.project_id
