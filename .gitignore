@@ -3,11 +3,9 @@
 logs
 duckdb.db
 .idea
-/input/reference/full_ca_avoided_costs_2020acc.csv
 output/*.csv
 __pycache__
 .DS_Store
 /output/*.db
 /output/*.db.wal
-
-
+/output/*.html
