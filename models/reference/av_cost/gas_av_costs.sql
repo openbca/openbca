@@ -11,7 +11,6 @@ SELECT
     market, t_d, environment, btm_methane, upstream_methane,
     EXTRACT(year from datetime::TIMESTAMP) AS year,
     EXTRACT(quarter from datetime::TIMESTAMP) AS quarter,
-    EXTRACT(month from datetime::TIMESTAMP) AS month,
-    (EXTRACT(DOY FROM datetime::TIMESTAMP) - 1) * 24 + EXTRACT(HOUR FROM datetime::TIMESTAMP) AS hour_of_year
+    EXTRACT(month from datetime::TIMESTAMP) AS month
 FROM
     read_csv_auto('test_data/test_real_data_calculations_aggregated/full_ca_avoided_costs_2020acc_gas.csv')
