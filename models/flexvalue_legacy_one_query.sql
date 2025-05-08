@@ -83,7 +83,7 @@ elec_calculations AS (
         , gas_av_costs.datetime
     FROM project_costs
     JOIN
-      flexvalue_reference.gas_av_costs_lol gas_av_costs
+      flexvalue_reference.gas_av_costs gas_av_costs
         ON gas_av_costs.utility = project_costs.utility
             AND gas_av_costs.datetime >= project_start_quarter
             AND gas_av_costs.datetime < project_end_quarter
