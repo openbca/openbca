@@ -2,9 +2,9 @@
 
 This library provides aggregators, program administrators, utilities, and regulators a means to configure and execute Jurisdiction-Specific Tests (JSTs) for demand side programs/portfolios in accordance to guidance in the National Standard Practice Manual. 
 
-Accurate cost-effectiveness tests that account for both energy impacts and progress toward other policy objectives are critical for optimal demand side program design and informed decision making. However, traditional cost effectiveness tests (e.g., Total Resource Cost test, Utility Cost Test etc.) are often too restrictive, utilize inputs that are not properly thought through or lack transparency, and do not fully reflect the goals and objectives of a jurisdiction. In such cases, benefit-cost testing can lead to poor demand side program design and ultimately unbalanced investment across energy resources. To help address these shortcomings, E4TheFuture’s [National Energy Screening Project](https://www.nationalenergyscreeningproject.org/) (NESP) published the [National Standard Practice Manual](https://www.nationalenergyscreeningproject.org/national-standard-practice-manual/) (NSPM) for Benefit-Cost Analysis of DERs (NSPM) in 2020, which provides a set of core principles and a process for developing a primary cost-effectiveness test, with guidance on conducting BCAs for different DER types and various inputs that should be used to define cost- effectiveness tests for DER investments and strategies. Following the NSPM guidance, a regulator, utility, and/or other party can develop a JST that properly accounts for the utility system costs and benefits of a DER program or investment strategy, as well as any non-utility system impacts applicable to the jurisdiction’s priority policy goals and objectives.
+Accurate cost-effectiveness tests that account for both energy impacts and progress toward other policy objectives are critical for optimal demand side program design and informed decision making. However, traditional cost effectiveness tests (e.g., Total Resource Cost test, Utility Cost Test etc.) are often too restrictive, utilize inputs that are not properly thought through or lack transparency, and do not fully reflect the goals and objectives of a jurisdiction. In such cases, benefit-cost testing can lead to poor demand side program design and ultimately unbalanced investment across energy resources. To help address these shortcomings, E4TheFuture’s [National Energy Screening Project](https://www.nationalenergyscreeningproject.org/) (NESP) published the [National Standard Practice Manual](https://www.nationalenergyscreeningproject.org/national-standard-practice-manual/) for Benefit-Cost Analysis of DERs (NSPM) in 2020, which provides a set of core principles and a process for developing complete and symmetric JSTs for demand side programs. Following the NSPM guidance, a regulator, utility, and/or other party can develop a JST that properly accounts for the utility system costs and benefits of a DER program or investment strategy, as well as any non-utility system impacts applicable to the jurisdiction’s priority policy goals and objectives.
 
-To carry out the vision of a balanced and comprehensive BCA architecture, this library is built to support comprehenseive and flexible configuration and computation required for the formulation of JSTs.
+To carry out the vision of a balanced and comprehensive BCA architecture, this library is built to support the comprehenseive and flexible configuration and computation required for the formulation of JSTs.
 
 # Usage
 
@@ -39,7 +39,7 @@ make run
 
 # Inputs
 
-Project input data are sourced from the `input/projects.csv`. Other references files are sourced from `test_data/test_real_data_calculations_aggregated`.
+Project input data are sourced from the `input/projects.csv`. Other reference files are sourced from `test_data/test_real_data_calculations_aggregated`.
 
 ## Reference files
 TODO describe the process to import files from the CPUC website.
