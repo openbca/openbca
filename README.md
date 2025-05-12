@@ -52,7 +52,7 @@ A CSV with the final results is automatically extracted from DuckDB using the co
 
 The Project benefit calculation is implemented in SQL/Python and is orchestrated using SQLMesh. The source code is in the `models` folder.
 
-![img.png](img.png)
+![img_1.png](img_1.png)
 
 
 A flow-chart of the project can be generated using the command:
