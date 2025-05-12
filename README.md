@@ -1,12 +1,16 @@
 # Open BCA
 
-This library provides aggregators, program administrators, utilities, and regulators a pathway to consistently and transparently gauge the value of their projects, portfolios, and programs.
+This library provides aggregators, program administrators, utilities, and regulators a means to configure and execute Jurisdiction-Specific Tests (JSTs) for demand side programs/portfolios in accordance to guidance in the National Standard Practice Manual. 
+
+Accurate cost-effectiveness tests that account for the energy impacts and progress toward other policy objectives are critical for optimal demand side program design and to guide utility and regulatory decision making. However, traditional cost effectiveness tests (e.g., Total Resource Cost test, Utility Cost Test etc.) often lack key value streams, utilize inputs that are not properly thought through or lack transparency, and do not fully reflect the goals and objectives of a jurisdiction. In such cases, benefit-cost testing can lead to poor demand side program design and ultimately unbalanced investment across energy resources. To help address these shortcomings, E4TheFuture’s National Energy Screening Project (NESP) published the National Standard Practice Manual for Benefit-Cost Analysis of DERs (NSPM) in 2020, which provides a set of core principles and a process for developing a primary cost-effectiveness test, with guidance on conducting BCAs for different DER types and various inputs that should be used to define cost- effectiveness tests for DER investments and strategies. Following the NSPM guidance, a regulator, utility, and/or other party can develop a JST that properly accounts for the utility system costs and benefits of a DER program or investment strategy, as well as any non-utility system impacts applicable to the jurisdiction’s priority policy goals and objectives.
+
+To carry out the vision of a balanced and comprehensive BCA architecture, this library is built to support comprehenseive and flexible configuration and computation required for the formulation of JSTs.
 
 # Usage
 
-Open BCA can run locally, it uses [DuckDB](https://duckdb.org/)  as a local database and [SQLMesh](https://sqlmesh.com/) to orchestrate the data-pipelines.
+Open BCA can run locally. It uses [DuckDB](https://duckdb.org/) as a local database and [SQLMesh](https://sqlmesh.com/) to orchestrate the data-pipelines.
 
-⚠️ Some references files requires Git LFS to be installed first.
+⚠️ Some reference files requires Git LFS to be installed first.
 ```bash
 git lfs install
 # if the repo was already cloned, run the following command to download the LFS files
