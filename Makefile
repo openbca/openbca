@@ -39,3 +39,6 @@ refresh-ref-output:
 
 generate-flow-diagram:
 	sqlmesh dag output/dah.html
+
+ui:
+	sqlmesh ui
