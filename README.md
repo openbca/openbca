@@ -60,6 +60,13 @@ A flow-chart of the project can be generated using the command:
 make generate-flow-diagram
 ```
 
+The column-level lineage is accessible through the SQLMesh ui:
+```bash
+make ui
+```
+<img width="1265" alt="image" src="https://github.com/user-attachments/assets/aa94224b-d4a0-4dce-b120-f16c4145337d" />
+
+
 # Continuous integration
 
 The project uses GitHub Actions to automatically run the project and the unit tests in the `tests` folder.
