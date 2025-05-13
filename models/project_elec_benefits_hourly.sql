@@ -41,8 +41,11 @@ SELECT
     pc.gross_adjusted_savings * peh.elec_load_shape_value * peh.discount * peh.transmission AS transmission,
     pc.gross_adjusted_savings * peh.elec_load_shape_value * peh.discount * peh.ghg_adder_rebalancing AS ghg_adder_rebalancing,
     pc.gross_adjusted_savings * peh.elec_load_shape_value * peh.discount * peh.ghg_adder AS ghg_adder,
+    pc.gross_adjusted_savings * peh.elec_load_shape_value * peh.discount * emc.marginal_cost as marginal_cost,
     pc.gross_adjusted_savings * peh.elec_load_shape_value AS net_mwh_savings,
     pc.gross_adjusted_savings * peh.elec_load_shape_value AS lifecycle_net_mwh_savings,
 FROM project_elec_hourly peh
 LEFT JOIN flexvalue.project_costs pc
     ON peh.project_id = pc.project_id
+LEFT JOIN flexvalue.elec_marginal_cost emc
+    ON peh.utility = emc.utility AND peh.region = emc.region

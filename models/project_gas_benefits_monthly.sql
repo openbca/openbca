@@ -36,7 +36,10 @@ SELECT
     pc.gross_adjusted_savings * pgh.therms_profile_value * pgh.discount * pgh.upstream_methane AS upstream_methane,
     pc.gross_adjusted_savings * pgh.therms_profile_value * pgh.discount * pgh.btm_methane AS btm_methane,
     pc.gross_adjusted_savings * pgh.therms_profile_value * pgh.discount * pgh.market AS market,
+    pc.gross_adjusted_savings * pgh.therms_profile_value * pgh.discount * emc.marginal_cost as marginal_cost,
     pc.gross_adjusted_savings * pgh.therms_profile_value * pgh.marginal_ghg as marginal_ghg
 FROM project_gas_monthly pgh
 LEFT JOIN flexvalue.project_costs pc
     ON pgh.project_id = pc.project_id
+LEFT JOIN flexvalue.elec_marginal_cost emc
+    ON pgh.utility = emc.utility AND pgh.region = emc.region

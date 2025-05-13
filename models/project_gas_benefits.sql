@@ -17,6 +17,7 @@ FROM (
         SUM(upstream_methane) as upstream_methane,
         SUM(btm_methane) as btm_methane,
         SUM(market) as market,
+        SUM(marginal_cost) as marginal_cost,
     FROM
         flexvalue.project_gas_benefits_monthly
     GROUP BY
