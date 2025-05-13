@@ -23,6 +23,7 @@ FROM (
         SUM(ghg_adder_rebalancing) as ghg_adder_rebalancing,
         SUM(ghg_adder) as ghg_adder,
         SUM(net_mwh_savings) as lifecycle_net_mwh_savings,
+        SUM(marginal_cost) as marginal_cost,
     FROM
         flexvalue.project_elec_benefits_hourly
     GROUP BY

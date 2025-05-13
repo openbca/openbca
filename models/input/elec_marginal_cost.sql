@@ -1,0 +1,11 @@
+MODEL(
+    name flexvalue.elec_marginal_cost,
+    kind SEED (
+        path '$root/input/elec_marginal_cost.csv'
+    ),
+    columns (
+        region VARCHAR,
+        utility VARCHAR,
+        marginal_cost FLOAT
+    )
+);

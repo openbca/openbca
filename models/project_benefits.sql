@@ -5,8 +5,10 @@ MODEL(
 );
 SELECT
     pc.project_id,
-    peb.* EXCLUDE (project_id),
-    pgb.* EXCLUDE (project_id),
+    peb.* EXCLUDE (project_id, marginal_cost),
+    pgb.* EXCLUDE (project_id, marginal_cost),
+    peb.marginal_cost as elec_marginal_cost,
+    pgb.marginal_cost as gas_marginal_cost,
     (COALESCE(lifecycle_elec_ghg_savings, 0) + COALESCE(lifecycle_gas_ghg_savings, 0)) as lifecycle_total_ghg_savings,
     (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) as total_benefits,
     (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) / trc_costs as trc_ratio,
