@@ -18,8 +18,11 @@ project_gas_monthly AS (
     JOIN
       flexvalue_reference.gas_av_costs gac
         ON gac.utility = pc.utility
-            AND gac.datetime >= pc.project_start_quarter
-            AND gac.datetime < pc.project_end_quarter
+            AND (
+                (gac.year > pc.start_year OR (gac.year = pc.start_year AND gac.quarter >= pc.start_quarter))
+                AND
+                (gac.year < pc.start_year + pc.eul OR (gac.year = pc.start_year + pc.eul AND gac.quarter < pc.start_quarter))
+            )
     JOIN flexvalue_reference.therms_profile_unpivoted tpp
         ON pc.therms_profile = tpp.therms_profile
             AND pc.utility = tpp.utility

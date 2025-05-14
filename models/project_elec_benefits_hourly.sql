@@ -17,8 +17,11 @@ project_elec_hourly AS (
     JOIN flexvalue_reference.elec_av_costs eac
         ON eac.utility = pc.utility
             AND eac.region = pc.region
-            AND eac.datetime >= project_start_quarter
-            AND eac.datetime < project_end_quarter
+            AND (
+                (eac.year > pc.start_year OR (eac.year = pc.start_year AND eac.quarter >= pc.start_quarter))
+                AND
+                (eac.year < pc.start_year + pc.eul OR (eac.year = pc.start_year + pc.eul AND eac.quarter < pc.start_quarter))
+            )
     JOIN flexvalue_reference.elec_load_shape_unpivoted els
         ON pc.load_shape = els.load_shape
             AND pc.utility = els.utility
