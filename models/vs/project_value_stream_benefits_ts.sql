@@ -29,6 +29,7 @@ project_elec_hourly AS (
     JOIN flexvalue.value_stream_ts vsts
         ON vsts.utility = pc.utility
             AND vsts.region = pc.region
+            AND vsts.commodity = pc.commodity
             AND (
                 (vsts.year > pc.start_year OR (vsts.year = pc.start_year AND vsts.quarter >= pc.start_quarter))
                 AND
