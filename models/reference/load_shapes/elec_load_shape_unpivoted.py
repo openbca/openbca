@@ -4,7 +4,7 @@ from pandas import DataFrame
 from sqlmesh import model, ExecutionContext
 import pandas as pd
 
-ID_COLUMNS = ['state', 'utility', 'region', 'quarter', 'month', 'hour_of_year', 'hour_of_day']
+ID_COLUMNS = ['state', 'utility', 'quarter', 'month', 'hour_of_year', 'hour_of_day']
 
 @model(
     name='flexvalue_reference.elec_load_shape_unpivoted',
@@ -13,7 +13,6 @@ ID_COLUMNS = ['state', 'utility', 'region', 'quarter', 'month', 'hour_of_year', 
     columns = {
         'state': 'string',
         'utility': 'string',
-        'region': 'string',
         'quarter': 'int',
         'month': 'int',
         'hour_of_year': 'int',

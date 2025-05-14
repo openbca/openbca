@@ -5,7 +5,7 @@ MODEL(
 );
 SELECT
     project_id,
-    utility, region,
+    state, utility, region,
     start_year, start_quarter,
     discount_rate, eul,
     load_shape, therms_profile,
