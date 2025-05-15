@@ -7,8 +7,6 @@ SELECT
     project_id,
     state, utility, region,
     start_year, start_quarter,
-    start_year + eul as end_year,
-    start_year * 4 + (start_quarter - 1) + eul * 4 AS end_quarter,
     discount_rate, eul,
     load_shape, therms_profile,
     units, ntg, mwh_savings,
