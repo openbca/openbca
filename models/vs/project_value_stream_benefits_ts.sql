@@ -43,9 +43,9 @@ project_vs_cst AS (
         AND project_vs_ts.commodity = vs_cst.commodity
 
 ),
-all_vs_ts AS (
-    SELECT
-),
+-- all_vs_ts AS (
+--     SELECT TODO merge with the constant VS
+-- ),
 vs_ts_with_load_shape AS (
     SELECT
         vsts.*,
