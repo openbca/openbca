@@ -22,8 +22,7 @@ UNPIVOT (
 UNION ALL
 -- monthly value streams
 SELECT
-    'CA' AS state, utility,
-    NULL AS region,
+    'CA' AS state, utility, r.region,
     'GAS' AS commodity,
     year, quarter, month,
     NULL AS hour_of_year, NULL AS hour_of_day,
@@ -35,3 +34,27 @@ UNPIVOT (
         total, marginal_ghg,
     )
 )
+CROSS JOIN flexvalue_reference.regions r
+
+UNION ALL
+-- constant value streams
+
+SELECT
+    'CA' AS state, utility, region,
+    'ELECTRICITY' AS commodity,
+    NULL AS year, NULL AS quarter, NULL AS month,
+    NULL AS hour_of_year, NULL AS hour_of_day,
+    'marginal_cost' AS value_stream,
+    marginal_cost AS value
+FROM flexvalue.elec_marginal_cost
+
+UNION ALL
+
+SELECT
+    'CA' AS state, utility, region,
+    'GAS' AS commodity,
+    NULL AS year, NULL AS quarter, NULL AS month,
+    NULL AS hour_of_year, NULL AS hour_of_day,
+    'marginal_cost' AS value_stream,
+    marginal_cost AS value
+FROM flexvalue.gas_marginal_cost

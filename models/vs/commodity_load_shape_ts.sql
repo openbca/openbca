@@ -1,7 +1,7 @@
 MODEL(
     name flexvalue.commodity_load_shape_ts,
     kind FULL,
-    grain (state, utility, region, commodity, year, hour_of_year),
+    grain (state, utility, commodity, year, hour_of_year),
 );
 SELECT
     'CA' AS state,
