@@ -10,6 +10,7 @@ FROM (
     SELECT
         project_id, commodity, value_stream,
         SUM(value) as value,
+        SUM(benefit_value) as benefit_value,
         SUM(net_energy_savings) as net_energy_savings
     FROM
         flexvalue.project_value_stream_benefits_ts
