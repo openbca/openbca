@@ -1,10 +1,10 @@
 MODEL(
-    name flexvalue.project_value_stream_benefits,
+    name flexvalue.project_commodity_value_stream_benefits,
     kind FULL,
     grain (project_id),
 );
 SELECT
-    bebh.*,
+    vsb_ts.*,
     net_energy_savings / pc.eul as annual_net_mwh_savings
 FROM (
     SELECT
@@ -13,9 +13,9 @@ FROM (
         SUM(benefit_value) as benefit_value,
         SUM(net_energy_savings) as net_energy_savings
     FROM
-        flexvalue.project_value_stream_benefits_ts
+        flexvalue.project_commodity_value_stream_benefits_ts
     GROUP BY
         project_id, commodity, value_stream
-) bebh
+) vsb_ts
 LEFT JOIN flexvalue.project_costs pc
-    ON pc.project_id = bebh.project_id
+    ON pc.project_id = vsb_ts.project_id

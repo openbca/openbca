@@ -1,12 +1,12 @@
 MODEL(
     name flexvalue.value_stream_ts,
     kind FULL,
-    grain (state, utility, region, commodity, value_stream, year, hour_of_year),
+    grain (utility, region, commodity, value_stream, year, hour_of_year),
 );
 
 -- hourly value streams
 SELECT
-    'CA' AS state, utility, region,
+    utility, region,
     'ELECTRICITY' AS commodity,
     year, quarter, month,
     hour_of_year, hour_of_day,
@@ -22,7 +22,7 @@ UNPIVOT (
 UNION ALL
 -- monthly value streams
 SELECT
-    'CA' AS state, utility, r.region,
+    utility, r.region,
     'GAS' AS commodity,
     year, quarter, month,
     NULL AS hour_of_year, NULL AS hour_of_day,
@@ -40,7 +40,7 @@ UNION ALL
 -- constant value streams
 
 SELECT
-    'CA' AS state, utility, region,
+    utility, region,
     'ELECTRICITY' AS commodity,
     NULL AS year, NULL AS quarter, NULL AS month,
     NULL AS hour_of_year, NULL AS hour_of_day,
@@ -51,7 +51,7 @@ FROM flexvalue.elec_marginal_cost
 UNION ALL
 
 SELECT
-    'CA' AS state, utility, region,
+    utility, region,
     'GAS' AS commodity,
     NULL AS year, NULL AS quarter, NULL AS month,
     NULL AS hour_of_year, NULL AS hour_of_day,

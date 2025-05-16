@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue.project_value_stream_benefits_ts,
+    name flexvalue.project_commodity_value_stream_benefits_ts,
     kind FULL,
     grain (project_id, commodity, year, hour_of_year),
 );
