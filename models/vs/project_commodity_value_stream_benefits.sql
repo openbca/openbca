@@ -1,7 +1,7 @@
 MODEL(
     name flexvalue.project_commodity_value_stream_benefits,
     kind FULL,
-    grain (project_id),
+    grain (project_id, commodity),
 );
 SELECT
     vsb_ts.*,

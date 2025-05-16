@@ -52,3 +52,4 @@ LEFT JOIN flexvalue.project_costs pc
     ON peh.project_id = pc.project_id
 LEFT JOIN flexvalue.elec_marginal_cost emc
     ON peh.utility = emc.utility AND peh.region = emc.region
+
