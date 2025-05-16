@@ -1,10 +1,9 @@
 MODEL(
     name flexvalue.commodity_load_shape_ts,
     kind FULL,
-    grain (state, utility, commodity, year, hour_of_year),
+    grain (utility, commodity, year, hour_of_year),
 );
 SELECT
-    'CA' AS state,
     utility,
     'ELECTRICITY' AS commodity,
     quarter, month,
@@ -13,7 +12,6 @@ SELECT
 FROM flexvalue_reference.elec_load_shape_unpivoted
 UNION ALL
 SELECT
-    'CA' AS state,
     utility,
     'GAS' AS commodity,
     quarter, month,

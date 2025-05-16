@@ -1,7 +1,7 @@
 MODEL(
     name flexvalue.project_commodity_load_shape_ts,
     kind FULL,
-    grain (project_id, commodity, year, month, hour_of_year)
+    grain (project_id, year, month, hour_of_year)
 );
 
 WITH
@@ -17,7 +17,7 @@ project_commodity_ts AS (
 )
 SELECT
     vsts.project_id, cls_ts.load_shape,
-    vsts.commodity, vsts.state, vsts.utility, vsts.region,
+    vsts.commodity, vsts.utility, vsts.region,
     vsts.year, vsts.quarter,
     cls_ts.month,
     cls_ts.hour_of_year, cls_ts.hour_of_day,
@@ -28,6 +28,6 @@ SELECT
     net_energy_savings * discount AS discounted_net_energy_savings,
 FROM flexvalue.commodity_load_shape_ts cls_ts
 JOIN project_commodity_ts vsts
-    ON vsts.state = cls_ts.state AND vsts.commodity = cls_ts.commodity
+    ON vsts.commodity = cls_ts.commodity
         AND vsts.load_shape = cls_ts.load_shape AND vsts.utility = cls_ts.utility
         AND vsts.quarter = cls_ts.quarter
