@@ -20,6 +20,6 @@ SELECT
     (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) as total_benefits,
     (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) / trc_costs as trc_ratio,
     (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) / pac_costs as pac_ratio,
-FROM flexvalue.project_costs pc
+FROM project.project_costs pc
 LEFT JOIN pivoted_vsb vsb
     ON pc.project_id = vsb.project_id

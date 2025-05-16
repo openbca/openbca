@@ -17,5 +17,5 @@ FROM (
     GROUP BY
         project_id, commodity, value_stream
 ) vsb_ts
-LEFT JOIN flexvalue.project_costs pc
+LEFT JOIN project.project_costs pc
     ON pc.project_id = vsb_ts.project_id

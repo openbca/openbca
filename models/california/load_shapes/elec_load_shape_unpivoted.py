@@ -7,7 +7,7 @@ import pandas as pd
 ID_COLUMNS = ['state', 'utility', 'quarter', 'month', 'hour_of_year', 'hour_of_day']
 
 @model(
-    name='flexvalue_reference.elec_load_shape_unpivoted',
+    name='california.elec_load_shape_unpivoted',
     kind='FULL',
     grain=(*ID_COLUMNS, 'load_shape'),
     columns = {

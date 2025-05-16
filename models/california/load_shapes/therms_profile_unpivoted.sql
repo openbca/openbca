@@ -1,10 +1,10 @@
 MODEL (
-  name flexvalue_reference.therms_profile_unpivoted,
+  name california.therms_profile_unpivoted,
   kind FULL,
   grain (state, utility, quarter, month, therms_profile),
 );
 WITH therms_profile AS (
-    SELECT * FROM flexvalue_reference.therms_profile
+    SELECT * FROM california.therms_profile
 )
 -- Unpivoting therms profile data
 SELECT state, utility, quarter, month, 'summer' AS therms_profile, summer AS value FROM therms_profile

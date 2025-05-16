@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue.project_costs,
+    name project.project_costs,
     kind FULL,
     grain (project_id),
 );
@@ -14,4 +14,4 @@ SELECT
     admin_cost + (incentive_cost / (1 + (discount_rate / 4.0))) as pac_costs,
     units * ntg * mwh_savings as gross_adjusted_savings,
 FROM
-    flexvalue_input.projects project_info
+    project.projects project_info

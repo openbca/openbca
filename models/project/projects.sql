@@ -1,5 +1,5 @@
 MODEL(
-  name flexvalue_input.projects,
+  name project.projects,
   kind SEED (
     path '$root/input/projects.csv'
   ),

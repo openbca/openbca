@@ -1,5 +1,5 @@
 MODEL (
-  name flexvalue_reference.therms_profile,
+  name california.therms_profile,
   kind FULL,
   grain (state, utility, quarter, month),
 );

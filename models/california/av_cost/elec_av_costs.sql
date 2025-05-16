@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue_reference.elec_av_costs,
+    name california.elec_av_costs,
     kind FULL,
     grain (utility, region, year, hour_of_year),
 );

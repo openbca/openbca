@@ -12,8 +12,17 @@ project_commodity_ts AS (
             {'commodity': 'ELECTRICITY', 'load_shape': load_shape},
             {'commodity': 'GAS', 'load_shape': therms_profile}
         ], recursive := true)
-    FROM flexvalue.project_discount_rate_ts
-    JOIN flexvalue_input.projects ON project_discount_rate_ts.project_id = projects.project_id
+    FROM project.project_discount_rate_ts
+    JOIN project.projects ON project_discount_rate_ts.project_id = projects.project_id
+),
+commodity_load_shape_ts AS (
+    SELECT
+        state, utility, region, quarter, month,
+        hour_of_year, hour_of_day,
+        load_shape, commodity,
+        value
+    FROM flexvalue.commodity_load_shape_ts
+
 )
 SELECT
     vsts.project_id, cls_ts.load_shape,

@@ -1,5 +1,5 @@
 MODEL(
-    name  flexvalue.project_discount_rate_ts,
+    name  project.project_discount_rate_ts,
     kind FULL,
     grain (project_id, year, quarter),
 );
@@ -14,5 +14,5 @@ SELECT
         1.0 + (discount_rate / 4.0),
         ((year - start_year) * 4) + quarter - start_quarter
     ) AS discount
-FROM flexvalue.project_costs
+FROM project.project_costs
 CROSS JOIN generate_series(start_year * 4 + (start_quarter - 1), (start_year + eul) * 4 + (start_quarter - 1 - 1)) AS gs(quarter_index)

@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue_reference.gas_av_costs,
+    name california.gas_av_costs,
     kind FULL,
     grain (utility, year, month),
 );
