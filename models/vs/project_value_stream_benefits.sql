@@ -6,10 +6,10 @@ MODEL(
 WITH pivoted_vsb(
     SELECT
         project_id,
-        SUM(IF(value_stream = 'total' AND commodity = 'ELECTRICITY', value)) AS electric_benefits,
-        SUM(IF(value_stream = 'total' AND commodity = 'GAS', value)) AS gas_benefits,
-        SUM(IF(value_stream = 'marginal_ghg' AND commodity = 'ELECTRICITY', value)) AS lifecycle_elec_ghg_savings,
-        SUM(IF(value_stream = 'marginal_ghg' AND commodity = 'GAS', value)) AS lifecycle_gas_ghg_savings,
+        SUM(IF(value_stream = 'total' AND commodity = 'ELECTRICITY', benefit_value)) AS electric_benefits,
+        SUM(IF(value_stream = 'total' AND commodity = 'GAS', benefit_value)) AS gas_benefits,
+        SUM(IF(value_stream = 'marginal_ghg' AND commodity = 'ELECTRICITY', benefit_value)) AS lifecycle_elec_ghg_savings,
+        SUM(IF(value_stream = 'marginal_ghg' AND commodity = 'GAS', benefit_value)) AS lifecycle_gas_ghg_savings,
     FROM flexvalue.project_commodity_value_stream_benefits
     GROUP BY ALL
 )

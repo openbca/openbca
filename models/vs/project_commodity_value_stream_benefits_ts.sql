@@ -3,11 +3,7 @@ MODEL(
     kind FULL,
     grain (project_id, commodity, year, hour_of_year),
 );
-
- SELECT
-     *,
-    discounted_net_energy_savings * value as benefit_value
- FROM (
+WITH all_time_granularities_vs_ts AS (
     SELECT
         pcls_ts.*,
         vs_ts.value_stream, vs_ts.value
@@ -49,3 +45,11 @@ MODEL(
         ON pcls_ts.region = vs_ts.region AND pcls_ts.commodity = vs_ts.commodity
     WHERE vs_ts.hour_of_year IS NULL AND vs_ts.month IS NULL AND vs_ts.year IS NULL
 )
+ SELECT
+     *,
+    CASE
+        WHEN value_stream = 'marginal_ghg' THEN net_energy_savings * value
+        ELSE discounted_net_energy_savings * value END
+    AS benefit_value
+ FROM
+    all_time_granularities_vs_ts
