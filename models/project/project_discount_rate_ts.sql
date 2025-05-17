@@ -6,9 +6,9 @@ MODEL(
 
 SELECT
     project_id,
-    state, utility, region,
+    utility, region,
     ((quarter_index - quarter_index%4) / 4)::int AS year,
-    (quarter_index%4 + 1) AS quarter,
+    (quarter_index % 4 + 1) AS quarter,
     gross_adjusted_savings,
     1.0 / POW(
         1.0 + (discount_rate / 4.0),

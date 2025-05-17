@@ -5,7 +5,6 @@ MODEL(
   ),
   columns (
     project_id VARCHAR,
-    state VARCHAR,
     utility VARCHAR,
     region VARCHAR,
     start_year INT,
