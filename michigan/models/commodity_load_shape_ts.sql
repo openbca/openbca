@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue.commodity_load_shape_ts,
+    name flexvalue_input.commodity_load_shape_ts,
     kind FULL,
     grain (utility, commodity, year, hour_of_year),
 );
@@ -9,7 +9,7 @@ SELECT
     quarter, month,
     hour_of_year, hour_of_day,
     load_shape, value
-FROM california.elec_load_shape_unpivoted
+FROM michigan.elec_load_shape_unpivoted
 UNION ALL
 SELECT
     utility,
@@ -17,4 +17,4 @@ SELECT
     quarter, month,
     NULL AS hour_of_year, NULL AS hour_of_day,
     therms_profile as load_shape, value
-FROM california.therms_profile_unpivoted
+FROM michigan.therms_profile_unpivoted

@@ -1,7 +1,7 @@
 MODEL(
     name michigan.elec_marginal_cost,
     kind SEED (
-        path '$root/input/elec_marginal_cost.csv'
+        path '$root/test_data/elec_marginal_cost.csv'
     ),
     columns (
         region VARCHAR,

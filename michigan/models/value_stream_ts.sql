@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue.value_stream_ts,
+    name flexvalue_input.value_stream_ts,
     kind FULL,
     grain (utility, region, commodity, value_stream, year, hour_of_year),
 );
@@ -39,25 +39,26 @@ UNPIVOT (
 )
 CROSS JOIN regions r
 
--- UNION ALL
+UNION ALL
+
 -- -- constant value streams
---
--- SELECT
---     utility, region,
---     'ELECTRICITY' AS commodity,
---     NULL AS year, NULL AS quarter, NULL AS month,
---     NULL AS hour_of_year, NULL AS hour_of_day,
---     'marginal_cost' AS value_stream,
---     marginal_cost AS value
--- FROM flexvalue.elec_marginal_cost
---
--- UNION ALL
---
--- SELECT
---     utility, region,
---     'GAS' AS commodity,
---     NULL AS year, NULL AS quarter, NULL AS month,
---     NULL AS hour_of_year, NULL AS hour_of_day,
---     'marginal_cost' AS value_stream,
---     marginal_cost AS value
--- FROM flexvalue.gas_marginal_cost
+
+SELECT
+    utility, region,
+    'ELECTRICITY' AS commodity,
+    NULL AS year, NULL AS quarter, NULL AS month,
+    NULL AS hour_of_year, NULL AS hour_of_day,
+    'marginal_cost' AS value_stream,
+    marginal_cost AS value
+FROM michigan.elec_marginal_cost
+
+UNION ALL
+
+SELECT
+    utility, region,
+    'GAS' AS commodity,
+    NULL AS year, NULL AS quarter, NULL AS month,
+    NULL AS hour_of_year, NULL AS hour_of_day,
+    'marginal_cost' AS value_stream,
+    marginal_cost AS value
+FROM michigan.gas_marginal_cost

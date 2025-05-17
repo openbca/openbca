@@ -14,7 +14,7 @@ SELECT
     pdr_ts.gross_adjusted_savings,
     pdr_ts.gross_adjusted_savings * cls_ts.value AS net_energy_savings,
     net_energy_savings * pdr_ts.discount AS discounted_net_energy_savings,
-FROM flexvalue.commodity_load_shape_ts cls_ts
+FROM flexvalue_input.commodity_load_shape_ts cls_ts
 JOIN project.project_commodity pc
     ON cls_ts.commodity = pc.commodity AND cls_ts.utility = pc.utility
         AND cls_ts.load_shape = pc.load_shape
