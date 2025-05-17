@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue.gas_marginal_cost,
+    name michigan.gas_marginal_cost,
     kind SEED (
         path '$root/input/gas_marginal_cost.csv'
     ),

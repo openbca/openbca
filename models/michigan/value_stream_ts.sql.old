@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue.value_stream_ts,
+    name michigan.value_stream_ts,
     kind FULL,
     grain (utility, region, commodity, value_stream, year, hour_of_year),
 );
