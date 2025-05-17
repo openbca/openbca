@@ -16,7 +16,7 @@ SELECT
     net_energy_savings * pdr_ts.discount AS discounted_net_energy_savings,
 FROM flexvalue.commodity_load_shape_ts cls_ts
 JOIN project.project_commodity pc
-    ON cls_ts.commodity = pc.commodity AND pc.utility = pc.utility
+    ON cls_ts.commodity = pc.commodity AND cls_ts.utility = pc.utility
         AND cls_ts.load_shape = pc.load_shape
 JOIN project.project_discount_rate_ts pdr_ts
     ON pdr_ts.project_id = pc.project_id
