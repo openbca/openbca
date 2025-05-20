@@ -38,26 +38,3 @@ UNPIVOT (
     )
 )
 CROSS JOIN regions r
-
--- UNION ALL
--- -- constant value streams
---
--- SELECT
---     utility, region,
---     'ELECTRICITY' AS commodity,
---     NULL AS year, NULL AS quarter, NULL AS month,
---     NULL AS hour_of_year, NULL AS hour_of_day,
---     'marginal_cost' AS value_stream,
---     marginal_cost AS value
--- FROM flexvalue.elec_marginal_cost
---
--- UNION ALL
---
--- SELECT
---     utility, region,
---     'GAS' AS commodity,
---     NULL AS year, NULL AS quarter, NULL AS month,
---     NULL AS hour_of_year, NULL AS hour_of_day,
---     'marginal_cost' AS value_stream,
---     marginal_cost AS value
--- FROM flexvalue.gas_marginal_cost

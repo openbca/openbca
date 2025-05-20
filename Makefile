@@ -39,7 +39,8 @@ refresh-ref-output:
 	duckdb output/duckdb.db "COPY flexvalue.project_value_stream_benefits TO 'california/test_data/test_real_data_calculations_aggregated/rdc_output_table.csv' (HEADER, DELIMITER ',');"
 
 generate-flow-diagram:
-	sqlmesh dag output/dah.html
+	sqlmesh -p . dag output/dag.html
+	sqlmesh -p ${PROFILE} dag output/dag_${PROFILE}.html
 
 ui:
 	sqlmesh ui
