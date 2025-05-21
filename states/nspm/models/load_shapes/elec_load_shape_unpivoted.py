@@ -4,14 +4,13 @@ from pandas import DataFrame
 from sqlmesh import model, ExecutionContext
 import pandas as pd
 
-ID_COLUMNS = ['state', 'utility', 'quarter', 'month', 'hour_of_year', 'hour_of_day']
+ID_COLUMNS = ['utility', 'quarter', 'month', 'hour_of_year', 'hour_of_day']
 
 @model(
-    name='michigan.elec_load_shape_unpivoted',
+    name='nspm.elec_load_shape_unpivoted',
     kind='FULL',
     grain=(*ID_COLUMNS, 'load_shape'),
     columns = {
-        'state': 'string',
         'utility': 'string',
         'quarter': 'int',
         'month': 'int',
@@ -23,7 +22,7 @@ ID_COLUMNS = ['state', 'utility', 'quarter', 'month', 'hour_of_year', 'hour_of_d
 )
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return unpivot(
-        context.fetchdf(f"SELECT * FROM {context.resolve_table('michigan.ca_hourly_electric_load_shapes_horizontal')}")
+        context.fetchdf(f"SELECT * FROM {context.resolve_table('nspm.ca_hourly_electric_load_shapes_horizontal')}")
     )
 
 

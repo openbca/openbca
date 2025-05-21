@@ -9,11 +9,10 @@ SELECT
     pc.commodity, pc.utility, pc.region,
     pdr_ts.year, pdr_ts.quarter,
     cls_ts.month, cls_ts.hour_of_year, cls_ts.hour_of_day,
-    cls_ts.value AS load_shape_value,
+    cls_ts.value AS normalized_load_shape_value,
     pdr_ts.discount,
-    pdr_ts.gross_adjusted_savings,
-    pdr_ts.gross_adjusted_savings * cls_ts.value AS net_energy_savings,
-    net_energy_savings * pdr_ts.discount AS discounted_net_energy_savings,
+    pdr_ts.net_savings,
+    pdr_ts.net_savings * normalized_load_shape_value AS net_energy_savings_ts,
 FROM flexvalue_input.commodity_load_shape_ts cls_ts
 JOIN project.project_commodity pc
     ON cls_ts.commodity = pc.commodity AND cls_ts.utility = pc.utility

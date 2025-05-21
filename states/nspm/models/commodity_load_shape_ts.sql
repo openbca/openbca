@@ -9,7 +9,7 @@ SELECT
     quarter, month,
     hour_of_year, hour_of_day,
     load_shape, value
-FROM michigan.elec_load_shape_unpivoted
+FROM nspm.elec_load_shape_unpivoted
 UNION ALL
 SELECT
     utility,
@@ -17,4 +17,4 @@ SELECT
     quarter, month,
     NULL AS hour_of_year, NULL AS hour_of_day,
     therms_profile as load_shape, value
-FROM michigan.therms_profile_unpivoted
+FROM nspm.therms_profile_unpivoted

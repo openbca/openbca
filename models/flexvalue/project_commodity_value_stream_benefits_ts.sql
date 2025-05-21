@@ -5,15 +5,15 @@ MODEL(
 );
 SELECT
      *,
+    value as value_stream_value,
     CASE
-        WHEN value_stream = 'marginal_ghg' THEN net_energy_savings * value
-        ELSE discounted_net_energy_savings * value END
-    AS benefit_value
+        WHEN value_stream = 'marginal_ghg' THEN net_energy_savings_ts * value_stream_value
+        ELSE net_energy_savings_ts * discount * value_stream_value
+    END AS benefit_value
  FROM (
 
     -- joining value-stream with project_commodity_load_shape_ts
     -- for all possible time granularity: constant, yearly, monthly, hourly
-
     SELECT
         pcls_ts.*,
         vs_ts.value_stream, vs_ts.value

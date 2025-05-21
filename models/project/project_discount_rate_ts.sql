@@ -9,7 +9,7 @@ SELECT
     utility, region,
     ((quarter_index - quarter_index%4) / 4)::int AS year,
     (quarter_index % 4 + 1) AS quarter,
-    gross_adjusted_savings,
+    net_savings,
     1.0 / POW(
         1.0 + (discount_rate / 4.0),
         ((year - start_year) * 4) + quarter - start_quarter

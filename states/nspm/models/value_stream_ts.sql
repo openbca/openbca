@@ -4,6 +4,9 @@ MODEL(
     grain (utility, region, commodity, value_stream, year, hour_of_year),
 );
 
+-- IMPORTANT NOTE: The time-granularity of the value_stream_ts table cannot be lower than the time-granularity of the commodity_load_shape_ts table.
+-- For instance, if the commodity_load_shape_ts table is monthly then the value_stream_ts table cannot be hourly.
+
 WITH regions AS (
     SELECT distinct region FROM california.elec_av_costs
 )
@@ -50,7 +53,7 @@ SELECT
     NULL AS hour_of_year, NULL AS hour_of_day,
     'marginal_cost' AS value_stream,
     marginal_cost AS value
-FROM michigan.elec_marginal_cost
+FROM nspm.elec_marginal_cost
 
 UNION ALL
 
@@ -61,4 +64,4 @@ SELECT
     NULL AS hour_of_year, NULL AS hour_of_day,
     'marginal_cost' AS value_stream,
     marginal_cost AS value
-FROM michigan.gas_marginal_cost
+FROM nspm.gas_marginal_cost

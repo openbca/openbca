@@ -4,14 +4,13 @@ from pandas import DataFrame
 from sqlmesh import model, ExecutionContext
 import pandas as pd
 
-ID_COLUMNS = ['state', 'utility', 'quarter', 'month', 'hour_of_year', 'hour_of_day']
+ID_COLUMNS = ['utility', 'quarter', 'month', 'hour_of_year', 'hour_of_day']
 
 @model(
     name='california.elec_load_shape_unpivoted',
     kind='FULL',
     grain=(*ID_COLUMNS, 'load_shape'),
     columns = {
-        'state': 'string',
         'utility': 'string',
         'quarter': 'int',
         'month': 'int',

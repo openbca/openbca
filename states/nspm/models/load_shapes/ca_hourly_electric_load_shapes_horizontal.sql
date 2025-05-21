@@ -1,5 +1,5 @@
 MODEL (
-  name michigan.ca_hourly_electric_load_shapes_horizontal,
+  name nspm.ca_hourly_electric_load_shapes_horizontal,
   kind FULL,
   grain (utility, hour_of_year),
 );

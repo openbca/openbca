@@ -1,10 +1,10 @@
 MODEL (
-  name michigan.therms_profile_unpivoted,
+  name nspm.therms_profile_unpivoted,
   kind FULL,
   grain (utility, quarter, month, therms_profile),
 );
 WITH therms_profile AS (
-    SELECT * FROM michigan.therms_profile
+    SELECT * FROM nspm.therms_profile
 )
 -- Unpivoting therms profile data
 SELECT utility, quarter, month, 'summer' AS therms_profile, summer AS value FROM therms_profile

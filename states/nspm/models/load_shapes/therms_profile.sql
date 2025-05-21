@@ -1,5 +1,5 @@
 MODEL (
-  name michigan.therms_profile,
+  name nspm.therms_profile,
   kind FULL,
   grain (utility, quarter, month),
 );

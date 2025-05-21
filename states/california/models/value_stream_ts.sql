@@ -7,6 +7,11 @@ MODEL(
 WITH regions AS (
     SELECT distinct region FROM california.elec_av_costs
 )
+
+-- IMPORTANT NOTE: The time-granularity of the value_stream_ts table cannot be lower than the time-granularity of the commodity_load_shape_ts table.
+-- For instance, if the commodity_load_shape_ts table is monthly then the value_stream_ts table cannot be hourly.
+
+
 -- hourly value streams
 SELECT
     utility, region,
