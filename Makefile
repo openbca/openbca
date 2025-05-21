@@ -13,7 +13,7 @@ run-all:
 duckdb:
 	duckdb output/duckdb.db
 
-test:
+test: #FIXME it should also run the states specific tests
 	PYTHONPATH=. pytest tests/
 	sqlmesh test
 

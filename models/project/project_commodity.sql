@@ -14,5 +14,5 @@ SELECT
     project_id,
     utility, region,
     'GAS' as commodity,
-    load_shape,
+    therms_profile as load_shape,
 FROM project.projects
