@@ -3,7 +3,7 @@ install:
 
 PROFILE?=california
 run:
-	sqlmesh -p ${PROFILE} -p . plan --auto-apply
+	sqlmesh -p states/${PROFILE} -p . plan --auto-apply
 	@duckdb output/${PROFILE}.db -c "COPY (SELECT * FROM flexvalue.project_value_stream_benefits) TO 'output/project_benefits_${PROFILE}.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
 duckdb:
@@ -20,7 +20,7 @@ DUCKDB_ARCH?=aarch64
 docker-build:
 	docker build --build-arg DUCKDB_ARCH=${DUCKDB_ARCH} -t open-bca -f Dockerfile .
 
-DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/test_data:/app/test_data -v $(shell pwd)/logs:/app/logs -v $(shell pwd)/tests:/app/tests open-bca
+DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/states:/app/states -v $(shell pwd)/logs:/app/logs open-bca
 
 docker-run: docker-build
 	docker run --rm ${DOCKER_RUN_ARGS}
@@ -40,7 +40,7 @@ refresh-ref-output:
 
 generate-flow-diagram:
 	sqlmesh -p . dag output/dag.html
-	sqlmesh -p ${PROFILE} dag output/dag_${PROFILE}.html
+	sqlmesh -p states/${PROFILE} dag output/dag_${PROFILE}.html
 
 ui:
 	sqlmesh ui

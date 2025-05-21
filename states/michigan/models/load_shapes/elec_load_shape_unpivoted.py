@@ -7,7 +7,7 @@ import pandas as pd
 ID_COLUMNS = ['state', 'utility', 'quarter', 'month', 'hour_of_year', 'hour_of_day']
 
 @model(
-    name='california.elec_load_shape_unpivoted',
+    name='michigan.elec_load_shape_unpivoted',
     kind='FULL',
     grain=(*ID_COLUMNS, 'load_shape'),
     columns = {
@@ -26,7 +26,7 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     Unpivot the elec_load_shape table to have a row for each load shape name and value.
     """
     return unpivot(
-        pd.read_csv('california/test_data/test_real_data_calculations_aggregated/ca_hourly_electric_load_shapes_horizontal_copy.csv')
+        pd.read_csv('states/california/test_data/test_real_data_calculations_aggregated/ca_hourly_electric_load_shapes_horizontal_copy.csv')
     )
 
 
