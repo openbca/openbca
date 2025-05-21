@@ -6,6 +6,10 @@ run:
 	sqlmesh -p states/${PROFILE} -p . plan --auto-apply
 	@duckdb output/${PROFILE}.db -c "COPY (SELECT * FROM flexvalue.project_value_stream_benefits) TO 'output/project_benefits_${PROFILE}.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
+run-all:
+	$(MAKE) run PROFILE=california
+	$(MAKE) run PROFILE=michigan
+
 duckdb:
 	duckdb output/duckdb.db
 
@@ -24,6 +28,9 @@ DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/out
 
 docker-run: docker-build
 	docker run --rm ${DOCKER_RUN_ARGS}
+
+docker-run-all: docker-build
+	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make run-all"
 
 docker-shell: docker-build
 	docker run -it --rm ${DOCKER_RUN_ARGS} bash
