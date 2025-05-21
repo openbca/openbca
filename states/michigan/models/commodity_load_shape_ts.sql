@@ -1,7 +1,7 @@
 MODEL(
     name flexvalue_input.commodity_load_shape_ts,
     kind FULL,
-    grain (utility, commodity, year, hour_of_year),
+    grain (utility, commodity, hour_of_year),
 );
 SELECT
     utility,
