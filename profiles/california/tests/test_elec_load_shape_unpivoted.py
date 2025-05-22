@@ -1,6 +1,6 @@
 import pandas as pd
 
-from states.california.models.load_shapes import elec_load_shape_unpivoted
+from profiles.california.models.load_shapes import elec_load_shape_unpivoted
 
 
 def test_unpivot_logic():

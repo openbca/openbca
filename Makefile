@@ -3,7 +3,7 @@ install:
 
 PROFILE?=california
 run:
-	sqlmesh -p states/${PROFILE} -p . plan --auto-apply
+	sqlmesh -p profiles/${PROFILE} -p . plan --auto-apply
 	@duckdb output/${PROFILE}.db -c "COPY (SELECT * FROM flexvalue.project_value_stream_benefits) TO 'output/project_benefits_${PROFILE}.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
 run-all:
@@ -15,8 +15,8 @@ duckdb:
 
 test:
 	#PYTHONPATH=. pytest tests/
-	PYTHONPATH=. pytest states/${PROFILE}/tests/
-	sqlmesh -p states/${PROFILE} -p . test
+	PYTHONPATH=. pytest profiles/${PROFILE}/tests/
+	sqlmesh -p profiles/${PROFILE} -p . test
 
 test-all:
 	$(MAKE) test PROFILE=california
@@ -29,7 +29,7 @@ DUCKDB_ARCH?=aarch64
 docker-build:
 	docker build --build-arg DUCKDB_ARCH=${DUCKDB_ARCH} -t open-bca -f Dockerfile .
 
-DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/states:/app/states -v $(shell pwd)/logs:/app/logs open-bca
+DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/profiles:/app/profiles -v $(shell pwd)/logs:/app/logs open-bca
 
 docker-run: docker-build
 	docker run --rm ${DOCKER_RUN_ARGS}
@@ -55,8 +55,8 @@ refresh-ref-output:
 
 generate-flow-diagram:
 	sqlmesh -p . dag output/dag.html
-	sqlmesh -p states/nspm dag output/dag_nspm.html
-	sqlmesh -p states/california dag output/dag_california.html
+	sqlmesh -p profiles/nspm dag output/dag_nspm.html
+	sqlmesh -p profiles/california dag output/dag_california.html
 
 ui:
 	sqlmesh ui

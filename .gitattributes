@@ -1,1 +1,1 @@
-states/california/test_data/test_real_data_calculations_aggregated/full_ca_avoided_costs_2020acc.csv.gz filter=lfs diff=lfs merge=lfs -text
+profiles/california/test_data/test_real_data_calculations_aggregated/full_ca_avoided_costs_2020acc.csv.gz filter=lfs diff=lfs merge=lfs -text
