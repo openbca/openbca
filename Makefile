@@ -55,7 +55,8 @@ refresh-ref-output:
 
 generate-flow-diagram:
 	sqlmesh -p . dag output/dag.html
-	sqlmesh -p states/${PROFILE} dag output/dag_${PROFILE}.html
+	sqlmesh -p states/nspm dag output/dag_nspm.html
+	sqlmesh -p states/california dag output/dag_california.html
 
 ui:
 	sqlmesh ui
