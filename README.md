@@ -39,7 +39,7 @@ make run
 
 # Inputs
 
-Project input data are sourced from the `input/projects.csv`. Other reference files are sourced from `test_data/test_real_data_calculations_aggregated`.
+Project input data are sourced from the `input/projects.csv`. Other reference files are sourced from `data/test_real_data_calculations_aggregated`.
 
 ## Reference files
 TODO describe the process to import files from the CPUC website.
