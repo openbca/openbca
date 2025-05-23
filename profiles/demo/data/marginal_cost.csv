@@ -1,0 +1,4 @@
+commodity,utility,region,marginal_cost
+ELECTRICITY,PGE,CZ2,0
+GAS,PGE,CZ2,30
+GAS,PGE,CZ3A,15

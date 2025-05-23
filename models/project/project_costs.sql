@@ -8,10 +8,8 @@ SELECT
     utility, region,
     start_year, start_quarter,
     discount_rate, eul,
-    load_shape, therms_profile,
-    units, ntg, mwh_savings,
+    units, ntg,
     admin_cost + (((1 - ntg) * incentive_cost) + (ntg * measure_cost)) / (1 + (discount_rate / 4.0)) as trc_costs,
     admin_cost + (incentive_cost / (1 + (discount_rate / 4.0))) as pac_costs,
-    units * ntg * mwh_savings as net_savings,
 FROM
     project.projects project_info

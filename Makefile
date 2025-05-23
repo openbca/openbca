@@ -1,26 +1,40 @@
 install:
 	pip install -r requirements.txt
 
-PROFILE?=california
+PROFILE?=nspm
+
 run:
 	sqlmesh -p profiles/${PROFILE} -p . plan --auto-apply
 	@duckdb output/${PROFILE}.db -c "COPY (SELECT * FROM flexvalue.project_value_stream_benefits) TO 'output/project_benefits_${PROFILE}.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
 run-all:
-	$(MAKE) run PROFILE=california
-	$(MAKE) run PROFILE=nspm
+	@for profile in $(shell ls profiles); do \
+		$(MAKE) run PROFILE=$$profile; \
+		if [ $$? -ne 0 ]; then \
+			echo "Error running profile: $$profile"; \
+			exit 1; \
+		fi; \
+	done
 
 duckdb:
 	duckdb output/duckdb.db
 
 test:
-	#PYTHONPATH=. pytest tests/
-	PYTHONPATH=. pytest profiles/${PROFILE}/tests/
+	@echo "Running tests for profile: ${PROFILE}"
+	@if [ -d "profiles/${PROFILE}/tests" ]; then \
+		PYTHONPATH=. pytest profiles/${PROFILE}/tests/; \
+	fi
+
 	sqlmesh -p profiles/${PROFILE} -p . test
 
 test-all:
-	$(MAKE) test PROFILE=california
-	#$(MAKE) test PROFILE=nspm
+	@for profile in $(shell ls profiles); do \
+		$(MAKE) test PROFILE=$$profile; \
+		if [ $$? -ne 0 ]; then \
+			echo "Error running profile: $$profile"; \
+			exit 1; \
+		fi; \
+	done
 
 clean:
 	rm -f duckdb.db && rm -rf logs && rm -rf .cache && rm -rf output/*
@@ -55,8 +69,12 @@ refresh-ref-output:
 
 generate-flow-diagram:
 	sqlmesh -p . dag output/dag.html
-	sqlmesh -p profiles/nspm dag output/dag_nspm.html
-	sqlmesh -p profiles/california dag output/dag_california.html
+	sqlmesh -p profiles/${PROFILE} dag output/dag_${PROFILE}.html
+
+generate-all-flow-diagrams:
+	@for profile in $(shell ls profiles); do \
+		$(MAKE) generate-flow-diagram PROFILE=$$profile; \
+	done
 
 ui:
 	sqlmesh ui
