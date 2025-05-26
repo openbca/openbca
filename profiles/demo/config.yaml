@@ -2,7 +2,7 @@ gateways:
   local_duckdb:
     connection:
       type: duckdb
-      database: output/{{ env_var('PROFILE') }}.db
+      database: output/demo.db
 
 default_gateway: local_duckdb
 
