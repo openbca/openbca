@@ -18,10 +18,10 @@ jobs:
       - name: Checkout LFS objects
         run: git lfs pull
       - id: build
-        name: Build FlexValue Docker image
+        name: Build openbca Docker image
         run: |
           make docker-build DUCKDB_ARCH=amd64
       - id: run
-        name: Run FlexValue in SQLMesh locally
+        name: Run openbca in SQLMesh locally
         run: |
           make docker-run-all DUCKDB_ARCH=amd64

@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue_input.commodity_load_shape_ts,
+    name openbca_input.commodity_load_shape_ts,
     kind FULL,
     grain (utility, commodity, hour_of_year),
 );

@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue.project_value_stream_benefits,
+    name openbca.project_value_stream_benefits,
     kind FULL,
     grain (project_id),
 );
@@ -10,7 +10,7 @@ WITH pivoted_vsb(
         SUM(IF(value_stream = 'total' AND commodity = 'GAS', benefit_value)) AS gas_benefits,
         SUM(IF(value_stream = 'marginal_ghg' AND commodity = 'ELECTRICITY', benefit_value)) AS lifecycle_elec_ghg_savings,
         SUM(IF(value_stream = 'marginal_ghg' AND commodity = 'GAS', benefit_value)) AS lifecycle_gas_ghg_savings,
-    FROM flexvalue.project_commodity_value_stream_benefits
+    FROM openbca.project_commodity_value_stream_benefits
     GROUP BY ALL
 )
 SELECT

@@ -53,12 +53,12 @@ A CSV with the final results is automatically extracted from DuckDB using the co
 # Repository structure
 
 The repository is split in 2 main part:
- - the FlexValue generic benefit calculation
+ - the OpenBCA generic benefit calculation
  - the state-specific processing logic of load shapes and value-streams. This is currently split between the California and NSPM subfolders.
 
-## FlexValue generic benefit calculation flow
+## OpenBCA generic benefit calculation flow
 
-To run the FlexValue calculation, we need the following inputs:
+To run the OpenBCA calculation, we need the following inputs:
  - `input/projects.csv`: the project input data
  - `value_stream_ts`: The Value Stream timeseries
  - `commodity_load_shape_ts`: The commodity load shape timeseries
@@ -67,9 +67,9 @@ To run the FlexValue calculation, we need the following inputs:
 %%{ init: { "theme": "default", "themeVariables": { "fontSize": "14px" }, "flowchart": { "nodeSpacing": 30, "curve": "basis" } } }%%
 flowchart TD
 
-    %% === FLEXVALUE Subgraph ===
-    subgraph FLEXVALUE ["OpenBCA Core"]
-        style FLEXVALUE fill:#e6f4ea
+    %% === OpenBCA Subgraph ===
+    subgraph OpenBCA ["OpenBCA Core"]
+        style OpenBCA fill:#e6f4ea
 
         user(["👤 OpenBCA User"]):::user
         project_csv[[📄 projects.csv]]:::fileref

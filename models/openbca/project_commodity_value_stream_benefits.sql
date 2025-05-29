@@ -1,5 +1,5 @@
 MODEL(
-    name flexvalue.project_commodity_value_stream_benefits,
+    name openbca.project_commodity_value_stream_benefits,
     kind FULL,
     grain (project_id, commodity),
 );
@@ -13,7 +13,7 @@ FROM (
         SUM(benefit_value) as benefit_value,
         SUM(net_energy_savings_ts) as net_energy_savings
     FROM
-        flexvalue.project_commodity_value_stream_benefits_ts
+        openbca.project_commodity_value_stream_benefits_ts
     GROUP BY
         project_id, commodity, value_stream
 ) vsb_ts
