@@ -1,3 +1,6 @@
 sqlmesh[web]==0.170.1
 duckdb==1.2.1
 pytest==8.3.5
+
+streamlit
+watchdog
