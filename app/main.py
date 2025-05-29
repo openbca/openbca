@@ -68,7 +68,7 @@ with st.container():
     with row_mid[0]:
         render_metric("Total System Benefit", result.total_system_benefit, "<small>Electric: 8,082 | Gas: 1,501</small>")
     with row_mid[1]:
-        render_metric("TSB/MWh", result.tsb_per_mwh, "<small>TSB/Therm: 1.50</small>")
+        render_metric("TSB/MWh", 5000, "<small>TSB/Therm: 1.50</small>")
     with row_mid[2]:
         render_metric("GHG Savings (Tons)", result.ghg_savings_tons, "<small>Electric: 27.37 | Gas: 5.29</small>")
     with row_mid[3]:

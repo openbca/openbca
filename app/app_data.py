@@ -70,19 +70,38 @@ class CalculationResults:
     net_lifecycle_mwh_savings: float
     net_lifecycle_therm_savings: float
     total_system_benefit: float
-    tsb_per_mwh: float
+    # tsb_per_mwh: float
     ghg_savings_tons: float
     trc: float
     pac: float
 
 
 def load_calculation_results():
+    conn = get_duckdb_connection()
+    result = conn.execute("""
+        SELECT 
+            round(electric_benefits, 0) as electric_benefits,
+            round(gas_benefits, 0) as gas_benefits,
+            round(lifecycle_total_ghg_savings, 0) as lifecycle_total_ghg_savings,
+            round(total_benefits, 0) as total_benefits,
+            round(trc_ratio, 0) as trc_ratio,
+            round(pac_ratio, 0) as pac_ratio,
+        FROM openbca.project_value_stream_benefits
+        WHERE project_id = 'MAR100628'
+    """).fetchone()
+    print(result)
     return CalculationResults(
-        net_lifecycle_mwh_savings = 100.0,
-        net_lifecycle_therm_savings = 200.0,
-        total_system_benefit = 500000.0,
-        tsb_per_mwh = 5000.0,
-        ghg_savings_tons = 1000.0,
-        trc = 0.62,
-        pac = 1.20
+        # net_lifecycle_mwh_savings = 100.0,
+        # net_lifecycle_therm_savings = 200.0,
+        # total_system_benefit = 500000.0,
+        # tsb_per_mwh = 5000.0,
+        # ghg_savings_tons = 1000.0,
+        # trc = 0.62,
+        # pac = 1.20
+        net_lifecycle_mwh_savings=result[0],
+        net_lifecycle_therm_savings=result[1],
+        total_system_benefit=result[2],
+        ghg_savings_tons=result[3],
+        trc=result[4],
+        pac=result[5]
     )
