@@ -1,7 +1,7 @@
 install:
 	pip install -r requirements.txt
 
-PROFILE?=nspm
+PROFILE?=california
 
 run:
 	sqlmesh -p profiles/${PROFILE} -p . plan --auto-apply
@@ -76,5 +76,8 @@ generate-all-flow-diagrams:
 		$(MAKE) generate-flow-diagram PROFILE=$$profile; \
 	done
 
-ui:
+sqlmesh-ui:
 	sqlmesh ui
+
+run-app:
+	streamlit run app/main.py
