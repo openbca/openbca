@@ -1,16 +1,16 @@
 MODEL(
-    name openbca.project_value_stream_benefits,
+    name openbca.project_impacts,
     kind FULL,
     grain (project_id),
 );
 WITH pivoted_vsb(
     SELECT
         project_id,
-        SUM(IF(value_stream = 'total' AND commodity = 'ELECTRICITY', benefit_value)) AS electric_benefits,
-        SUM(IF(value_stream = 'total' AND commodity = 'GAS', benefit_value)) AS gas_benefits,
-        SUM(IF(value_stream = 'marginal_ghg' AND commodity = 'ELECTRICITY', benefit_value)) AS lifecycle_elec_ghg_savings,
-        SUM(IF(value_stream = 'marginal_ghg' AND commodity = 'GAS', benefit_value)) AS lifecycle_gas_ghg_savings,
-    FROM openbca.project_commodity_value_stream_benefits
+        SUM(IF(cost_type = 'total' AND commodity = 'ELECTRICITY', impact_value)) AS electric_benefits,
+        SUM(IF(cost_type = 'total' AND commodity = 'GAS', impact_value)) AS gas_benefits,
+        SUM(IF(cost_type = 'marginal_ghg' AND commodity = 'ELECTRICITY', impact_value)) AS lifecycle_elec_ghg_savings,
+        SUM(IF(cost_type = 'marginal_ghg' AND commodity = 'GAS', impact_value)) AS lifecycle_gas_ghg_savings,
+    FROM openbca.project_commodity_impacts
     GROUP BY ALL
 )
 SELECT
