@@ -78,7 +78,7 @@ class CalculationResults:
 
 def load_calculation_results():
     conn = get_duckdb_connection()
-    result = conn.execute("""
+    res = conn.execute("""
         SELECT 
             round(electric_benefits, 0) as electric_benefits,
             round(gas_benefits, 0) as gas_benefits,
@@ -88,8 +88,11 @@ def load_calculation_results():
             round(pac_ratio, 0) as pac_ratio,
         FROM openbca.project_value_stream_benefits
         WHERE project_id = 'MAR100628'
-    """).fetchone()
+    """)
+    result = res.fetchone()
+    print(res.description)
     print(result)
+    row_dict = dict(zip([desc[0] for desc in res.description], result))
     return CalculationResults(
         # net_lifecycle_mwh_savings = 100.0,
         # net_lifecycle_therm_savings = 200.0,
@@ -98,7 +101,7 @@ def load_calculation_results():
         # ghg_savings_tons = 1000.0,
         # trc = 0.62,
         # pac = 1.20
-        net_lifecycle_mwh_savings=result[0],
+        net_lifecycle_mwh_savings=row_dict['electric_benefits'], # result[0],
         net_lifecycle_therm_savings=result[1],
         total_system_benefit=result[2],
         ghg_savings_tons=result[3],
