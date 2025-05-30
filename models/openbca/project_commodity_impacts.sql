@@ -1,5 +1,5 @@
 MODEL(
-    name openbca.project_commodity_value_stream_benefits,
+    name openbca.project_commodity_impacts,
     kind FULL,
     grain (project_id, commodity),
 );
@@ -8,14 +8,14 @@ SELECT
     net_energy_savings / pc.eul as annual_net_mwh_savings
 FROM (
     SELECT
-        project_id, commodity, value_stream,
-        SUM(value_stream_value) as value_stream_value,
-        SUM(benefit_value) as benefit_value,
+        project_id, commodity, cost_type,
+        SUM(av_cost_value) as av_cost_value,
+        SUM(impact_value) as impact_value,
         SUM(net_energy_savings_ts) as net_energy_savings
     FROM
-        openbca.project_commodity_value_stream_benefits_ts
+        openbca.project_commodity_impact_ts
     GROUP BY
-        project_id, commodity, value_stream
+        project_id, commodity, cost_type
 ) vsb_ts
 LEFT JOIN project.project_costs pc
     ON pc.project_id = vsb_ts.project_id

@@ -60,7 +60,7 @@ The repository is split in 2 main part:
 
 To run the OpenBCA calculation, we need the following inputs:
  - `input/projects.csv`: the project input data
- - `value_stream_ts`: The Value Stream timeseries
+ - `avoided_cost_ts`: The avoided cost timeseries
  - `commodity_load_shape_ts`: The commodity load shape timeseries
 
 ```mermaid
@@ -79,11 +79,11 @@ flowchart TD
         project_discount_rate_ts[(project_discount_rate_ts)]:::intermediate
         project_commodity[(project_commodity)]:::intermediate
         project_commodity_load_shape_ts[(project_commodity_load_shape_ts)]:::intermediate
-        project_commodity_value_stream_benefits_ts[(📈 project_commodity_value_stream_benefits_ts)]:::output
-        project_commodity_value_stream_benefits(["📊 project_commodity_value_stream_benefits"]):::intermediate
-        project_value_stream_benefits(["📊 project_value_stream_benefits"]):::output
+        project_commodity_impact_ts[(📈 project_commodity_impact_ts)]:::output
+        project_commodity_impacts(["📊 project_commodity_impacts"]):::intermediate
+        project_impacts(["📊 project_impacts"]):::output
         
-        value_stream_ts[(value_stream_ts)]:::interface
+        avoided_cost_ts[(avoided_cost_ts)]:::interface
         commodity_load_shape_ts[(commodity_load_shape_ts)]:::interface
 
         user --> project_csv --> projects
@@ -93,12 +93,12 @@ flowchart TD
         project_commodity --> project_commodity_load_shape_ts
         project_discount_rate_ts --> project_commodity_load_shape_ts
         commodity_load_shape_ts --> project_commodity_load_shape_ts
-        value_stream_ts --> project_commodity_value_stream_benefits_ts
-        project_commodity_load_shape_ts --> project_commodity_value_stream_benefits_ts
-        project_commodity_value_stream_benefits_ts --> project_commodity_value_stream_benefits
-        project_costs --> project_commodity_value_stream_benefits
-        project_commodity_value_stream_benefits --> project_value_stream_benefits
-        project_costs --> project_value_stream_benefits
+        avoided_cost_ts --> project_commodity_impact_ts
+        project_commodity_load_shape_ts --> project_commodity_impact_ts
+        project_commodity_impact_ts --> project_commodity_impacts
+        project_costs --> project_commodity_impacts
+        project_commodity_impacts --> project_impacts
+        project_costs --> project_impacts
     end
 
     %% === CLASS DEFINITIONS ===
@@ -121,13 +121,13 @@ flowchart TD
     subgraph CALIFORNIA ["California"]
         style CALIFORNIA fill:#F3E9DC
 
-        subgraph CALI_VS ["value_stream datasets"]
+        subgraph CALI_VS ["av_cost datasets"]
             cal_gas_av_costs[["CPUC Gas Avoided Costs"]]:::fileref
             cal_elec_av_costs[["CPUC Electric Avoided Costs"]]:::fileref
-            cal_value_stream_ts[(value_stream_ts)]:::interface
+            cal_avoided_cost_ts[(avoided_cost_ts)]:::interface
 
-            cal_gas_av_costs --> cal_value_stream_ts
-            cal_elec_av_costs --> cal_value_stream_ts
+            cal_gas_av_costs --> cal_avoided_cost_ts
+            cal_elec_av_costs --> cal_avoided_cost_ts
         end
 
         subgraph CALI_LS ["load_shape datasets"]
@@ -162,13 +162,13 @@ flowchart TD
     subgraph NSPM ["NSPM"]
         style NSPM fill:#d0e0f3
 
-        subgraph NSPM_VS ["value_stream datasets"]
+        subgraph NSPM_VS ["av_cost datasets"]
             nspm_gas_marginal_cost[[gas_marginal_cost.csv]]:::fileref
             nspm_elec_av_costs[[TODO]]:::fileref
-            nspm_value_stream_ts[(value_stream_ts)]:::interface
+            nspm_avoided_cost_ts[(avoided_cost_ts)]:::interface
 
-            nspm_elec_av_costs --> nspm_value_stream_ts
-            nspm_gas_marginal_cost --> nspm_value_stream_ts
+            nspm_elec_av_costs --> nspm_avoided_cost_ts
+            nspm_gas_marginal_cost --> nspm_avoided_cost_ts
         end
 
         subgraph NSPM_LS ["load_shape datasets"]
