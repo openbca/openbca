@@ -7,27 +7,40 @@ st.set_page_config(layout="wide")
 st.markdown("# OpenBCA")
 
 with st.expander("Inputs", expanded=True):
-    filter_rows = st.columns(4)
+    filter_rows = st.columns(3)
 
     with filter_rows[0]:
-        st.markdown("#### Value Curve")
-        electric_curve = st.selectbox("Electric Value Curve", ["NONRES_INDOOR_CFL_LTG", "NONRES_HVAC_SPLIT_PACKAGE_AC"])
-        gas_curve = st.selectbox("Gas Value Curve", ["annual"])
+        st.markdown("#### Utility & Location")
+        utility = st.selectbox("Utility", ["PGE"])
+        region = st.selectbox("Region", ['CZ12', 'CZ2', 'CZ3A', 'CZ3B', 'CZ12'])
 
     with filter_rows[1]:
-        st.markdown("#### Utility & Zone")
-        utility = st.selectbox("Utility", ["PGE"])
-        climate_zone = st.selectbox("Climate Zone", ['CZ12', 'CZ2', 'CZ3A', 'CZ3B', 'CZ12'])
-
-    with filter_rows[2]:
         st.markdown("#### Time Period")
         start_year = st.number_input("Start Year", value=2021, step=1)
         start_quarter = st.selectbox("Start Quarter", [1, 2, 3, 4])
 
-    with filter_rows[3]:
+    with filter_rows[2]:
         st.markdown("#### Financial Inputs")
         eul = st.number_input("EUL", value=10)
         discount_rate = st.number_input("Discount Rate", value=0.075)
+
+    filter_rows = st.columns(3)
+
+    with filter_rows[0]:
+        st.markdown("#### Electric Saving and Load Shape")
+        electric_curve = st.selectbox("Electric Value Curve", ["NONRES_INDOOR_CFL_LTG", "NONRES_HVAC_SPLIT_PACKAGE_AC"])
+        mwh_savings = st.number_input("Annual MWh saving", value=10)
+
+    with filter_rows[1]:
+        st.markdown("#### Gas Saving and Load Profile")
+        gas_curve = st.selectbox("Gas Value Curve", ["annual"])
+        therms_savings = st.number_input("Annual Therms saving", value=100)
+
+    with filter_rows[2]:
+        st.markdown("#### Cost Information")
+        admin_cost = st.number_input("Administrative Cost", value=3000)
+        incentive_cost = st.number_input("Incentive", value=0.075)
+        measure_cost = st.number_input("Measure", value=0.075)
 
     st.markdown("#### Impacts Selection")
     selected_streams = []
@@ -40,24 +53,20 @@ with st.expander("Inputs", expanded=True):
                 selected_streams.append(stream)
             st.markdown(f"<div style='height:10px;width:100%;background-color:{color};margin-top:5px;border-radius:2px'></div>", unsafe_allow_html=True)
 
-    # INPUT_PROJECT_FIELDS = ['utility', 'region', 'start_year', 'start_quarter', 'discount_rate', 'eul', 'units', 'ntg',
-    #                         'admin_cost', 'incentive_cost', 'measure_cost', 'mwh_savings', 'therms_savings',
-    #                         'load_shape', 'therms_profile']
-
     refresh_project_table(
         utility=utility,
-        region=climate_zone,
+        region=region,
         start_year=start_year,
         start_quarter=start_quarter,
         discount_rate=discount_rate,
         eul=eul,
         units=1,
         ntg=1,
-        admin_cost=1,
-        incentive_cost=1,
-        measure_cost=1,
-        mwh_savings=1,
-        therms_savings=1,
+        admin_cost=admin_cost,
+        incentive_cost=incentive_cost,
+        measure_cost=measure_cost,
+        mwh_savings=mwh_savings,
+        therms_savings=therms_savings,
         load_shape=electric_curve,
         therms_profile=gas_curve,
     )
@@ -96,9 +105,7 @@ with st.container():
     with row_mid[4]:
         render_metric("PAC", result[PROJECT_IMPACT_PAC_RATIO])
 
-# Tabs for Electricity and Gas
 energy_tabs = st.tabs(["Electricity", "Gas"])
-
 
 with energy_tabs[0]:
     st.markdown("## Electricity")
