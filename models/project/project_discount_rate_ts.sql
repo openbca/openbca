@@ -1,6 +1,6 @@
 MODEL(
     name  project.project_discount_rate_ts,
-    kind FULL,
+    kind VIEW,
     grain (project_id, year, quarter),
 );
 

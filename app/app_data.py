@@ -1,16 +1,29 @@
 from dataclasses import dataclass
 
-import duckdb
+from sqlmesh import Context, Config, model
+from sqlmesh.core.config import load_configs
+from streamlit.runtime.scriptrunner import get_script_run_ctx
 import streamlit as st
 import pandas as pd
+import duckdb
+PROJECT_ID = get_script_run_ctx().session_id
 
+INPUT_PROJECT_FIELDS = ['utility', 'region', 'start_year', 'start_quarter', 'discount_rate', 'eul', 'units', 'ntg', 'admin_cost', 'incentive_cost', 'measure_cost', 'mwh_savings', 'therms_savings', 'load_shape', 'therms_profile']
+
+PROJECT_IMPACT_ELECTRIC_BENEFITS = "electric_benefits"
+PROJECT_IMPACT_GAS_BENEFITS = "gas_benefits"
+PROJECT_IMPACT_LIFECYCLE_TOTAL_GHG_SAVINGS = "lifecycle_total_ghg_savings"
+PROJECT_IMPACT_TOTAL_BENEFITS = "total_benefits"
+PROJECT_IMPACT_TRC_RATIO = "trc_ratio"
+PROJECT_IMPACT_PAC_RATIO = "pac_ratio"
 
 @st.cache_resource
-def get_duckdb_connection():
-    con = duckdb.connect("output/california.db")
-    # df = pd.read_csv("data.csv")
-    # con.register("avoided_costs", df)
-    return con
+def get_connection(session_id: str):
+    # TODO 1 connection/db per session ?
+    return duckdb.connect("output/app.db", read_only=False)
+
+def get_read_connection():
+    return get_connection(PROJECT_ID)#.cursor()
 
 def load_value_streams():
     return {
@@ -65,46 +78,51 @@ def load_gas_table():
         "$ / Therm": [round(2 - i * 0.05, 2) for i in range(12)]
     })
 
-@dataclass
-class CalculationResults:
-    net_lifecycle_mwh_savings: float
-    net_lifecycle_therm_savings: float
-    total_system_benefit: float
-    # tsb_per_mwh: float
-    ghg_savings_tons: float
-    trc: float
-    pac: float
-
 
 def load_calculation_results():
-    conn = get_duckdb_connection()
-    res = conn.execute("""
-        SELECT 
-            round(electric_benefits, 0) as electric_benefits,
-            round(gas_benefits, 0) as gas_benefits,
-            round(lifecycle_total_ghg_savings, 0) as lifecycle_total_ghg_savings,
-            round(total_benefits, 0) as total_benefits,
-            round(trc_ratio, 0) as trc_ratio,
-            round(pac_ratio, 0) as pac_ratio,
-        FROM openbca.project_value_stream_benefits
-        WHERE project_id = 'MAR100628'
-    """)
-    result = res.fetchone()
-    print(res.description)
-    print(result)
-    row_dict = dict(zip([desc[0] for desc in res.description], result))
-    return CalculationResults(
-        # net_lifecycle_mwh_savings = 100.0,
-        # net_lifecycle_therm_savings = 200.0,
-        # total_system_benefit = 500000.0,
-        # tsb_per_mwh = 5000.0,
-        # ghg_savings_tons = 1000.0,
-        # trc = 0.62,
-        # pac = 1.20
-        net_lifecycle_mwh_savings=row_dict['electric_benefits'], # result[0],
-        net_lifecycle_therm_savings=result[1],
-        total_system_benefit=result[2],
-        ghg_savings_tons=result[3],
-        trc=result[4],
-        pac=result[5]
-    )
+    #with get_read_connection() as conn:
+    conn = get_read_connection()
+    res = conn.execute(f"""
+        SELECT
+            round(electric_benefits, 0) as {PROJECT_IMPACT_ELECTRIC_BENEFITS},
+            round(gas_benefits, 0) as {PROJECT_IMPACT_GAS_BENEFITS},
+            round(lifecycle_total_ghg_savings, 0) as {PROJECT_IMPACT_LIFECYCLE_TOTAL_GHG_SAVINGS},
+            round(total_benefits, 0) as {PROJECT_IMPACT_TOTAL_BENEFITS},
+            round(trc_ratio, 0) as {PROJECT_IMPACT_TRC_RATIO},
+            round(pac_ratio, 0) as {PROJECT_IMPACT_PAC_RATIO},
+        FROM app.openbca.project_impacts
+        WHERE project_id = '{PROJECT_ID}'
+    """).fetch_df()
+
+    return res.iloc[0].to_dict()
+
+@st.cache_resource
+def get_context():
+    return Context(config=load_configs(None, Context.CONFIG_TYPE, "profiles/app"))
+
+def refresh_project_table(**kwargs):
+
+    project_fields = [field for field in INPUT_PROJECT_FIELDS if field in kwargs]
+    project_values = [kwargs[field] for field in project_fields]
+
+    if not project_fields:
+        st.error("No project fields provided to refresh the project table.")
+        return
+
+    conn = get_read_connection()
+
+    conn.execute(f"""
+        INSERT INTO app.app_tmp.empty_projects (project_id, {', '.join(project_fields)}) VALUES (
+        '{PROJECT_ID}', {','.join('?' * len(project_fields))})
+        ON CONFLICT DO UPDATE SET {', '.join([f"{field} = EXCLUDED.{field}" for field in project_fields])};
+    """, project_values)
+
+    context = get_context()
+
+    df = context.fetchdf("SELECT * FROM app.openbca.project_impacts LIMIT 10")
+    print(df)
+
+    # context.upsert_model(my_static_data())
+    context.apply(context.plan("openbca.project_impacts"))
+
+    st.success("Project table refreshed successfully!")

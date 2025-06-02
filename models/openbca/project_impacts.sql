@@ -1,6 +1,6 @@
 MODEL(
     name openbca.project_impacts,
-    kind FULL,
+    kind VIEW,
     grain (project_id),
 );
 WITH pivoted_vsb(

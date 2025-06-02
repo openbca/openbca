@@ -1,6 +1,6 @@
 MODEL(
     name openbca.project_commodity_impacts,
-    kind FULL,
+    kind VIEW,
     grain (project_id, commodity),
 );
 SELECT

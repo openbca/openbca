@@ -1,5 +1,3 @@
-import streamlit as st
-import pandas as pd
 import altair as alt
 
 from app_data import *
@@ -13,17 +11,17 @@ with st.expander("Inputs", expanded=True):
 
     with filter_rows[0]:
         st.markdown("#### Value Curve")
-        electric_curve = st.selectbox("Electric Value Curve", ["2022", "2023"])
-        gas_curve = st.selectbox("Gas Value Curve", ["2022", "2023"])
+        electric_curve = st.selectbox("Electric Value Curve", ["NONRES_INDOOR_CFL_LTG", "NONRES_HVAC_SPLIT_PACKAGE_AC"])
+        gas_curve = st.selectbox("Gas Value Curve", ["annual"])
 
     with filter_rows[1]:
         st.markdown("#### Utility & Zone")
-        utility = st.selectbox("Utility", ["PG&E", "SCE", "SDG&E"])
-        climate_zone = st.selectbox("Climate Zone", list(range(1, 17)))
+        utility = st.selectbox("Utility", ["PGE"])
+        climate_zone = st.selectbox("Climate Zone", ['CZ12', 'CZ2', 'CZ3A', 'CZ3B', 'CZ12'])
 
     with filter_rows[2]:
         st.markdown("#### Time Period")
-        start_year = st.number_input("Start Year", value=2024, step=1)
+        start_year = st.number_input("Start Year", value=2021, step=1)
         start_quarter = st.selectbox("Start Quarter", [1, 2, 3, 4])
 
     with filter_rows[3]:
@@ -42,6 +40,28 @@ with st.expander("Inputs", expanded=True):
                 selected_streams.append(stream)
             st.markdown(f"<div style='height:10px;width:100%;background-color:{color};margin-top:5px;border-radius:2px'></div>", unsafe_allow_html=True)
 
+    # INPUT_PROJECT_FIELDS = ['utility', 'region', 'start_year', 'start_quarter', 'discount_rate', 'eul', 'units', 'ntg',
+    #                         'admin_cost', 'incentive_cost', 'measure_cost', 'mwh_savings', 'therms_savings',
+    #                         'load_shape', 'therms_profile']
+
+    refresh_project_table(
+        utility=utility,
+        region=climate_zone,
+        start_year=start_year,
+        start_quarter=start_quarter,
+        discount_rate=discount_rate,
+        eul=eul,
+        units=1,
+        ntg=1,
+        admin_cost=1,
+        incentive_cost=1,
+        measure_cost=1,
+        mwh_savings=1,
+        therms_savings=1,
+        load_shape=electric_curve,
+        therms_profile=gas_curve,
+    )
+
 st.markdown("## Total System Benefits")
 
 def render_metric(name: str, value: float, details: str = ""):
@@ -58,23 +78,23 @@ result = load_calculation_results()
 with st.container():
     row_top = st.columns(2)
     with row_top[0]:
-        render_metric("Net Lifecycle MWh Savings", result.net_lifecycle_mwh_savings)
+        render_metric("Net Lifecycle MWh Savings", result[PROJECT_IMPACT_ELECTRIC_BENEFITS])
     with row_top[1]:
-        render_metric("Net Lifecycle Therm Savings", result.net_lifecycle_therm_savings)
+        render_metric("Net Lifecycle Therm Savings", result[PROJECT_IMPACT_GAS_BENEFITS])
 
     st.markdown("### System Benefits and Savings")
     row_mid = st.columns([2, 1.5, 2, 1, 1])
 
     with row_mid[0]:
-        render_metric("Total System Benefit", result.total_system_benefit, "<small>Electric: 8,082 | Gas: 1,501</small>")
+        render_metric("Total System Benefit", result[PROJECT_IMPACT_TOTAL_BENEFITS], "<small>Electric: 8,082 | Gas: 1,501</small>")
     with row_mid[1]:
         render_metric("TSB/MWh", 5000, "<small>TSB/Therm: 1.50</small>")
     with row_mid[2]:
-        render_metric("GHG Savings (Tons)", result.ghg_savings_tons, "<small>Electric: 27.37 | Gas: 5.29</small>")
+        render_metric("GHG Savings (Tons)", result[PROJECT_IMPACT_LIFECYCLE_TOTAL_GHG_SAVINGS], "<small>Electric: 27.37 | Gas: 5.29</small>")
     with row_mid[3]:
-        render_metric("TRC", result.trc)
+        render_metric("TRC", result[PROJECT_IMPACT_TRC_RATIO])
     with row_mid[4]:
-        render_metric("PAC", result.pac)
+        render_metric("PAC", result[PROJECT_IMPACT_PAC_RATIO])
 
 # Tabs for Electricity and Gas
 energy_tabs = st.tabs(["Electricity", "Gas"])

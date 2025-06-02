@@ -1,6 +1,6 @@
 MODEL(
     name project.project_commodity,
-    kind FULL,
+    kind VIEW,
     grain (project_id, commodity),
 );
 SELECT
@@ -10,7 +10,7 @@ SELECT
     load_shape,
     mwh_savings as energy_savings,
     units * ntg * mwh_savings as net_energy_savings,
-FROM project.projects
+FROM openbca_input.projects
 UNION ALL
 SELECT
     project_id,
@@ -19,4 +19,4 @@ SELECT
     therms_profile as load_shape,
     therms_savings as energy_savings,
     units * ntg * therms_savings as net_energy_savings,
-FROM project.projects
+FROM openbca_input.projects
