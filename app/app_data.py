@@ -17,7 +17,7 @@ PROJECT_IMPACT_TRC_RATIO = "trc_ratio"
 PROJECT_IMPACT_PAC_RATIO = "pac_ratio"
 
 @st.cache_resource
-def get_connection(session_id: str):
+def get_connection():
     return duckdb.connect("output/app.db", read_only=False)
 
 def load_value_streams():
