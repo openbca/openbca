@@ -6,6 +6,22 @@ st.set_page_config(layout="wide")
 
 st.markdown("# OpenBCA")
 
+
+def impact_selection():
+    st.markdown("#### Impacts Selection")
+    selected_streams = []
+    value_streams = load_value_streams()
+    stream_cols = st.columns(len(value_streams))
+    for i, (stream, color) in enumerate(value_streams.items()):
+        with stream_cols[i]:
+            checked = st.checkbox(f"{stream}", value=True)
+            if checked:
+                selected_streams.append(stream)
+            st.markdown(
+                f"<div style='height:10px;width:100%;background-color:{color};margin-top:5px;border-radius:2px'></div>",
+                unsafe_allow_html=True)
+
+
 with st.expander("Inputs", expanded=True):
     filter_rows = st.columns(3)
 
@@ -39,36 +55,19 @@ with st.expander("Inputs", expanded=True):
     with filter_rows[2]:
         st.markdown("#### Cost Information")
         admin_cost = st.number_input("Administrative Cost", value=3000)
-        incentive_cost = st.number_input("Incentive", value=0.075)
-        measure_cost = st.number_input("Measure", value=0.075)
+        incentive_cost = st.number_input("Incentive Cost", value=0.075)
+        measure_cost = st.number_input("Measure Cost", value=0.075)
 
-    st.markdown("#### Impacts Selection")
-    selected_streams = []
-    value_streams = load_value_streams()
-    stream_cols = st.columns(len(value_streams))
-    for i, (stream, color) in enumerate(value_streams.items()):
-        with stream_cols[i]:
-            checked = st.checkbox(f"{stream}", value=True)
-            if checked:
-                selected_streams.append(stream)
-            st.markdown(f"<div style='height:10px;width:100%;background-color:{color};margin-top:5px;border-radius:2px'></div>", unsafe_allow_html=True)
+    impact_selection() #TODO
 
     refresh_project_table(
-        utility=utility,
-        region=region,
-        start_year=start_year,
-        start_quarter=start_quarter,
-        discount_rate=discount_rate,
-        eul=eul,
-        units=1,
-        ntg=1,
-        admin_cost=admin_cost,
-        incentive_cost=incentive_cost,
-        measure_cost=measure_cost,
-        mwh_savings=mwh_savings,
-        therms_savings=therms_savings,
-        load_shape=electric_curve,
-        therms_profile=gas_curve,
+        utility=utility, region=region,
+        start_year=start_year, start_quarter=start_quarter,
+        discount_rate=discount_rate, eul=eul,
+        units=1, ntg=1,
+        mwh_savings=mwh_savings, load_shape=electric_curve,
+        therms_savings=therms_savings, therms_profile=gas_curve,
+        admin_cost=admin_cost, incentive_cost=incentive_cost, measure_cost=measure_cost,
     )
 
 st.markdown("## Total System Benefits")
@@ -95,7 +94,7 @@ with st.container():
     row_mid = st.columns([2, 1.5, 2, 1, 1])
 
     with row_mid[0]:
-        render_metric("Total System Benefit", result[PROJECT_IMPACT_TOTAL_BENEFITS], "<small>Electric: 8,082 | Gas: 1,501</small>")
+        render_metric("Total System Benefit", result[PROJECT_IMPACT_TOTAL_BENEFITS], f"<small>Electric: {PROJECT_IMPACT} | Gas: 1,501</small>")
     with row_mid[1]:
         render_metric("TSB/MWh", 5000, "<small>TSB/Therm: 1.50</small>")
     with row_mid[2]:
