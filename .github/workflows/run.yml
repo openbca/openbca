@@ -15,8 +15,8 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - name: Checkout LFS objects
-        run: git lfs pull
+        with:
+          lfs: 'true'
       - id: build
         name: Build openbca Docker image
         run: |
