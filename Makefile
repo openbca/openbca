@@ -43,7 +43,7 @@ DUCKDB_ARCH?=aarch64
 docker-build:
 	docker build --build-arg DUCKDB_ARCH=${DUCKDB_ARCH} -t open-bca -f Dockerfile .
 
-DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/profiles:/app/profiles -v $(shell pwd)/logs:/app/logs open-bca
+DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/profiles:/app/profiles -v $(shell pwd)/logs:/app/logs -v $(shell pwd)/app:/app/app open-bca
 
 docker-run: docker-build
 	docker run --rm ${DOCKER_RUN_ARGS}
@@ -82,3 +82,6 @@ sqlmesh-ui:
 run-app:
 	#duckdb output/app.db -c "CREATE OR REPLACE TEMP TABLE projects_temp AS SELECT * FROM app_tmp.empty_projects; CREATE OR REPLACE VIEW app_tmp.view_projects AS SELECT * FROM projects_temp"
 	streamlit run app/main.py
+
+docker-run-app: docker-build
+	docker run --rm -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
