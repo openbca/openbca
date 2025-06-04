@@ -84,4 +84,4 @@ run-app:
 	streamlit run app/main.py
 
 docker-run-app: docker-build
-	docker run --rm -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
+	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
