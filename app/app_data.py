@@ -10,9 +10,19 @@ PROJECT_ID = get_script_run_ctx().session_id
 INPUT_PROJECT_FIELDS = ['utility', 'region', 'start_year', 'start_quarter', 'discount_rate', 'eul', 'units', 'ntg', 'admin_cost', 'incentive_cost', 'measure_cost', 'mwh_savings', 'therms_savings', 'load_shape', 'therms_profile']
 
 PROJECT_IMPACT_ELECTRIC_BENEFITS = "electric_benefits"
-PROJECT_IMPACT_GAS_BENEFITS = "gas_benefits"
-PROJECT_IMPACT_LIFECYCLE_TOTAL_GHG_SAVINGS = "lifecycle_total_ghg_savings"
 PROJECT_IMPACT_TOTAL_BENEFITS = "total_benefits"
+PROJECT_IMPACT_GAS_BENEFITS = "gas_benefits"
+
+PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS = "net_electric_energy_savings"
+PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS = "net_gas_energy_savings"
+
+PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH = "total_benefits_per_mwh"
+PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM = "total_benefits_per_therm"
+
+PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS = "electric_ghg_benefits"
+PROJECT_IMPACT_GAS_GHG_BENEFITS = "gas_ghg_benefits"
+PROJECT_IMPACT_TOTAL_GHG_BENEFITS = "total_ghg_benefits"
+
 PROJECT_IMPACT_TRC_RATIO = "trc_ratio"
 PROJECT_IMPACT_PAC_RATIO = "pac_ratio"
 
@@ -21,13 +31,15 @@ def get_connection():
     return duckdb.connect("output/app.db", read_only=False)
 
 def load_value_streams():
-    return {
-        "Cap and Trade": "#0072B2",
-        "Capacity": "#56B4E9",
-        "Energy": "#D55E00",
-        "Losses": "#FCAEB7",
-        "Transmission": "#009E73"
-    }
+    df = get_connection().execute(f"""
+        SELECT DISTINCT commodity, cost_type
+        FROM app.openbca_input.avoided_costs_ts
+        WHERE cost_type NOT IN ('total')
+        --AND cost_type IN ('btm_methane', 'cap_and_trade', 'capacity', 't_d')
+        ORDER BY commodity, cost_type
+    """).fetch_df()
+
+    return df
 
 def load_electric_chart_data():
     return pd.DataFrame({
@@ -72,19 +84,46 @@ def load_gas_table():
         "$ / Therm": [round(2 - i * 0.05, 2) for i in range(12)]
     })
 
-
-def load_calculation_results():
-    res = get_connection().execute(f"""
-        SELECT
-            round(electric_benefits, 0) as {PROJECT_IMPACT_ELECTRIC_BENEFITS},
-            round(gas_benefits, 0) as {PROJECT_IMPACT_GAS_BENEFITS},
-            round(lifecycle_total_ghg_savings, 0) as {PROJECT_IMPACT_LIFECYCLE_TOTAL_GHG_SAVINGS},
-            round(total_benefits, 0) as {PROJECT_IMPACT_TOTAL_BENEFITS},
-            round(trc_ratio, 0) as {PROJECT_IMPACT_TRC_RATIO},
-            round(pac_ratio, 0) as {PROJECT_IMPACT_PAC_RATIO},
-        FROM app.openbca.project_impacts
+def load_impacts_df(elec_costs, gas_costs):
+    query = f"""
+        SELECT *,
+            {PROJECT_IMPACT_ELECTRIC_BENEFITS} + {PROJECT_IMPACT_GAS_BENEFITS}
+                AS {PROJECT_IMPACT_TOTAL_BENEFITS},
+            {PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS} + {PROJECT_IMPACT_GAS_GHG_BENEFITS}
+                AS {PROJECT_IMPACT_TOTAL_GHG_BENEFITS},
+            ({PROJECT_IMPACT_ELECTRIC_BENEFITS} + {PROJECT_IMPACT_GAS_BENEFITS}) / trc_costs
+                as {PROJECT_IMPACT_TRC_RATIO},
+            ({PROJECT_IMPACT_ELECTRIC_BENEFITS} + {PROJECT_IMPACT_GAS_BENEFITS}) / pac_costs
+                as {PROJECT_IMPACT_PAC_RATIO},
+            {PROJECT_IMPACT_ELECTRIC_BENEFITS} / {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS} AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH},                           
+            {PROJECT_IMPACT_GAS_BENEFITS} / {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS} AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM}
+        FROM ( SELECT
+            SUM(CASE WHEN cost_type <> 'marginal_ghg' AND commodity = 'ELECTRICITY' THEN impact_value ELSE 0 END)
+                AS {PROJECT_IMPACT_ELECTRIC_BENEFITS},
+            SUM(CASE WHEN cost_type <> 'marginal_ghg' AND commodity = 'GAS' THEN impact_value ELSE 0 END)
+                AS {PROJECT_IMPACT_GAS_BENEFITS},
+            SUM(CASE WHEN cost_type = 'marginal_ghg' AND commodity = 'ELECTRICITY' THEN impact_value ELSE 0 END)
+                AS {PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS},
+            SUM(CASE WHEN cost_type = 'marginal_ghg' AND commodity = 'GAS' THEN impact_value ELSE 0 END)
+                AS {PROJECT_IMPACT_GAS_GHG_BENEFITS},
+            SUM(CASE WHEN commodity = 'ELECTRICITY' THEN net_energy_savings ELSE 0 END)
+                AS {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS},
+            SUM(CASE WHEN commodity = 'GAS' THEN net_energy_savings ELSE 0 END)
+                AS {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS},                
+        FROM app.openbca.project_commodity_impacts
         WHERE project_id = '{PROJECT_ID}'
-    """).fetch_df()
+        AND (
+            ( commodity = 'ELECTRICITY' AND cost_type IN ({','.join([f"'{c}'" for c in elec_costs])}) )
+            OR ( commodity = 'GAS' AND cost_type IN ({','.join([f"'{c}'" for c in gas_costs])}) )
+        )
+        ) JOIN project.project_costs ON project_id = '{PROJECT_ID}'
+    """
+    print(query)
+    res = get_connection().execute(query, ).fetch_df()
+
+    float_columns = res.select_dtypes(include=['float64']).columns
+    for col in float_columns:
+        res[col] = res[col].round(0).astype(pd.Int64Dtype(), errors='ignore')
 
     return res.iloc[0].to_dict()
 
