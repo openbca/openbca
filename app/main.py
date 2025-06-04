@@ -123,8 +123,8 @@ with st.expander("Inputs", expanded=True):
     with filter_rows[5]:
         #st.markdown("#### Cost Information")
         admin_cost = st.number_input("Administrative Cost", value=3000)
-        incentive_cost = st.number_input("Incentive Cost", value=0.075)
-        measure_cost = st.number_input("Measure Cost", value=0.075)
+        incentive_cost = st.number_input("Incentive Cost", value=500)
+        measure_cost = st.number_input("Measure Cost", value=1000)
 
     with filter_rows[6]:
         #st.markdown("#### Additional Inputs")

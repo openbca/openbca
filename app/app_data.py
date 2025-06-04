@@ -41,8 +41,6 @@ def load_value_streams():
 
     return df
 
-# project_commodity_impact_ts
-
 def load_electric_chart_data(elec_costs):
     return get_connection().execute(f"""
         SELECT hour_of_day as "Hour of Day", cost_type AS Category, round(SUM(av_cost_value), 0) AS "$ / MWh"
@@ -52,14 +50,6 @@ def load_electric_chart_data(elec_costs):
         AND cost_type IN ({','.join([f"'{c}'" for c in elec_costs])})
         GROUP BY hour_of_day, cost_type
     """).fetch_df()
-
-# def load_electric_chart_data():
-#     return pd.DataFrame({
-#         "Hour of Day": list(range(24)) * 5,
-#         "$ / MWh": [20] * 24 + [5] * 24 + [3] * 24 + [10 if i in [17, 18, 19] else 2 for i in range(24)] + [1] * 24,
-#         "Category": ["Energy"] * 24 + ["Losses"] * 24 + ["Cap and Trade"] * 24 + ["Capacity"] * 24 + [
-#             "Transmission"] * 24
-#     })
 
 def load_electric_table():
     return pd.DataFrame({
@@ -79,14 +69,6 @@ def load_peak_offpeak():
         "$ / MWh": peak + off_peak,
         "Type": ["peak"] * 10 + ["off_peak"] * 10
     })
-
-
-# def load_gas_chart_data():
-#     return pd.DataFrame({
-#         "Month": list(range(1, 13)),
-#         "$ / Therm": [1.6 if m in [1, 2, 3, 11, 12] else 1.4 for m in range(1, 13)],
-#         "Component": ["Market"] * 12
-#     })
 
 def load_gas_chart_data(gas_costs):
     return get_connection().execute(f"""

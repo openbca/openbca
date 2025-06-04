@@ -1,6 +1,6 @@
 MODEL(
     name openbca.project_commodity_load_shape_ts,
-    kind VIEW,
+    kind FULL,
     grain (project_id, year, month, hour_of_year)
 );
 
