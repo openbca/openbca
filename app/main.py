@@ -90,7 +90,7 @@ def impact_selection(commodity: str):
 
     return selected
 
-main_cols = st.columns([1,2])
+main_cols = st.columns([2, 3])
 
 with main_cols[0]:
 
