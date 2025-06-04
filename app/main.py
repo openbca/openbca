@@ -84,7 +84,7 @@ def impact_selection(commodity: str):
         key=widget_key,
     )
 
-    inject_color_styles(selected, options, widget_key)
+    #inject_color_styles(selected, options, widget_key)
 
     return selected
 
@@ -146,14 +146,21 @@ with st.expander("Inputs", expanded=True):
 
 st.markdown("## Total System Benefits")
 
+def f_n(value: float) -> str:
+    return f"{value:,.0f}"
+
+def f_n_2(value: float) -> str:
+    return f"{value:,.2f}"
+
 def render_metric(name: str, value: float, details: str = ""):
     st.markdown(f"""
-            <div style='padding: 10px; border: 1px solid #ccc; border-radius: 10px;'>
-                <strong>{name}</strong><br>
-                <span style='font-size: 24px;'>{value}</span><br>
-                {details}
-            </div>
-        """, unsafe_allow_html=True)
+        <div style='padding: 10px; border: 1px solid #ccc; border-radius: 10px;'>
+            <strong>{name}</strong><br>
+            <span style='font-size: 24px;'>{f_n_2(value) if name in {'TRC', 'PAC'} else f_n(value)}</span><br>
+            {details}
+        </div>
+    """, unsafe_allow_html=True)
+
 
 result = load_impacts_df(electricity_impact_selection, gas_impact_selection)
 
@@ -170,14 +177,14 @@ with st.container():
     with row_mid[0]:
         render_metric(
             "Total System Benefit", result[PROJECT_IMPACT_TOTAL_BENEFITS],
-            f"<small>Electric: {result[PROJECT_IMPACT_ELECTRIC_BENEFITS]} | Gas: {result[PROJECT_IMPACT_GAS_BENEFITS]}</small>"
+            f"<small>Electric: {f_n(result[PROJECT_IMPACT_ELECTRIC_BENEFITS])} | Gas: {f_n(result[PROJECT_IMPACT_GAS_BENEFITS])}</small>"
         )
     with row_mid[1]:
         render_metric("TSB/MWh", result[PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH], f"<small>TSB/Therm: {result[PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM]}</small>")
     with row_mid[2]:
         render_metric(
             "GHG Savings (Tons)", result[PROJECT_IMPACT_TOTAL_GHG_BENEFITS],
-            f"<small>Electric: {result[PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS]} | Gas: {result[PROJECT_IMPACT_GAS_GHG_BENEFITS]}</small>"
+            f"<small>Electric: {f_n(result[PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS])} | Gas: {f_n(result[PROJECT_IMPACT_GAS_GHG_BENEFITS])}</small>"
         )
     with row_mid[3]:
         render_metric("TRC", result[PROJECT_IMPACT_TRC_RATIO])
@@ -194,7 +201,7 @@ with energy_tabs[0]:
     # electric_cols[2].metric("Off Peak $/MWh", "44.94")
     # electric_cols[3].metric("Marginal GHG Tons/MWh", "0.32")
 
-    electric_chart_data = load_electric_chart_data()
+    electric_chart_data = load_electric_chart_data(electricity_impact_selection)
     electric_chart = alt.Chart(electric_chart_data).mark_bar().encode(
         x=alt.X("Hour of Day:O", title="Hour of Day"),
         y=alt.Y("sum($ / MWh):Q", title="$ / MWh"),
@@ -222,7 +229,7 @@ with energy_tabs[1]:
     # gas_cols[2].metric("Non-Winter $/Therm", "1.38")
     # gas_cols[3].metric("Marginal GHG Tons/Therm", "0.0053")
 
-    gas_chart_data = load_gas_chart_data()
+    gas_chart_data = load_gas_chart_data(gas_impact_selection)
     gas_chart = alt.Chart(gas_chart_data).mark_bar().encode(
         x="Month:O",
         y="$ / Therm:Q",

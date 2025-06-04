@@ -41,13 +41,25 @@ def load_value_streams():
 
     return df
 
-def load_electric_chart_data():
-    return pd.DataFrame({
-        "Hour of Day": list(range(24)) * 5,
-        "$ / MWh": [20] * 24 + [5] * 24 + [3] * 24 + [10 if i in [17, 18, 19] else 2 for i in range(24)] + [1] * 24,
-        "Category": ["Energy"] * 24 + ["Losses"] * 24 + ["Cap and Trade"] * 24 + ["Capacity"] * 24 + [
-            "Transmission"] * 24
-    })
+# project_commodity_impact_ts
+
+def load_electric_chart_data(elec_costs):
+    return get_connection().execute(f"""
+        SELECT hour_of_day as "Hour of Day", cost_type AS Category, round(SUM(av_cost_value), 0) AS "$ / MWh"
+        FROM app.openbca.project_commodity_impact_ts
+        WHERE project_id = '{PROJECT_ID}'
+        AND commodity = 'ELECTRICITY'
+        AND cost_type IN ({','.join([f"'{c}'" for c in elec_costs])})
+        GROUP BY hour_of_day, cost_type
+    """).fetch_df()
+
+# def load_electric_chart_data():
+#     return pd.DataFrame({
+#         "Hour of Day": list(range(24)) * 5,
+#         "$ / MWh": [20] * 24 + [5] * 24 + [3] * 24 + [10 if i in [17, 18, 19] else 2 for i in range(24)] + [1] * 24,
+#         "Category": ["Energy"] * 24 + ["Losses"] * 24 + ["Cap and Trade"] * 24 + ["Capacity"] * 24 + [
+#             "Transmission"] * 24
+#     })
 
 def load_electric_table():
     return pd.DataFrame({
@@ -69,12 +81,23 @@ def load_peak_offpeak():
     })
 
 
-def load_gas_chart_data():
-    return pd.DataFrame({
-        "Month": list(range(1, 13)),
-        "$ / Therm": [1.6 if m in [1, 2, 3, 11, 12] else 1.4 for m in range(1, 13)],
-        "Component": ["Market"] * 12
-    })
+# def load_gas_chart_data():
+#     return pd.DataFrame({
+#         "Month": list(range(1, 13)),
+#         "$ / Therm": [1.6 if m in [1, 2, 3, 11, 12] else 1.4 for m in range(1, 13)],
+#         "Component": ["Market"] * 12
+#     })
+
+def load_gas_chart_data(gas_costs):
+    return get_connection().execute(f"""
+        SELECT month as Month, cost_type AS Component, round(SUM(av_cost_value), 2) AS "$ / Therm"
+        FROM app.openbca.project_commodity_impact_ts
+        WHERE project_id = '{PROJECT_ID}'
+        AND commodity = 'GAS'
+        AND cost_type IN ({','.join([f"'{c}'" for c in gas_costs])})
+        GROUP BY month, cost_type
+    """).fetch_df()
+
 
 
 def load_gas_table():
@@ -91,9 +114,9 @@ def load_impacts_df(elec_costs, gas_costs):
                 AS {PROJECT_IMPACT_TOTAL_BENEFITS},
             {PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS} + {PROJECT_IMPACT_GAS_GHG_BENEFITS}
                 AS {PROJECT_IMPACT_TOTAL_GHG_BENEFITS},
-            ({PROJECT_IMPACT_ELECTRIC_BENEFITS} + {PROJECT_IMPACT_GAS_BENEFITS}) / trc_costs
+            ({PROJECT_IMPACT_ELECTRIC_BENEFITS}::float + {PROJECT_IMPACT_GAS_BENEFITS}::float) / trc_costs
                 as {PROJECT_IMPACT_TRC_RATIO},
-            ({PROJECT_IMPACT_ELECTRIC_BENEFITS} + {PROJECT_IMPACT_GAS_BENEFITS}) / pac_costs
+            ({PROJECT_IMPACT_ELECTRIC_BENEFITS}::float + {PROJECT_IMPACT_GAS_BENEFITS}::float) / pac_costs
                 as {PROJECT_IMPACT_PAC_RATIO},
             {PROJECT_IMPACT_ELECTRIC_BENEFITS} / {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS} AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH},                           
             {PROJECT_IMPACT_GAS_BENEFITS} / {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS} AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM}
