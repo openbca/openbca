@@ -80,8 +80,9 @@ sqlmesh-ui:
 	sqlmesh ui
 
 run-app:
-	#duckdb output/app.db -c "CREATE OR REPLACE TEMP TABLE projects_temp AS SELECT * FROM app_tmp.empty_projects; CREATE OR REPLACE VIEW app_tmp.view_projects AS SELECT * FROM projects_temp"
+	$(MAKE) run PROFILE=app
 	streamlit run app/main.py
 
 docker-run-app: docker-build
+	$(MAKE) docker-run PROFILE=app
 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"

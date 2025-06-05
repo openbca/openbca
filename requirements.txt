@@ -1,4 +1,4 @@
-sqlmesh[web]==0.170.1
+sqlmesh[web]==0.189.0
 duckdb==1.2.1
 pytest==8.3.5
 
