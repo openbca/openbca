@@ -1,9 +1,10 @@
 install:
 	pip install -r requirements.txt
 
-PROFILE?=nspm
+PROFILE?=app
 
 run:
+	echo "Running profile: ${PROFILE}"
 	sqlmesh -p profiles/${PROFILE} -p . plan --auto-apply
 	@duckdb output/${PROFILE}.db -c "COPY (SELECT * FROM openbca.project_impacts) TO 'output/project_benefits_${PROFILE}.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
@@ -43,7 +44,7 @@ DUCKDB_ARCH?=aarch64
 docker-build:
 	docker build --build-arg DUCKDB_ARCH=${DUCKDB_ARCH} -t open-bca -f Dockerfile .
 
-DOCKER_RUN_ARGS=-v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/profiles:/app/profiles -v $(shell pwd)/logs:/app/logs open-bca
+DOCKER_RUN_ARGS=-e PROFILE=${PROFILE} -v $(shell pwd)/input:/app/input -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/profiles:/app/profiles -v $(shell pwd)/logs:/app/logs -v $(shell pwd)/app:/app/app open-bca
 
 docker-run: docker-build
 	docker run --rm ${DOCKER_RUN_ARGS}
@@ -76,5 +77,13 @@ generate-all-flow-diagrams:
 		$(MAKE) generate-flow-diagram PROFILE=$$profile; \
 	done
 
-ui:
+sqlmesh-ui:
 	sqlmesh ui
+
+run-app:
+	PROFILE=app $(MAKE) run
+	streamlit run app/main.py
+
+docker-run-app: docker-build
+	PROFILE=app $(MAKE) docker-run
+	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"

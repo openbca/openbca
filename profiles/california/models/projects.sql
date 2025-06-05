@@ -1,7 +1,7 @@
 MODEL(
-  name project.projects,
+  name openbca_input.projects,
   kind SEED (
-    path '$root/input/projects.csv'
+    path '$root/../../input/projects.csv'
   ),
   columns (
     project_id VARCHAR,
