@@ -1,8 +1,11 @@
 import altair as alt
+from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
 
 from app_data import *
 
 st.set_page_config(layout="wide")
+
+PROJECT_ID = get_script_run_ctx().session_id
 
 # hide header
 st.markdown("""<style> .block-container {padding-top: 1rem;} header[data-testid="stHeader"] {height: 0px;visibility: hidden;} </style>""", unsafe_allow_html=True)
@@ -10,7 +13,7 @@ st.markdown("""<style> .block-container {padding-top: 1rem;} header[data-testid=
 st.markdown("# OpenBCA")
 
 def impact_selection(commodity: str):
-    value_streams_df = load_value_streams()
+    value_streams_df = get_value_streams()
     value_streams_df = value_streams_df[value_streams_df['commodity'] == commodity]
     options = sorted(value_streams_df['cost_type'].unique().tolist())  # sorted = stable order
 
@@ -32,8 +35,8 @@ with main_cols[0]:
         filter_rows = st.columns(4)
 
         with filter_rows[0]:
-            utility = st.selectbox("Utility", ["PGE"])
-            region = st.selectbox("Region", ['CZ12', 'CZ2', 'CZ3A', 'CZ3B', 'CZ12'])
+            utility = st.selectbox("Utility", get_utilities())
+            region = st.selectbox("Region", get_regions())
 
         with filter_rows[1]:
             start_year = st.number_input("Start Year", value=2021, step=1)
@@ -60,7 +63,7 @@ with main_cols[0]:
         with commodity_input_tabs[0]:
             elec_commodity_cols = st.columns(2)
             with elec_commodity_cols[0]:
-                electric_curve = st.selectbox("Electric Value Curve", ["NONRES_INDOOR_CFL_LTG", "NONRES_HVAC_SPLIT_PACKAGE_AC"])
+                electric_curve = st.selectbox("Electric Value Curve", get_electricity_value_curves())
             with elec_commodity_cols[1]:
                 mwh_savings = st.number_input("Annual MWh saving", value=10)
 
@@ -69,13 +72,14 @@ with main_cols[0]:
         with commodity_input_tabs[1]:
             gas_commodity_cols = st.columns(2)
             with gas_commodity_cols[0]:
-                gas_curve = st.selectbox("Gas Value Curve", ["annual"])
+                gas_curve = st.selectbox("Gas Value Curve", get_gas_value_curves())
             with gas_commodity_cols[1]:
                 therms_savings = st.number_input("Annual Therms saving", value=100)
 
             gas_impact_selection = impact_selection('GAS')
 
-        refresh_project_table(
+        update_project(
+            PROJECT_ID,
             utility=utility, region=region,
             start_year=start_year, start_quarter=start_quarter,
             discount_rate=discount_rate, eul=eul,
@@ -101,7 +105,7 @@ with main_cols[1]:
         """, unsafe_allow_html=True)
 
 
-    result = load_impacts_df(electricity_impact_selection, gas_impact_selection)
+    result = get_project_impacts(PROJECT_ID, electricity_impact_selection, gas_impact_selection)
 
     with st.container():
         row_top = st.columns(2)
@@ -138,7 +142,7 @@ with main_cols[1]:
     energy_tabs = st.tabs(["Electricity", "Gas"])
 
     with energy_tabs[0]:
-        electric_chart_data = load_electric_chart_data(electricity_impact_selection)
+        electric_chart_data = get_electricity_impacts_by_cost_type_ts(PROJECT_ID, electricity_impact_selection)
         electric_chart = alt.Chart(electric_chart_data).mark_bar().encode(
             x=alt.X("Hour of Day:O", title="Hour of Day"),
             y=alt.Y("sum($ / MWh):Q", title="$ / MWh"),
@@ -147,10 +151,8 @@ with main_cols[1]:
         st.altair_chart(electric_chart, use_container_width=True)
 
     with energy_tabs[1]:
-        gas_chart_data = load_gas_chart_data(gas_impact_selection)
+        gas_chart_data = get_gas_impacts_by_cost_type_ts(PROJECT_ID, gas_impact_selection)
         gas_chart = alt.Chart(gas_chart_data).mark_bar().encode(
-            x="Month:O",
-            y="$ / Therm:Q",
-            color="Component:N"
+            x="Month:O", y="$ / Therm:Q", color="Component:N"
         ).properties(title="Monthly Gas Costs by Component")
         st.altair_chart(gas_chart, use_container_width=True)

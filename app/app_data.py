@@ -1,11 +1,7 @@
 from sqlmesh import Context
 from sqlmesh.core.config import load_configs
-from streamlit.runtime.scriptrunner import get_script_run_ctx
 import streamlit as st
-import pandas as pd
 import duckdb
-
-PROJECT_ID = get_script_run_ctx().session_id
 
 INPUT_PROJECT_FIELDS = ['utility', 'region', 'start_year', 'start_quarter', 'discount_rate', 'eul', 'units', 'ntg', 'admin_cost', 'incentive_cost', 'measure_cost', 'mwh_savings', 'therms_savings', 'load_shape', 'therms_profile']
 
@@ -30,38 +26,36 @@ PROJECT_IMPACT_PAC_RATIO = "pac_ratio"
 def get_connection():
     return duckdb.connect("output/app.db", read_only=False)
 
-def load_value_streams():
-    df = get_connection().execute(f"""
+def get_value_streams():
+    return get_connection().execute(f"""
         SELECT DISTINCT commodity, cost_type
         FROM app.openbca_input.avoided_costs_ts
         WHERE cost_type NOT IN ('total')
         ORDER BY commodity, cost_type
     """).fetch_df()
 
-    return df
-
-def load_electric_chart_data(elec_costs):
+def get_electricity_impacts_by_cost_type_ts(project_id: str, elec_costs: list[str]):
     return get_connection().execute(f"""
         SELECT hour_of_day as "Hour of Day", cost_type AS Category, round(SUM(av_cost_value), 0) AS "$ / MWh"
         FROM app.openbca.project_commodity_impact_ts
-        WHERE project_id = '{PROJECT_ID}'
+        WHERE project_id = '{project_id}'
         AND commodity = 'ELECTRICITY'
         AND cost_type IN ({','.join([f"'{c}'" for c in elec_costs])})
         GROUP BY hour_of_day, cost_type
     """).fetch_df()
 
-def load_gas_chart_data(gas_costs):
+def get_gas_impacts_by_cost_type_ts(project_id: str, gas_costs: list[str]):
     return get_connection().execute(f"""
         SELECT month as Month, cost_type AS Component, round(SUM(av_cost_value), 2) AS "$ / Therm"
         FROM app.openbca.project_commodity_impact_ts
-        WHERE project_id = '{PROJECT_ID}'
+        WHERE project_id = '{project_id}'
         AND commodity = 'GAS'
         AND cost_type IN ({','.join([f"'{c}'" for c in gas_costs])})
         GROUP BY month, cost_type
     """).fetch_df()
 
 
-def load_impacts_df(elec_costs, gas_costs):
+def get_project_impacts(project_id: str, elec_costs: list[str], gas_costs: list[str]):
     query = f"""
         SELECT *,
             {PROJECT_IMPACT_ELECTRIC_BENEFITS} + {PROJECT_IMPACT_GAS_BENEFITS}
@@ -90,12 +84,12 @@ def load_impacts_df(elec_costs, gas_costs):
             SUM(CASE WHEN commodity = 'GAS' THEN net_energy_savings ELSE 0 END)
                 AS {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS},                
         FROM openbca.project_commodity_impacts
-        WHERE project_id = '{PROJECT_ID}'
+        WHERE project_id = '{project_id}'
         AND (
             ( commodity = 'ELECTRICITY' AND cost_type IN ({','.join([f"'{c}'" for c in elec_costs])}) )
             OR ( commodity = 'GAS' AND cost_type IN ({','.join([f"'{c}'" for c in gas_costs])}) )
         )
-        ) JOIN project.project_costs ON project_id = '{PROJECT_ID}'
+        ) JOIN project.project_costs ON project_id = '{project_id}'
     """
     print(query)
     res = get_connection().execute(query, ).fetch_df()
@@ -106,7 +100,7 @@ def load_impacts_df(elec_costs, gas_costs):
 def get_context():
     return Context(config=load_configs(None, Context.CONFIG_TYPE, "profiles/app"))
 
-def refresh_project_table(**kwargs):
+def update_project(project_id: str, **kwargs):
     """
     Refreshes the project table with the provided parameters like eul=2, utility='PG&E', region='CA', etc.
     """
@@ -115,7 +109,7 @@ def refresh_project_table(**kwargs):
 
     get_connection().execute(f"""
         INSERT INTO app.app_tmp.empty_projects (project_id, {', '.join(project_fields)}) 
-        VALUES ('{PROJECT_ID}', {','.join('?' * len(project_fields))})
+        VALUES ('{project_id}', {','.join('?' * len(project_fields))})
         ON CONFLICT DO UPDATE SET {', '.join([f"{field} = EXCLUDED.{field}" for field in project_fields])};
     """, project_values)
 
@@ -125,3 +119,36 @@ def refresh_project_table(**kwargs):
 def recalculate_impacts():
     context = get_context()
     context.apply(context.plan('app'))
+
+def get_utilities()->list[str]:
+    return get_connection().execute(f"""
+        SELECT DISTINCT utility
+        FROM app.openbca_input.avoided_costs_ts
+        ORDER BY utility
+    """).fetch_df().utility.tolist()
+
+
+def get_regions():
+    return get_connection().execute(f"""
+        SELECT DISTINCT region
+        FROM app.openbca_input.avoided_costs_ts
+        ORDER BY utility
+    """).fetch_df().region.tolist()
+
+
+def get_electricity_value_curves():
+    return get_connection().execute(f"""
+        SELECT distinct load_shape 
+        FROM openbca_input.commodity_load_shape_ts 
+        where commodity = 'ELECTRICITY'
+        ORDER BY load_shape
+    """).fetch_df().load_shape.tolist()
+
+
+def get_gas_value_curves():
+    return get_connection().execute(f"""
+        SELECT distinct load_shape 
+        FROM openbca_input.commodity_load_shape_ts 
+        where commodity = 'GAS'
+        ORDER BY load_shape
+    """).fetch_df().load_shape.tolist()
