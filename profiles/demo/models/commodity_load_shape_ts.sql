@@ -4,7 +4,7 @@ MODEL(
     grain (utility, commodity, hour_of_year),
 );
 SELECT
-    'PGE' as utility,
+    'SCE' as utility,
     commodity,
     quarter,
     month,
