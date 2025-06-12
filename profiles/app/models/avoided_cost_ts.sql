@@ -1,7 +1,7 @@
 MODEL(
     name openbca_input.avoided_costs_ts,
     kind FULL,
-    grain (utility, region, commodity, cost_type, year, hour_of_year),
+    grain (utility, region, commodity, avoided_cost, year, hour_of_year),
 );
 
 WITH regions AS (
@@ -18,10 +18,10 @@ SELECT
     'ELECTRICITY' AS commodity,
     year, quarter, month,
     hour_of_year, hour_of_day,
-    cost_type, value
+    avoided_cost, value
 FROM app.elec_av_costs
 UNPIVOT (
-    value FOR cost_type IN (
+    value FOR avoided_cost IN (
         energy, losses, ancillary_services, capacity,
         transmission, distribution, cap_and_trade, ghg_adder, ghg_rebalancing,
         methane_leakage, ghg_adder_rebalancing, total, marginal_ghg,
@@ -34,10 +34,10 @@ SELECT
     'GAS' AS commodity,
     year, quarter, month,
     NULL AS hour_of_year, NULL AS hour_of_day,
-    cost_type, value
+    avoided_cost, value
 FROM app.gas_av_costs
 UNPIVOT (
-    value FOR cost_type IN (
+    value FOR avoided_cost IN (
         market, t_d, environment, btm_methane, upstream_methane,
         total, marginal_ghg,
     )

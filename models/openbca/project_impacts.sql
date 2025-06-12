@@ -8,10 +8,10 @@ WITH pivoted_vsb(
         project_id,
         -- FIXME we need to exclude total
         -- FIXME we need to 2 types of costs: $ and marginal_ghg
-        SUM(IF(cost_type = 'total' AND commodity = 'ELECTRICITY', impact_value)) AS electric_benefits,
-        SUM(IF(cost_type = 'total' AND commodity = 'GAS', impact_value)) AS gas_benefits,
-        SUM(IF(cost_type = 'marginal_ghg' AND commodity = 'ELECTRICITY', impact_value)) AS lifecycle_elec_ghg_savings,
-        SUM(IF(cost_type = 'marginal_ghg' AND commodity = 'GAS', impact_value)) AS lifecycle_gas_ghg_savings,
+        SUM(IF(avoided_cost = 'total' AND commodity = 'ELECTRICITY', impact_value)) AS electric_benefits,
+        SUM(IF(avoided_cost = 'total' AND commodity = 'GAS', impact_value)) AS gas_benefits,
+        SUM(IF(avoided_cost = 'marginal_ghg' AND commodity = 'ELECTRICITY', impact_value)) AS lifecycle_elec_ghg_savings,
+        SUM(IF(avoided_cost = 'marginal_ghg' AND commodity = 'GAS', impact_value)) AS lifecycle_gas_ghg_savings,
     FROM openbca.project_commodity_impacts
     GROUP BY ALL
 )

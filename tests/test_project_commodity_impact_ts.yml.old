@@ -22,7 +22,7 @@ test_constant_join:
           utility: str
           region: str
           commodity: str
-          cost_type: str
+          avoided_cost: str
           value: int
           year: int
           quarter: int
@@ -33,7 +33,7 @@ test_constant_join:
         - utility: U1
           region: R1
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           value: 1
           year: null
           quarter: null
@@ -47,7 +47,7 @@ test_constant_join:
         - project_id: 1
           region: R1
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           av_cost_value: 1
           impact_value: 1
 
@@ -76,7 +76,7 @@ test_annual_join:
           utility: str
           region: str
           commodity: str
-          cost_type: str
+          avoided_cost: str
           value: int
           year: int
           quarter: int
@@ -87,7 +87,7 @@ test_annual_join:
         - utility: U1
           region: R2
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           value: 2
           year: 2021
           quarter: null
@@ -102,7 +102,7 @@ test_annual_join:
           region: R2
           commodity: ELECTRICITY
           year: 2021
-          cost_type: total
+          avoided_cost: total
           av_cost_value: 2
           impact_value: 2
 
@@ -131,7 +131,7 @@ test_monthly_cross_year_join:
           utility: str
           region: str
           commodity: str
-          cost_type: str
+          avoided_cost: str
           value: int
           year: int
           quarter: int
@@ -142,7 +142,7 @@ test_monthly_cross_year_join:
         - utility: U1
           region: R3
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           value: 3
           year: null
           quarter: null
@@ -157,7 +157,7 @@ test_monthly_cross_year_join:
           region: R3
           commodity: ELECTRICITY
           month: 3
-          cost_type: total
+          avoided_cost: total
           av_cost_value: 3
           impact_value: 3
 
@@ -186,7 +186,7 @@ test_monthly_with_year_join:
           utility: str
           region: str
           commodity: str
-          cost_type: str
+          avoided_cost: str
           value: int
           year: int
           quarter: int
@@ -197,7 +197,7 @@ test_monthly_with_year_join:
         - utility: U1
           region: R4
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           value: 4
           year: 2023
           quarter: null
@@ -213,7 +213,7 @@ test_monthly_with_year_join:
           commodity: ELECTRICITY
           year: 2023
           month: 4
-          cost_type: total
+          avoided_cost: total
           av_cost_value: 4
           impact_value: 4
 
@@ -242,7 +242,7 @@ test_hour_of_year_cross_year_join:
           utility: str
           region: str
           commodity: str
-          cost_type: str
+          avoided_cost: str
           value: int
           year: int
           quarter: int
@@ -253,7 +253,7 @@ test_hour_of_year_cross_year_join:
         - utility: U1
           region: R5
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           value: 5
           year: null
           quarter: null
@@ -268,7 +268,7 @@ test_hour_of_year_cross_year_join:
           region: R5
           commodity: ELECTRICITY
           hour_of_year: 5
-          cost_type: total
+          avoided_cost: total
           av_cost_value: 5
           impact_value: 5
 
@@ -297,7 +297,7 @@ test_hour_of_year_with_year_join:
           utility: str
           region: str
           commodity: str
-          cost_type: str
+          avoided_cost: str
           value: int
           year: int
           quarter: int
@@ -308,7 +308,7 @@ test_hour_of_year_with_year_join:
         - utility: U1
           region: R6
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           value: 6
           year: 2025
           quarter: null
@@ -324,7 +324,7 @@ test_hour_of_year_with_year_join:
           commodity: ELECTRICITY
           year: 2025
           hour_of_year: 6
-          cost_type: total
+          avoided_cost: total
           av_cost_value: 6
           impact_value: 6
 
@@ -353,7 +353,7 @@ test_hour_of_day_cross_year_month_join:
           utility: str
           region: str
           commodity: str
-          cost_type: str
+          avoided_cost: str
           value: int
           year: int
           quarter: int
@@ -364,7 +364,7 @@ test_hour_of_day_cross_year_month_join:
         - utility: U1
           region: R7
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           value: 7
           year: null
           quarter: null
@@ -379,7 +379,7 @@ test_hour_of_day_cross_year_month_join:
           region: R7
           commodity: ELECTRICITY
           hour_of_day: 7
-          cost_type: total
+          avoided_cost: total
           av_cost_value: 7
           impact_value: 7
 
@@ -408,7 +408,7 @@ test_hour_of_day_with_year_month_join:
           utility: str
           region: str
           commodity: str
-          cost_type: str
+          avoided_cost: str
           value: int
           year: int
           quarter: int
@@ -419,7 +419,7 @@ test_hour_of_day_with_year_month_join:
         - utility: U1
           region: R8
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           value: 8
           year: 2027
           quarter: null
@@ -436,7 +436,7 @@ test_hour_of_day_with_year_month_join:
           year: 2027
           month: 8
           hour_of_day: 8
-          cost_type: total
+          avoided_cost: total
           av_cost_value: 8
           impact_value: 8
 
@@ -465,7 +465,7 @@ test_hour_of_day_with_year_join:
           utility: str
           region: str
           commodity: str
-          cost_type: str
+          avoided_cost: str
           value: int
           year: int
           quarter: int
@@ -476,7 +476,7 @@ test_hour_of_day_with_year_join:
         - utility: U1
           region: R9
           commodity: ELECTRICITY
-          cost_type: total
+          avoided_cost: total
           value: 9
           year: 2028
           quarter: null
@@ -492,7 +492,7 @@ test_hour_of_day_with_year_join:
           commodity: ELECTRICITY
           year: 2028
           hour_of_day: 9
-          cost_type: total
+          avoided_cost: total
           av_cost_value: 9
           impact_value: 9
 
