@@ -28,30 +28,30 @@ def get_connection():
 
 def get_value_streams():
     return get_connection().execute(f"""
-        SELECT DISTINCT commodity, cost_type
+        SELECT DISTINCT commodity, avoided_cost
         FROM app.openbca_input.avoided_costs_ts
-        WHERE cost_type NOT IN ('total')
-        ORDER BY commodity, cost_type
+        WHERE avoided_cost NOT IN ('total')
+        ORDER BY commodity, avoided_cost
     """).fetch_df()
 
-def get_electricity_impacts_by_cost_type_ts(project_id: str, elec_costs: list[str]):
+def get_electricity_impacts_by_avoided_cost_ts(project_id: str, elec_costs: list[str]):
     return get_connection().execute(f"""
-        SELECT hour_of_day as "Hour of Day", cost_type AS Category, round(SUM(av_cost_value), 0) AS "$ / MWh"
+        SELECT hour_of_day as "Hour of Day", avoided_cost AS Category, round(SUM(av_cost_value), 0) AS "$ / MWh"
         FROM app.openbca.project_commodity_impact_ts
         WHERE project_id = '{project_id}'
         AND commodity = 'ELECTRICITY'
-        AND cost_type IN ({','.join([f"'{c}'" for c in elec_costs])})
-        GROUP BY hour_of_day, cost_type
+        AND avoided_cost IN ({','.join([f"'{c}'" for c in elec_costs])})
+        GROUP BY hour_of_day, avoided_cost
     """).fetch_df()
 
-def get_gas_impacts_by_cost_type_ts(project_id: str, gas_costs: list[str]):
+def get_gas_impacts_by_avoided_cost_ts(project_id: str, gas_costs: list[str]):
     return get_connection().execute(f"""
-        SELECT month as Month, cost_type AS Component, round(SUM(av_cost_value), 2) AS "$ / Therm"
+        SELECT month as Month, avoided_cost AS Component, round(SUM(av_cost_value), 2) AS "$ / Therm"
         FROM app.openbca.project_commodity_impact_ts
         WHERE project_id = '{project_id}'
         AND commodity = 'GAS'
-        AND cost_type IN ({','.join([f"'{c}'" for c in gas_costs])})
-        GROUP BY month, cost_type
+        AND avoided_cost IN ({','.join([f"'{c}'" for c in gas_costs])})
+        GROUP BY month, avoided_cost
     """).fetch_df()
 
 
@@ -71,13 +71,13 @@ def get_project_impacts(project_id: str, elec_costs: list[str], gas_costs: list[
             {PROJECT_IMPACT_GAS_BENEFITS}::float / {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS}::float 
                 AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM}
         FROM ( SELECT
-            SUM(CASE WHEN cost_type <> 'marginal_ghg' AND commodity = 'ELECTRICITY' THEN impact_value ELSE 0 END)
+            SUM(CASE WHEN avoided_cost <> 'marginal_ghg' AND commodity = 'ELECTRICITY' THEN impact_value ELSE 0 END)
                 AS {PROJECT_IMPACT_ELECTRIC_BENEFITS},
-            SUM(CASE WHEN cost_type <> 'marginal_ghg' AND commodity = 'GAS' THEN impact_value ELSE 0 END)
+            SUM(CASE WHEN avoided_cost <> 'marginal_ghg' AND commodity = 'GAS' THEN impact_value ELSE 0 END)
                 AS {PROJECT_IMPACT_GAS_BENEFITS},
-            SUM(CASE WHEN cost_type = 'marginal_ghg' AND commodity = 'ELECTRICITY' THEN impact_value ELSE 0 END)
+            SUM(CASE WHEN avoided_cost = 'marginal_ghg' AND commodity = 'ELECTRICITY' THEN impact_value ELSE 0 END)
                 AS {PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS},
-            SUM(CASE WHEN cost_type = 'marginal_ghg' AND commodity = 'GAS' THEN impact_value ELSE 0 END)
+            SUM(CASE WHEN avoided_cost = 'marginal_ghg' AND commodity = 'GAS' THEN impact_value ELSE 0 END)
                 AS {PROJECT_IMPACT_GAS_GHG_BENEFITS},
             SUM(CASE WHEN commodity = 'ELECTRICITY' THEN net_energy_savings ELSE 0 END)
                 AS {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS},
@@ -86,8 +86,8 @@ def get_project_impacts(project_id: str, elec_costs: list[str], gas_costs: list[
         FROM openbca.project_commodity_impacts
         WHERE project_id = '{project_id}'
         AND (
-            ( commodity = 'ELECTRICITY' AND cost_type IN ({','.join([f"'{c}'" for c in elec_costs])}) )
-            OR ( commodity = 'GAS' AND cost_type IN ({','.join([f"'{c}'" for c in gas_costs])}) )
+            ( commodity = 'ELECTRICITY' AND avoided_cost IN ({','.join([f"'{c}'" for c in elec_costs])}) )
+            OR ( commodity = 'GAS' AND avoided_cost IN ({','.join([f"'{c}'" for c in gas_costs])}) )
         )
         ) JOIN project.project_costs ON project_id = '{project_id}'
     """

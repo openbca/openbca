@@ -7,7 +7,7 @@ SELECT
      *,
     value as av_cost_value,
     CASE
-        WHEN cost_type = 'marginal_ghg' THEN net_energy_savings_ts * av_cost_value
+        WHEN avoided_cost = 'marginal_ghg' THEN net_energy_savings_ts * av_cost_value
         ELSE net_energy_savings_ts * discount * av_cost_value
     END AS impact_value
  FROM (
@@ -18,7 +18,7 @@ SELECT
     -- Constant
     SELECT
         pcls_ts.*,
-        av_ts.cost_type, av_ts.value
+        av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
         ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
@@ -31,7 +31,7 @@ SELECT
     -- Annual
     SELECT
         pcls_ts.*,
-        av_ts.cost_type, av_ts.value
+        av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
         ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
@@ -43,7 +43,7 @@ SELECT
     -- Monthly cross-year
     SELECT
         pcls_ts.*,
-        av_ts.cost_type, av_ts.value
+        av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
         ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
@@ -55,7 +55,7 @@ SELECT
     -- Monthly with year
     SELECT
         pcls_ts.*,
-        av_ts.cost_type, av_ts.value
+        av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
         ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
@@ -67,7 +67,7 @@ SELECT
     -- Hourly by hour_of_year cross-year
     SELECT
         pcls_ts.*,
-        av_ts.cost_type, av_ts.value
+        av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
         ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
@@ -79,7 +79,7 @@ SELECT
     -- Hourly by hour_of_year with year
     SELECT
         pcls_ts.*,
-        av_ts.cost_type, av_ts.value
+        av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
         ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
@@ -91,7 +91,7 @@ SELECT
     -- Hourly by hour_of_day cross year/month
     SELECT
         pcls_ts.*,
-        av_ts.cost_type, av_ts.value
+        av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
         ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
@@ -103,7 +103,7 @@ SELECT
     -- Hourly by hour_of_day with year/month
     SELECT
         pcls_ts.*,
-        av_ts.cost_type, av_ts.value
+        av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
         ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
@@ -116,7 +116,7 @@ SELECT
     -- Hourly by hour_of_day with year
     SELECT
         pcls_ts.*,
-        av_ts.cost_type, av_ts.value
+        av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
         ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity

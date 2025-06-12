@@ -15,7 +15,7 @@ st.markdown("# OpenBCA")
 def impact_selection(commodity: str):
     value_streams_df = get_value_streams()
     value_streams_df = value_streams_df[value_streams_df['commodity'] == commodity]
-    options = sorted(value_streams_df['cost_type'].unique().tolist())  # sorted = stable order
+    options = sorted(value_streams_df['avoided_cost'].unique().tolist())  # sorted = stable order
 
     widget_key = f"{commodity}_multiselect"
     selected = st.multiselect(
@@ -142,7 +142,7 @@ with main_cols[1]:
     energy_tabs = st.tabs(["Electricity", "Gas"])
 
     with energy_tabs[0]:
-        electric_chart_data = get_electricity_impacts_by_cost_type_ts(PROJECT_ID, electricity_impact_selection)
+        electric_chart_data = get_electricity_impacts_by_avoided_cost_ts(PROJECT_ID, electricity_impact_selection)
         electric_chart = alt.Chart(electric_chart_data).mark_bar().encode(
             x=alt.X("Hour of Day:O", title="Hour of Day"),
             y=alt.Y("sum($ / MWh):Q", title="$ / MWh"),
@@ -151,7 +151,7 @@ with main_cols[1]:
         st.altair_chart(electric_chart, use_container_width=True)
 
     with energy_tabs[1]:
-        gas_chart_data = get_gas_impacts_by_cost_type_ts(PROJECT_ID, gas_impact_selection)
+        gas_chart_data = get_gas_impacts_by_avoided_cost_ts(PROJECT_ID, gas_impact_selection)
         gas_chart = alt.Chart(gas_chart_data).mark_bar().encode(
             x="Month:O", y="$ / Therm:Q", color="Component:N"
         ).properties(title="Monthly Gas Costs by Component")
