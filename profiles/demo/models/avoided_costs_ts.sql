@@ -8,8 +8,8 @@ MODEL(
 -- For instance, if the commodity_load_shape_ts table is monthly then the avoided_costs_ts table cannot be hourly.
 
 SELECT
-    'SCE_CZ8' AS avoided_cost_subset,
     commodity,
+    avoided_cost_subset,
     year,
     quarter,
     month,
