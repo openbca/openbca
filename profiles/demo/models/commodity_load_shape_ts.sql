@@ -1,10 +1,9 @@
 MODEL(
     name openbca_input.commodity_load_shape_ts,
     kind FULL,
-    grain (utility, commodity, hour_of_year),
+    grain (commodity, load_shape, hour_of_year),
 );
 SELECT
-    'SCE' as utility,
     commodity,
     quarter,
     month,

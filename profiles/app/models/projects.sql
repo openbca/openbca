@@ -7,10 +7,9 @@ CREATE SCHEMA IF NOT EXISTS app_tmp;
 
 -- empty table to be re-created as temp table and populated by the OpenBCA app at runtime
 
-CREATE TABLE IF NOT EXISTS app_tmp.empty_projects (
+CREATE OR REPLACE TABLE app_tmp.empty_projects (
     project_id STRING PRIMARY KEY,
-    utility STRING,
-    region STRING,
+    avoided_cost_subset STRING,
     start_year INT,
     start_quarter INT,
     discount_rate FLOAT,
@@ -26,6 +25,6 @@ CREATE TABLE IF NOT EXISTS app_tmp.empty_projects (
     therms_profile STRING
 );
 
-CREATE VIEW IF NOT EXISTS app_tmp.view_projects AS SELECT * FROM app_tmp.empty_projects;
+CREATE OR REPLACE VIEW app_tmp.view_projects AS SELECT * FROM app_tmp.empty_projects;
 
 SELECT * FROM app_tmp.view_projects

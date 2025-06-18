@@ -5,8 +5,7 @@ MODEL(
   ),
   columns (
     project_id VARCHAR,
-    utility VARCHAR,
-    region VARCHAR,
+    avoided_cost_subset VARCHAR,
     start_year INT,
     start_quarter INT,
     discount_rate FLOAT,

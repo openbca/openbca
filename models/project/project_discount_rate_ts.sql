@@ -6,7 +6,7 @@ MODEL(
 
 SELECT
     project_id,
-    utility, region,
+    avoided_cost_subset,
     ((quarter_index - quarter_index%4) / 4)::int AS year,
     (quarter_index % 4 + 1) AS quarter,
     1.0 / POW(

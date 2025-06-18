@@ -21,7 +21,7 @@ SELECT
         av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
-        ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
+        ON pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset AND pcls_ts.commodity = av_ts.commodity
     WHERE
         av_ts.year IS NULL AND av_ts.month IS NULL AND av_ts.hour_of_day IS NULL AND av_ts.hour_of_year IS NULL
 
@@ -34,7 +34,7 @@ SELECT
         av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
-        ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
+        ON pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset AND pcls_ts.commodity = av_ts.commodity
         AND pcls_ts.year = av_ts.year
     WHERE av_ts.year IS NOT NULL AND av_ts.month IS NULL AND av_ts.hour_of_day IS NULL AND av_ts.hour_of_year IS NULL
 
@@ -46,7 +46,7 @@ SELECT
         av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
-        ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
+        ON pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset AND pcls_ts.commodity = av_ts.commodity
         AND pcls_ts.month = av_ts.month
     WHERE av_ts.year IS NULL AND av_ts.month IS NOT NULL AND av_ts.hour_of_day IS NULL AND av_ts.hour_of_year IS NULL
 
@@ -58,7 +58,7 @@ SELECT
         av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
-        ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
+        ON pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset AND pcls_ts.commodity = av_ts.commodity
         AND pcls_ts.year = av_ts.year AND pcls_ts.month = av_ts.month
     WHERE av_ts.year IS NOT NULL AND av_ts.month IS NOT NULL AND av_ts.hour_of_day IS NULL AND av_ts.hour_of_year IS NULL
 
@@ -70,7 +70,7 @@ SELECT
         av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
-        ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
+        ON pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset AND pcls_ts.commodity = av_ts.commodity
         AND pcls_ts.hour_of_year = av_ts.hour_of_year
     WHERE av_ts.year IS NULL AND av_ts.hour_of_year IS NOT NULL
 
@@ -82,7 +82,7 @@ SELECT
         av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
-        ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
+        ON pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset AND pcls_ts.commodity = av_ts.commodity
         AND pcls_ts.year = av_ts.year AND pcls_ts.hour_of_year = av_ts.hour_of_year
     WHERE av_ts.year IS NOT NULL AND av_ts.hour_of_year IS NOT NULL
 
@@ -94,7 +94,7 @@ SELECT
         av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
-        ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
+        ON pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset AND pcls_ts.commodity = av_ts.commodity
         AND pcls_ts.hour_of_day = av_ts.hour_of_day
     WHERE av_ts.year IS NULL AND av_ts.month IS NULL AND av_ts.hour_of_day IS NOT NULL AND av_ts.hour_of_year IS NULL
 
@@ -106,7 +106,7 @@ SELECT
         av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
-        ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
+        ON pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset AND pcls_ts.commodity = av_ts.commodity
         AND pcls_ts.year = av_ts.year AND pcls_ts.month = av_ts.month
         AND pcls_ts.hour_of_day = av_ts.hour_of_day
     WHERE av_ts.year IS NOT NULL AND av_ts.month IS NOT NULL AND av_ts.hour_of_day IS NOT NULL AND av_ts.hour_of_year IS NULL
@@ -119,7 +119,7 @@ SELECT
         av_ts.avoided_cost, av_ts.value
     FROM openbca.project_commodity_load_shape_ts pcls_ts
     JOIN openbca_input.avoided_costs_ts av_ts
-        ON pcls_ts.region = av_ts.region AND pcls_ts.commodity = av_ts.commodity
+        ON pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset AND pcls_ts.commodity = av_ts.commodity
         AND pcls_ts.year = av_ts.year
         AND pcls_ts.hour_of_day = av_ts.hour_of_day
     WHERE av_ts.year IS NOT NULL AND av_ts.month IS NULL AND av_ts.hour_of_day IS NOT NULL AND av_ts.hour_of_year IS NOT NULL

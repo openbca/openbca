@@ -6,7 +6,7 @@ MODEL(
 SELECT
     project_id,
     'ELECTRICITY' as commodity,
-    utility, region,
+    avoided_cost_subset,
     upper(load_shape) as load_shape,
     mwh_savings as energy_savings,
     units * ntg * mwh_savings as net_energy_savings,
@@ -15,7 +15,7 @@ UNION ALL
 SELECT
     project_id,
     'GAS' as commodity,
-    utility, region,
+    avoided_cost_subset,
     upper(therms_profile) as load_shape,
     therms_savings as energy_savings,
     units * ntg * therms_savings as net_energy_savings,
