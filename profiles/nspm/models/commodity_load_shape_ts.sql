@@ -1,11 +1,10 @@
 MODEL(
     name openbca_input.commodity_load_shape_ts,
     kind FULL,
-    grain (utility, commodity, hour_of_year),
+    grain (commodity, load_shape, hour_of_year),
 );
 -- TODO replace with the actual source table
 SELECT
-    CAST(NULL AS STRING) AS utility,
     CAST(NULL AS STRING) AS commodity,
     CAST(NULL AS INTEGER) AS quarter,
     CAST(NULL AS INTEGER) AS month,

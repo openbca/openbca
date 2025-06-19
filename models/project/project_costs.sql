@@ -5,7 +5,7 @@ MODEL(
 );
 SELECT
     project_id,
-    utility, region,
+    avoided_cost_subset,
     start_year, start_quarter,
     discount_rate, eul,
     units, ntg,

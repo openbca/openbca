@@ -13,8 +13,7 @@ ID_COLUMNS = ['commodity', 'avoided_cost', 'utility', 'year', 'month', 'hour_of_
     columns = {
         'commodity': 'string',
         'avoided_cost': 'string',
-        'utility': 'string',
-        'region': 'string',
+        'avoided_cost_subset': 'string',
         'year': 'int',
         'quarter': 'int',
         'month': 'int',
