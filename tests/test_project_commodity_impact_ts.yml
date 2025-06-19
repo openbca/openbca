@@ -2,12 +2,13 @@ test_constant_join:
   model: openbca.project_commodity_impact_ts
   inputs:
     openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
         rows:
         - project_id: 1
           load_shape: LS
           commodity: ELECTRICITY
-          utility: U1
-          region: R1
+          avoided_cost_subset: U1_R1
           year: 2020
           quarter: 1
           month: 1
@@ -19,8 +20,7 @@ test_constant_join:
           net_energy_savings_ts: 1
     openbca_input.avoided_costs_ts:
         columns:
-          utility: str
-          region: str
+          avoided_cost_subset: str
           commodity: str
           avoided_cost: str
           value: int
@@ -30,8 +30,7 @@ test_constant_join:
           hour_of_year: int
           hour_of_day: int
         rows:
-        - utility: U1
-          region: R1
+        - avoided_cost_subset: U1_R1
           commodity: ELECTRICITY
           avoided_cost: total
           value: 1
@@ -45,7 +44,7 @@ test_constant_join:
     query:
       rows:
         - project_id: 1
-          region: R1
+          avoided_cost_subset: U1_R1
           commodity: ELECTRICITY
           avoided_cost: total
           av_cost_value: 1
@@ -56,12 +55,13 @@ test_annual_join:
   model: openbca.project_commodity_impact_ts
   inputs:
     openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
         rows:
         - project_id: 2
           load_shape: LS
           commodity: ELECTRICITY
-          utility: U1
-          region: R2
+          avoided_cost_subset: U1_R2
           year: 2021
           quarter: 1
           month: 2
@@ -73,8 +73,7 @@ test_annual_join:
           net_energy_savings_ts: 1
     openbca_input.avoided_costs_ts:
         columns:
-          utility: str
-          region: str
+          avoided_cost_subset: str
           commodity: str
           avoided_cost: str
           value: int
@@ -84,8 +83,7 @@ test_annual_join:
           hour_of_year: int
           hour_of_day: int
         rows:
-        - utility: U1
-          region: R2
+        - avoided_cost_subset: U1_R2
           commodity: ELECTRICITY
           avoided_cost: total
           value: 2
@@ -99,7 +97,7 @@ test_annual_join:
     query:
       rows:
         - project_id: 2
-          region: R2
+          avoided_cost_subset: U1_R2
           commodity: ELECTRICITY
           year: 2021
           avoided_cost: total
@@ -111,12 +109,13 @@ test_monthly_cross_year_join:
   model: openbca.project_commodity_impact_ts
   inputs:
     openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
         rows:
         - project_id: 3
           load_shape: LS
           commodity: ELECTRICITY
-          utility: U1
-          region: R3
+          avoided_cost_subset: U1_R3
           year: 2022
           quarter: 1
           month: 3
@@ -128,8 +127,7 @@ test_monthly_cross_year_join:
           net_energy_savings_ts: 1
     openbca_input.avoided_costs_ts:
         columns:
-          utility: str
-          region: str
+          avoided_cost_subset: str
           commodity: str
           avoided_cost: str
           value: int
@@ -139,8 +137,7 @@ test_monthly_cross_year_join:
           hour_of_year: int
           hour_of_day: int
         rows:
-        - utility: U1
-          region: R3
+        - avoided_cost_subset: U1_R3
           commodity: ELECTRICITY
           avoided_cost: total
           value: 3
@@ -154,7 +151,7 @@ test_monthly_cross_year_join:
     query:
       rows:
         - project_id: 3
-          region: R3
+          avoided_cost_subset: U1_R3
           commodity: ELECTRICITY
           month: 3
           avoided_cost: total
@@ -166,12 +163,13 @@ test_monthly_with_year_join:
   model: openbca.project_commodity_impact_ts
   inputs:
     openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
         rows:
         - project_id: 4
           load_shape: LS
           commodity: ELECTRICITY
-          utility: U1
-          region: R4
+          avoided_cost_subset: U1_R4
           year: 2023
           quarter: 1
           month: 4
@@ -183,8 +181,7 @@ test_monthly_with_year_join:
           net_energy_savings_ts: 1
     openbca_input.avoided_costs_ts:
         columns:
-          utility: str
-          region: str
+          avoided_cost_subset: str
           commodity: str
           avoided_cost: str
           value: int
@@ -194,8 +191,7 @@ test_monthly_with_year_join:
           hour_of_year: int
           hour_of_day: int
         rows:
-        - utility: U1
-          region: R4
+        - avoided_cost_subset: U1_R4
           commodity: ELECTRICITY
           avoided_cost: total
           value: 4
@@ -209,7 +205,7 @@ test_monthly_with_year_join:
     query:
       rows:
         - project_id: 4
-          region: R4
+          avoided_cost_subset: U1_R4
           commodity: ELECTRICITY
           year: 2023
           month: 4
@@ -222,12 +218,13 @@ test_hour_of_year_cross_year_join:
   model: openbca.project_commodity_impact_ts
   inputs:
     openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
         rows:
         - project_id: 5
           load_shape: LS
           commodity: ELECTRICITY
-          utility: U1
-          region: R5
+          avoided_cost_subset: U1_R5
           year: 2024
           quarter: 1
           month: 5
@@ -239,8 +236,7 @@ test_hour_of_year_cross_year_join:
           net_energy_savings_ts: 1
     openbca_input.avoided_costs_ts:
         columns:
-          utility: str
-          region: str
+          avoided_cost_subset: str
           commodity: str
           avoided_cost: str
           value: int
@@ -250,8 +246,7 @@ test_hour_of_year_cross_year_join:
           hour_of_year: int
           hour_of_day: int
         rows:
-        - utility: U1
-          region: R5
+        - avoided_cost_subset: U1_R5
           commodity: ELECTRICITY
           avoided_cost: total
           value: 5
@@ -265,7 +260,7 @@ test_hour_of_year_cross_year_join:
     query:
       rows:
         - project_id: 5
-          region: R5
+          avoided_cost_subset: U1_R5
           commodity: ELECTRICITY
           hour_of_year: 5
           avoided_cost: total
@@ -277,12 +272,13 @@ test_hour_of_year_with_year_join:
   model: openbca.project_commodity_impact_ts
   inputs:
     openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
         rows:
         - project_id: 6
           load_shape: LS
           commodity: ELECTRICITY
-          utility: U1
-          region: R6
+          avoided_cost_subset: U1_R6
           year: 2025
           quarter: 1
           month: 6
@@ -294,8 +290,7 @@ test_hour_of_year_with_year_join:
           net_energy_savings_ts: 1
     openbca_input.avoided_costs_ts:
         columns:
-          utility: str
-          region: str
+          avoided_cost_subset: str
           commodity: str
           avoided_cost: str
           value: int
@@ -305,8 +300,7 @@ test_hour_of_year_with_year_join:
           hour_of_year: int
           hour_of_day: int
         rows:
-        - utility: U1
-          region: R6
+        - avoided_cost_subset: U1_R6
           commodity: ELECTRICITY
           avoided_cost: total
           value: 6
@@ -320,7 +314,7 @@ test_hour_of_year_with_year_join:
     query:
       rows:
         - project_id: 6
-          region: R6
+          avoided_cost_subset: U1_R6
           commodity: ELECTRICITY
           year: 2025
           hour_of_year: 6
@@ -333,12 +327,13 @@ test_hour_of_day_cross_year_month_join:
   model: openbca.project_commodity_impact_ts
   inputs:
     openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
         rows:
         - project_id: 7
           load_shape: LS
           commodity: ELECTRICITY
-          utility: U1
-          region: R7
+          avoided_cost_subset: U1_R7
           year: 2026
           quarter: 1
           month: 7
@@ -350,8 +345,7 @@ test_hour_of_day_cross_year_month_join:
           net_energy_savings_ts: 1
     openbca_input.avoided_costs_ts:
         columns:
-          utility: str
-          region: str
+          avoided_cost_subset: str
           commodity: str
           avoided_cost: str
           value: int
@@ -361,8 +355,7 @@ test_hour_of_day_cross_year_month_join:
           hour_of_year: int
           hour_of_day: int
         rows:
-        - utility: U1
-          region: R7
+        - avoided_cost_subset: U1_R7
           commodity: ELECTRICITY
           avoided_cost: total
           value: 7
@@ -376,7 +369,7 @@ test_hour_of_day_cross_year_month_join:
     query:
       rows:
         - project_id: 7
-          region: R7
+          avoided_cost_subset: U1_R7
           commodity: ELECTRICITY
           hour_of_day: 7
           avoided_cost: total
@@ -388,12 +381,13 @@ test_hour_of_day_with_year_month_join:
   model: openbca.project_commodity_impact_ts
   inputs:
     openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
         rows:
         - project_id: 8
           load_shape: LS
           commodity: ELECTRICITY
-          utility: U1
-          region: R8
+          avoided_cost_subset: U1_R8
           year: 2027
           quarter: 1
           month: 8
@@ -405,8 +399,7 @@ test_hour_of_day_with_year_month_join:
           net_energy_savings_ts: 1
     openbca_input.avoided_costs_ts:
         columns:
-          utility: str
-          region: str
+          avoided_cost_subset: str
           commodity: str
           avoided_cost: str
           value: int
@@ -416,8 +409,7 @@ test_hour_of_day_with_year_month_join:
           hour_of_year: int
           hour_of_day: int
         rows:
-        - utility: U1
-          region: R8
+        - avoided_cost_subset: U1_R8
           commodity: ELECTRICITY
           avoided_cost: total
           value: 8
@@ -431,7 +423,7 @@ test_hour_of_day_with_year_month_join:
     query:
       rows:
         - project_id: 8
-          region: R8
+          avoided_cost_subset: U1_R8
           commodity: ELECTRICITY
           year: 2027
           month: 8
@@ -445,12 +437,13 @@ test_hour_of_day_with_year_join:
   model: openbca.project_commodity_impact_ts
   inputs:
     openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
         rows:
         - project_id: 9
           load_shape: LS
           commodity: ELECTRICITY
-          utility: U1
-          region: R9
+          avoided_cost_subset: U1_R9
           year: 2028
           quarter: 1
           month: 9
@@ -462,8 +455,7 @@ test_hour_of_day_with_year_join:
           net_energy_savings_ts: 1
     openbca_input.avoided_costs_ts:
         columns:
-          utility: str
-          region: str
+          avoided_cost_subset: str
           commodity: str
           avoided_cost: str
           value: int
@@ -473,8 +465,7 @@ test_hour_of_day_with_year_join:
           hour_of_year: int
           hour_of_day: int
         rows:
-        - utility: U1
-          region: R9
+        - avoided_cost_subset: U1_R9
           commodity: ELECTRICITY
           avoided_cost: total
           value: 9
@@ -488,7 +479,7 @@ test_hour_of_day_with_year_join:
     query:
       rows:
         - project_id: 9
-          region: R9
+          avoided_cost_subset: U1_R9
           commodity: ELECTRICITY
           year: 2028
           hour_of_day: 9
@@ -496,3 +487,55 @@ test_hour_of_day_with_year_join:
           av_cost_value: 9
           impact_value: 9
 
+
+test_subset_null_join:
+  model: openbca.project_commodity_impact_ts
+  inputs:
+    openbca.project_commodity_load_shape_ts:
+        columns:
+          avoided_cost_subset: str
+        rows:
+        - project_id: 10
+          load_shape: LS
+          commodity: ELECTRICITY
+          avoided_cost_subset: null
+          year: 2029
+          quarter: 1
+          month: 10
+          hour_of_year: 10
+          hour_of_day: 10
+          normalized_load_shape_value: 1
+          discount: 1
+          net_energy_savings: 1
+          net_energy_savings_ts: 1
+    openbca_input.avoided_costs_ts:
+        columns:
+          avoided_cost_subset: str
+          commodity: str
+          avoided_cost: str
+          value: int
+          year: int
+          quarter: int
+          month: int
+          hour_of_year: int
+          hour_of_day: int
+        rows:
+        - avoided_cost_subset: null
+          commodity: ELECTRICITY
+          avoided_cost: total
+          value: 10
+          year: null
+          quarter: null
+          month: null
+          hour_of_year: null
+          hour_of_day: null
+  outputs:
+    partial: true
+    query:
+      rows:
+        - project_id: 10
+          avoided_cost_subset: null
+          commodity: ELECTRICITY
+          avoided_cost: total
+          av_cost_value: 10
+          impact_value: 10
