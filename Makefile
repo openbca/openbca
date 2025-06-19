@@ -3,6 +3,9 @@ install:
 
 PROFILE?=app
 
+load_input_files:
+	@duckdb output/${PROFILE}.db -c "DELETE FROM openbca_user_input.user_projects WHERE project_id IN (SELECT project_id FROM read_csv_auto('input/projects.csv')); INSERT INTO openbca_user_input.user_projects SELECT * FROM read_csv_auto('input/projects.csv');"
+
 run:
 	mkdir -p output
 	echo "Running profile: ${PROFILE}"

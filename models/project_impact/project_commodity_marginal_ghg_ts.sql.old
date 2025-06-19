@@ -1,0 +1,24 @@
+MODEL(
+    name openbca_project.project_commodity_marginal_ghg_ts,
+    kind VIEW,
+    grain (commodity, avoided_cost_subset, timestamp),
+);
+SELECT
+    pc.project_id,
+    cls_ts.commodity,
+    cls_ts.timestamp,
+    pc.net_energy_savings,
+    cls_ts.saved_energy_units,
+    ghg_ts.av_marginal_ghg_ton_co2_per_energy_unit,
+    pc.net_energy_savings * cls_ts.saved_energy_units * ghg_ts.av_marginal_ghg_ton_co2_per_energy_unit
+        AS impact_ton_co2
+FROM openbca_reference.commodity_load_shape_ts cls_ts
+JOIN openbca_project.project_commodity pc
+    ON cls_ts.commodity = pc.commodity
+    AND cls_ts.load_shape = pc.load_shape
+JOIN openbca_reference.avoided_marginal_ghg_ts ghg_ts
+    ON pc.commodity = ghg_ts.commodity
+    AND pc.avoided_cost_version = ghg_ts.avoided_cost_version
+    AND pc.avoided_cost_subset IS NOT DISTINCT FROM ghg_ts.avoided_cost_subset
+    AND cls_ts.timestamp = ghg_ts.timestamp
+

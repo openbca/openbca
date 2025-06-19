@@ -17,7 +17,7 @@ ID_COLUMNS = ['utility', 'quarter', 'month', 'hour_of_year', 'hour_of_day']
         'hour_of_year': 'int',
         'hour_of_day': 'int',
         'load_shape': 'string',
-        'value': 'float'
+        'saved_kwh': 'float'
     }
 )
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
@@ -34,7 +34,7 @@ def unpivot(df: DataFrame) -> DataFrame:
             id_vars=ID_COLUMNS,
             value_vars=[col for col in df.columns if col not in ID_COLUMNS],
             var_name='load_shape',
-            value_name='value'
+            value_name='saved_kwh'
     )
 
     unpivoted_df['load_shape'] = unpivoted_df['load_shape'].str.upper()

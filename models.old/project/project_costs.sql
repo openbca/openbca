@@ -1,5 +1,5 @@
 MODEL(
-    name openbca_project.project_costs,
+    name project.project_costs,
     kind VIEW,
     grain (project_id),
 );

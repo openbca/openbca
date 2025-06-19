@@ -16,14 +16,14 @@ test_therms_profile_unpivoted:
           quarter: Q1
           month: 1
           therms_profile: summer
-          value: 10.5
+          saved_therm: 10.5
         - utility: PG&E
           quarter: Q1
           month: 1
           therms_profile: annual
-          value: 20.0
+          saved_therm: 20.0
         - utility: PG&E
           quarter: Q1
           month: 1
           therms_profile: winter
-          value: 30.25
+          saved_therm: 30.25
