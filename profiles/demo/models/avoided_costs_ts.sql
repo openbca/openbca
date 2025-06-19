@@ -8,15 +8,11 @@ MODEL(
 -- For instance, if the commodity_load_shape_ts table is monthly then the avoided_costs_ts table cannot be hourly.
 
 SELECT
-    commodity,
     avoided_cost_subset,
-    year,
-    quarter,
-    month,
-    hour_of_year,
-    hour_of_day,
-    avoided_cost as avoided_cost,
-    value
+    commodity,
+    year, quarter, month,
+    hour_of_year, hour_of_day,
+    avoided_cost as avoided_cost, value
 FROM demo.custom_avoided_costs_tabs
 
 

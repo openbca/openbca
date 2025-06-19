@@ -12,7 +12,7 @@ SELECT
     cls_ts.value AS normalized_load_shape_value,
     pdr_ts.discount,
     pc.net_energy_savings,
-    pc.net_energy_savings * normalized_load_shape_value AS net_energy_savings_ts,
+    pc.net_energy_savings * normalized_load_shape_value AS net_energy_savings_ts
 FROM openbca_input.commodity_load_shape_ts cls_ts
 JOIN project.project_commodity pc
     ON cls_ts.commodity = pc.commodity

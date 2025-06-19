@@ -4,6 +4,7 @@ install:
 PROFILE?=app
 
 run:
+	mkdir -p output
 	echo "Running profile: ${PROFILE}"
 	sqlmesh -p profiles/${PROFILE} -p . plan --auto-apply
 	@duckdb output/${PROFILE}.db -c "COPY (SELECT * FROM openbca.project_impacts) TO 'output/project_benefits_${PROFILE}.csv' WITH (FORMAT CSV, HEADER TRUE);"
@@ -39,6 +40,8 @@ test-all:
 
 clean:
 	rm -f duckdb.db && rm -rf logs && rm -rf .cache && rm -rf output/*
+	# recursively delete all the .cache folders
+	find . -type d -name ".cache" -exec rm -rf {} +
 
 DUCKDB_ARCH?=aarch64
 docker-build:

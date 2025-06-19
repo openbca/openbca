@@ -4,7 +4,11 @@ MODEL(
     grain (project_id, commodity, year, hour_of_year),
 );
 SELECT
-     *,
+    project_id, load_shape,
+    commodity, avoided_cost, avoided_cost_subset,
+    year, quarter,
+    month, hour_of_year, hour_of_day,
+    discount, net_energy_savings_ts,
     value as av_cost_value,
     CASE
         WHEN avoided_cost = 'marginal_ghg' THEN net_energy_savings_ts * av_cost_value
@@ -131,6 +135,6 @@ SELECT
         AND (pcls_ts.avoided_cost_subset = av_ts.avoided_cost_subset OR pcls_ts.avoided_cost_subset IS NULL)
         AND pcls_ts.year = av_ts.year
         AND pcls_ts.hour_of_day = av_ts.hour_of_day
-    WHERE av_ts.year IS NOT NULL AND av_ts.month IS NULL AND av_ts.hour_of_day IS NOT NULL AND av_ts.hour_of_year IS NOT NULL
+    WHERE av_ts.year IS NOT NULL AND av_ts.month IS NULL AND av_ts.hour_of_day IS NOT NULL AND av_ts.hour_of_year IS NULL
 
 )
