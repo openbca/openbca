@@ -24,7 +24,7 @@ UNPIVOT (
     value FOR avoided_cost IN (
         energy, losses, ancillary_services, capacity,
         transmission, distribution, cap_and_trade, ghg_adder, ghg_rebalancing,
-        methane_leakage, ghg_adder_rebalancing, total, marginal_ghg,
+        methane_leakage, ghg_adder_rebalancing
     )
 )
 UNION ALL
@@ -38,8 +38,7 @@ SELECT
 FROM california.gas_av_costs
 UNPIVOT (
     value FOR avoided_cost IN (
-        market, t_d, environment, btm_methane, upstream_methane,
-        total, marginal_ghg,
+        market, t_d, environment, btm_methane, upstream_methane
     )
 )
 CROSS JOIN regions r
