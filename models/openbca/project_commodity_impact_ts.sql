@@ -89,10 +89,7 @@ hourly_by_hour_of_year_with_year AS (
 SELECT
      *,
     value as av_cost_value,
-    CASE
-        WHEN avoided_cost = 'marginal_ghg' THEN net_energy_savings_ts * av_cost_value
-        ELSE net_energy_savings_ts * discount * av_cost_value
-    END AS impact_value
+    net_energy_savings_ts * discount * av_cost_value AS impact_value
  FROM (
     SELECT * FROM constant
     UNION ALL
