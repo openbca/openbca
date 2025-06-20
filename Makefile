@@ -39,6 +39,7 @@ test-all:
 
 clean:
 	rm -f duckdb.db && rm -rf logs && rm -rf .cache && rm -rf output/*
+	find . -type d -name ".cache" -exec rm -rf {} +
 
 DUCKDB_ARCH?=aarch64
 docker-build:
