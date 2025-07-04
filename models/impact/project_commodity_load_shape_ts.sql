@@ -1,5 +1,5 @@
 MODEL(
-    name openbca.project_commodity_load_shape_ts,
+    name openbca_impact.project_commodity_load_shape_ts,
     kind VIEW,
     grain (project_id, year, month, hour_of_year)
 );

@@ -1,5 +1,5 @@
 MODEL(
-    name openbca.project_commodity_economic_impacts,
+    name openbca_impact.project_commodity_economic_impacts,
     kind VIEW,
     grain (project_id, commodity),
 );
@@ -13,7 +13,7 @@ FROM (
         SUM(impact_dollars) as impact_dollars,
         SUM(net_energy_savings_ts) as net_energy_savings
     FROM
-        openbca.project_commodity_economic_impact_ts
+        openbca_impact.project_commodity_economic_impact_ts
     GROUP BY
         project_id, commodity, avoided_cost
 ) vsb_ts

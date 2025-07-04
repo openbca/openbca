@@ -1,7 +1,7 @@
 test_constant_join:
-  model: openbca.project_commodity_impact_ts
+  model: openbca_impact.project_commodity_impact_ts
   inputs:
-    openbca.project_commodity_load_shape_ts:
+    openbca_impact.project_commodity_load_shape_ts:
         rows:
         - project_id: 1
           load_shape: LS
@@ -53,9 +53,9 @@ test_constant_join:
 
 # Annual join
 test_annual_join:
-  model: openbca.project_commodity_impact_ts
+  model: openbca_impact.project_commodity_impact_ts
   inputs:
-    openbca.project_commodity_load_shape_ts:
+    openbca_impact.project_commodity_load_shape_ts:
         rows:
         - project_id: 2
           load_shape: LS
@@ -108,9 +108,9 @@ test_annual_join:
 
 # Monthly cross-year join
 test_monthly_cross_year_join:
-  model: openbca.project_commodity_impact_ts
+  model: openbca_impact.project_commodity_impact_ts
   inputs:
-    openbca.project_commodity_load_shape_ts:
+    openbca_impact.project_commodity_load_shape_ts:
         rows:
         - project_id: 3
           load_shape: LS
@@ -163,9 +163,9 @@ test_monthly_cross_year_join:
 
 # Monthly with year join
 test_monthly_with_year_join:
-  model: openbca.project_commodity_impact_ts
+  model: openbca_impact.project_commodity_impact_ts
   inputs:
-    openbca.project_commodity_load_shape_ts:
+    openbca_impact.project_commodity_load_shape_ts:
         rows:
         - project_id: 4
           load_shape: LS
@@ -219,9 +219,9 @@ test_monthly_with_year_join:
 
 # Hourly by hour_of_year cross-year join
 test_hour_of_year_cross_year_join:
-  model: openbca.project_commodity_impact_ts
+  model: openbca_impact.project_commodity_impact_ts
   inputs:
-    openbca.project_commodity_load_shape_ts:
+    openbca_impact.project_commodity_load_shape_ts:
         rows:
         - project_id: 5
           load_shape: LS
@@ -274,9 +274,9 @@ test_hour_of_year_cross_year_join:
 
 # Hourly by hour_of_year with year join
 test_hour_of_year_with_year_join:
-  model: openbca.project_commodity_impact_ts
+  model: openbca_impact.project_commodity_impact_ts
   inputs:
-    openbca.project_commodity_load_shape_ts:
+    openbca_impact.project_commodity_load_shape_ts:
         rows:
         - project_id: 6
           load_shape: LS
@@ -330,9 +330,9 @@ test_hour_of_year_with_year_join:
 
 # Hourly by hour_of_day cross year/month join
 test_hour_of_day_cross_year_month_join:
-  model: openbca.project_commodity_impact_ts
+  model: openbca_impact.project_commodity_impact_ts
   inputs:
-    openbca.project_commodity_load_shape_ts:
+    openbca_impact.project_commodity_load_shape_ts:
         rows:
         - project_id: 7
           load_shape: LS
@@ -385,9 +385,9 @@ test_hour_of_day_cross_year_month_join:
 
 # Hourly by hour_of_day with year/month join
 test_hour_of_day_with_year_month_join:
-  model: openbca.project_commodity_impact_ts
+  model: openbca_impact.project_commodity_impact_ts
   inputs:
-    openbca.project_commodity_load_shape_ts:
+    openbca_impact.project_commodity_load_shape_ts:
         rows:
         - project_id: 8
           load_shape: LS
@@ -442,9 +442,9 @@ test_hour_of_day_with_year_month_join:
 
 # Hourly by hour_of_day with year join
 test_hour_of_day_with_year_join:
-  model: openbca.project_commodity_impact_ts
+  model: openbca_impact.project_commodity_impact_ts
   inputs:
-    openbca.project_commodity_load_shape_ts:
+    openbca_impact.project_commodity_load_shape_ts:
         rows:
         - project_id: 9
           load_shape: LS

@@ -1,5 +1,5 @@
 MODEL(
-    name openbca.project_commodity_impact_ts,
+    name openbca_impact.project_commodity_impact_ts,
     kind VIEW,
     grain (project_id, commodity, avoided_cost, year, month, hour_of_year),
 );
@@ -10,7 +10,7 @@ constant AS (
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
     FROM openbca_input.avoided_costs_ts av_ts
-    JOIN openbca.project_commodity_load_shape_ts pcls_ts
+    JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
@@ -22,7 +22,7 @@ annual AS (
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
     FROM openbca_input.avoided_costs_ts av_ts
-    JOIN openbca.project_commodity_load_shape_ts pcls_ts
+    JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
@@ -35,7 +35,7 @@ monthly_cross_years AS (
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
     FROM openbca_input.avoided_costs_ts av_ts
-    JOIN openbca.project_commodity_load_shape_ts pcls_ts
+    JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
@@ -48,7 +48,7 @@ monthly_with_year AS (
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
     FROM openbca_input.avoided_costs_ts av_ts
-    JOIN openbca.project_commodity_load_shape_ts pcls_ts
+    JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
@@ -62,7 +62,7 @@ hourly_by_hour_of_year_cross_years AS (
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
     FROM openbca_input.avoided_costs_ts av_ts
-    JOIN openbca.project_commodity_load_shape_ts pcls_ts
+    JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
@@ -76,7 +76,7 @@ hourly_by_hour_of_year_with_year AS (
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
     FROM openbca_input.avoided_costs_ts av_ts
-    JOIN openbca.project_commodity_load_shape_ts pcls_ts
+    JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
@@ -102,4 +102,5 @@ SELECT
     SELECT * FROM hourly_by_hour_of_year_cross_years
     UNION ALL
     SELECT * FROM hourly_by_hour_of_year_with_year
-)
+) pci_ts JOIN project.project_commodity_avoided_costs pcac
+    ON pci_ts.project_id = pcac.project_id AND pci_ts.avoided_cost = pcac.avoided_cost

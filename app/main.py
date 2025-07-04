@@ -35,8 +35,7 @@ with main_cols[0]:
         filter_rows = st.columns(4)
 
         with filter_rows[0]:
-            utility = st.selectbox("Utility", get_utilities())
-            region = st.selectbox("Region", get_regions())
+            avoided_cost_subset = st.selectbox("Subset", get_avoided_cost_subsets())
 
         with filter_rows[1]:
             start_year = st.number_input("Start Year", value=2021, step=1)
@@ -80,7 +79,7 @@ with main_cols[0]:
 
         update_project(
             PROJECT_ID,
-            utility=utility, region=region,
+            avoided_cost_subset=avoided_cost_subset,
             start_year=start_year, start_quarter=start_quarter,
             discount_rate=discount_rate, eul=eul,
             units=units, ntg=ntg,
@@ -128,12 +127,12 @@ with main_cols[1]:
                 <strong>TSB/MWh</strong><br><span style='font-size: 24px;'>{f"{result[PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH]:,.2f}"}</span><br>
                 <small>TSB/Therm {f"{result[PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM]:,.2f}"}</small>
             </div>""", unsafe_allow_html=True)
-        with row_mid[2]:
-            render_metric(
-                "GHG Savings (Tons)", f"{result[PROJECT_IMPACT_TOTAL_GHG_BENEFITS]:,.0f}",
-                f"{result[PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS]:,.0f}",
-                f"{result[PROJECT_IMPACT_GAS_GHG_BENEFITS]:,.0f}"
-            )
+        # with row_mid[2]: FIXME reactivate
+        #     render_metric(
+        #         "GHG Savings (Tons)", f"{result[PROJECT_IMPACT_TOTAL_GHG_BENEFITS]:,.0f}",
+        #         f"{result[PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS]:,.0f}",
+        #         f"{result[PROJECT_IMPACT_GAS_GHG_BENEFITS]:,.0f}"
+        #     )
         with row_mid[3]:
             render_metric("TRC", f"{result[PROJECT_IMPACT_TRC_RATIO]:,.2f}")
         with row_mid[4]:

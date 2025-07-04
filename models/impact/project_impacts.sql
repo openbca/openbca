@@ -1,5 +1,5 @@
 MODEL(
-    name openbca.project_impacts,
+    name openbca_impact.project_impacts,
     kind VIEW,
     grain (project_id),
 );
@@ -9,7 +9,7 @@ pivoted_economic_impacts(
         project_id,
         SUM(IF(commodity = 'ELECTRICITY', impact_dollars)) AS electric_benefits,
         SUM(IF(commodity = 'GAS', impact_dollars)) AS gas_benefits,
-    FROM openbca.project_commodity_economic_impacts
+    FROM openbca_impact.project_commodity_economic_impacts
     GROUP BY ALL
 ),
 pivoted_environmental_impacts(
@@ -17,7 +17,7 @@ pivoted_environmental_impacts(
         project_id,
         SUM(IF(commodity = 'ELECTRICITY', impact_tons_co2e)) AS electric_ghg_savings,
         SUM(IF(commodity = 'GAS', impact_tons_co2e)) AS gas_ghg_savings,
-    FROM openbca.project_commodity_environmental_impacts
+    FROM openbca_impact.project_commodity_environmental_impacts
     GROUP BY ALL
 )
 SELECT
