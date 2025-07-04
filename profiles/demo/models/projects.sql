@@ -1,7 +1,7 @@
 MODEL(
   name openbca_input.projects,
   kind SEED (
-    path '$root/../../input/projects.csv'
+    path '$root/data/projects.csv'
   ),
   columns (
     project_id VARCHAR,
@@ -18,6 +18,7 @@ MODEL(
     mwh_savings FLOAT,
     therms_savings FLOAT,
     load_shape VARCHAR,
-    therms_profile VARCHAR
+    therms_profile VARCHAR,
+    avoided_costs ARRAY<VARCHAR>
   )
 )

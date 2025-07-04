@@ -1,4 +1,4 @@
-DB?=output/openbca.db
+
 
 install:
 	pip install -r requirements.txt
@@ -7,8 +7,11 @@ load_projects_csv: run
 	@duckdb ${DB} -c "DELETE FROM openbca_user_input.user_projects WHERE project_id IN (SELECT project_id FROM read_csv_auto('input/projects.csv')); INSERT INTO openbca_user_input.user_projects SELECT * FROM read_csv_auto('input/projects.csv');"
 	@time duckdb ${DB} -c "COPY (SELECT * FROM openbca_impact.project_impacts) TO 'output/project_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
-run:
-	DB=${DB} sqlmesh plan --auto-apply
+#run:
+#	DB=${DB} sqlmesh plan --auto-apply
+
+run-demo:
+	DB=output/demo.db sqlmesh -p profiles/demo -p . plan --auto-apply
 
 duckdb:
 	duckdb ${DB}
@@ -49,8 +52,11 @@ generate-flow-diagram:
 sqlmesh-ui:
 	sqlmesh ui
 
-run-app: run
-	DB=${DB} streamlit run app/main.py
+prepare-app:
+	DB=output/app.db sqlmesh -p profiles/app -p . plan --auto-apply
+
+run-app: prepare-app
+	DB=output/app.db streamlit run app/main.py
 
 docker-run-app: docker-run
 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"

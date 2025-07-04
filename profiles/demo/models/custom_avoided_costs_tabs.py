@@ -7,7 +7,7 @@ import pandas as pd
 ID_COLUMNS = ['commodity', 'avoided_cost', 'utility', 'year', 'month', 'hour_of_year', 'hour_of_day']
 
 @model(
-    name='demo.custom_avoided_costs_tabs',
+    name='openbca_input.custom_avoided_costs_tabs',
     kind='FULL',
     grain=ID_COLUMNS,
     columns = {

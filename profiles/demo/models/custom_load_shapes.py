@@ -7,7 +7,7 @@ import pandas as pd
 ID_COLUMNS = {'sheet_name', 'month', 'hour_of_year', 'hour_of_week', 'hour_of_day'}
 
 @model(
-    name='demo.custom_load_shapes',
+    name='openbca_input.custom_load_shapes',
     kind='FULL',
     grain=('month', 'hour_of_year', 'load_shape'),
     columns = {
