@@ -5,7 +5,7 @@ install:
 
 load_projects_csv: run
 	@duckdb ${DB} -c "DELETE FROM openbca_user_input.user_projects WHERE project_id IN (SELECT project_id FROM read_csv_auto('input/projects.csv')); INSERT INTO openbca_user_input.user_projects SELECT * FROM read_csv_auto('input/projects.csv');"
-	@duckdb ${DB} -c "COPY (SELECT * FROM openbca_impact.project_impacts) TO 'output/project_benefits_${DB}.csv' WITH (FORMAT CSV, HEADER TRUE);"
+	@duckdb ${DB} -c "COPY (SELECT * FROM openbca_impact.project_impacts) TO 'output/project_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
 run:
 	DB=${DB} sqlmesh plan --auto-apply

@@ -5,7 +5,8 @@ MODEL(
 
 CREATE SCHEMA IF NOT EXISTS openbca_user_input;
 
-CREATE TABLE IF NOT EXISTS openbca_user_input.user_projects (
+DROP TABLE IF EXISTS openbca_user_input.user_projects;
+CREATE TABLE openbca_user_input.user_projects (
     project_id STRING PRIMARY KEY,
     load_shape STRING,
     start_year INT,
@@ -26,5 +27,5 @@ CREATE TABLE IF NOT EXISTS openbca_user_input.user_projects (
 
 SELECT
     * EXCEPT avoided_costs,
-    SPLIT(avoided_costs) AS avoided_costs
-FROM openbca_user_input.user_projects;
+    SPLIT(avoided_costs, ',') AS avoided_costs
+FROM openbca_user_input.user_projects

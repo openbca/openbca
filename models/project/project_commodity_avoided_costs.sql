@@ -5,9 +5,9 @@ MODEL(
 );
 
 SELECT
-    project_id,
-    commodity,
-    avoided_cost_subset,
-    avoided_cost
-FROM openbca_input.projects
-CROSS JOIN avoided_costs AS ac(avoided_cost)
+    p.project_id,
+    pc.commodity,
+    p.avoided_cost_subset,
+    unnest(COALESCE(p.avoided_costs, [NULL])) AS avoided_cost
+FROM openbca_input.projects p
+JOIN project.project_commodity pc ON p.project_id = pc.project_id

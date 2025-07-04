@@ -87,7 +87,7 @@ hourly_by_hour_of_year_with_year AS (
         av_ts.year IS NOT NULL AND av_ts.hour_of_year IS NOT NULL
 )
 SELECT
-     *,
+    pci_ts.*,
     value as av_cost_value,
     net_energy_savings_ts * discount * av_cost_value AS impact_value
  FROM (
@@ -103,4 +103,4 @@ SELECT
     UNION ALL
     SELECT * FROM hourly_by_hour_of_year_with_year
 ) pci_ts JOIN project.project_commodity_avoided_costs pcac
-    ON pci_ts.project_id = pcac.project_id AND pci_ts.avoided_cost = pcac.avoided_cost
+    ON pci_ts.project_id = pcac.project_id AND (pcac.avoided_cost IS NULL OR pci_ts.avoided_cost = pcac.avoided_cost)
