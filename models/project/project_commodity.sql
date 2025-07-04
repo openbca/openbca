@@ -10,7 +10,7 @@ SELECT
     upper(load_shape) as load_shape,
     mwh_savings as energy_savings,
     units * ntg * mwh_savings as net_energy_savings,
-FROM openbca_input.projects
+FROM openbca_impact.projects
 UNION ALL
 SELECT
     project_id,
@@ -19,4 +19,4 @@ SELECT
     upper(therms_profile) as load_shape,
     therms_savings as energy_savings,
     units * ntg * therms_savings as net_energy_savings,
-FROM openbca_input.projects
+FROM openbca_impact.projects

@@ -3,15 +3,10 @@
 install:
 	pip install -r requirements.txt
 
-load_projects_csv: run
-	@duckdb ${DB} -c "DELETE FROM openbca_user_input.user_projects WHERE project_id IN (SELECT project_id FROM read_csv_auto('input/projects.csv')); INSERT INTO openbca_user_input.user_projects SELECT * FROM read_csv_auto('input/projects.csv');"
-	@time duckdb ${DB} -c "COPY (SELECT * FROM openbca_impact.project_impacts) TO 'output/project_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
-
-#run:
-#	DB=${DB} sqlmesh plan --auto-apply
-
 run-demo:
 	DB=output/demo.db sqlmesh -p profiles/demo -p . plan --auto-apply
+	@echo "Evaluating and writing output in output/project_impacts.csv..."
+	@time duckdb output/demo.db -c "COPY (SELECT * FROM openbca_impact.project_impacts) TO 'output/project_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
 duckdb:
 	duckdb ${DB}

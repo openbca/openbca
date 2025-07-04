@@ -9,5 +9,5 @@ SELECT
     pc.commodity,
     p.avoided_cost_subset,
     unnest(COALESCE(p.avoided_costs, [NULL])) AS avoided_cost
-FROM openbca_input.projects p
+FROM openbca_impact.projects p
 JOIN project.project_commodity pc ON p.project_id = pc.project_id
