@@ -1,5 +1,5 @@
 MODEL(
-    name openbca_input.avoided_costs_ts,
+    name openbca_reference.avoided_costs_ts,
     kind FULL,
     grain (utility, region, commodity, avoided_cost, year, hour_of_year),
 );

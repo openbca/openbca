@@ -17,7 +17,7 @@ test_constant_join:
           discount: 1
           net_energy_savings: 1
           net_energy_savings_ts: 1
-    openbca_input.avoided_costs_ts:
+    openbca_reference.avoided_costs_ts:
         columns:
           utility: str
           region: str
@@ -71,7 +71,7 @@ test_annual_join:
           discount: 1
           net_energy_savings: 1
           net_energy_savings_ts: 1
-    openbca_input.avoided_costs_ts:
+    openbca_reference.avoided_costs_ts:
         columns:
           utility: str
           region: str
@@ -126,7 +126,7 @@ test_monthly_cross_year_join:
           discount: 1
           net_energy_savings: 1
           net_energy_savings_ts: 1
-    openbca_input.avoided_costs_ts:
+    openbca_reference.avoided_costs_ts:
         columns:
           utility: str
           region: str
@@ -181,7 +181,7 @@ test_monthly_with_year_join:
           discount: 1
           net_energy_savings: 1
           net_energy_savings_ts: 1
-    openbca_input.avoided_costs_ts:
+    openbca_reference.avoided_costs_ts:
         columns:
           utility: str
           region: str
@@ -237,7 +237,7 @@ test_hour_of_year_cross_year_join:
           discount: 1
           net_energy_savings: 1
           net_energy_savings_ts: 1
-    openbca_input.avoided_costs_ts:
+    openbca_reference.avoided_costs_ts:
         columns:
           utility: str
           region: str
@@ -292,7 +292,7 @@ test_hour_of_year_with_year_join:
           discount: 1
           net_energy_savings: 1
           net_energy_savings_ts: 1
-    openbca_input.avoided_costs_ts:
+    openbca_reference.avoided_costs_ts:
         columns:
           utility: str
           region: str
@@ -348,7 +348,7 @@ test_hour_of_day_cross_year_month_join:
           discount: 1
           net_energy_savings: 1
           net_energy_savings_ts: 1
-    openbca_input.avoided_costs_ts:
+    openbca_reference.avoided_costs_ts:
         columns:
           utility: str
           region: str
@@ -403,7 +403,7 @@ test_hour_of_day_with_year_month_join:
           discount: 1
           net_energy_savings: 1
           net_energy_savings_ts: 1
-    openbca_input.avoided_costs_ts:
+    openbca_reference.avoided_costs_ts:
         columns:
           utility: str
           region: str
@@ -460,7 +460,7 @@ test_hour_of_day_with_year_join:
           discount: 1
           net_energy_savings: 1
           net_energy_savings_ts: 1
-    openbca_input.avoided_costs_ts:
+    openbca_reference.avoided_costs_ts:
         columns:
           utility: str
           region: str

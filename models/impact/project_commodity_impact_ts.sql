@@ -9,7 +9,7 @@ constant AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
-    FROM openbca_input.avoided_costs_ts av_ts
+    FROM openbca_impact.all_avoided_costs_ts av_ts
     JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
@@ -21,7 +21,7 @@ annual AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
-    FROM openbca_input.avoided_costs_ts av_ts
+    FROM openbca_impact.all_avoided_costs_ts av_ts
     JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
@@ -34,7 +34,7 @@ monthly_cross_years AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
-    FROM openbca_input.avoided_costs_ts av_ts
+    FROM openbca_impact.all_avoided_costs_ts av_ts
     JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
@@ -47,7 +47,7 @@ monthly_with_year AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
-    FROM openbca_input.avoided_costs_ts av_ts
+    FROM openbca_impact.all_avoided_costs_ts av_ts
     JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
@@ -61,7 +61,7 @@ hourly_by_hour_of_year_cross_years AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
-    FROM openbca_input.avoided_costs_ts av_ts
+    FROM openbca_impact.all_avoided_costs_ts av_ts
     JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
@@ -75,7 +75,7 @@ hourly_by_hour_of_year_with_year AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.value
-    FROM openbca_input.avoided_costs_ts av_ts
+    FROM openbca_impact.all_avoided_costs_ts av_ts
     JOIN openbca_impact.project_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
         --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version

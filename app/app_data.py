@@ -29,7 +29,7 @@ def get_connection():
 def get_value_streams():
     return get_connection().execute(f"""
         SELECT DISTINCT commodity, avoided_cost
-        FROM openbca_input.avoided_costs_ts
+        FROM openbca_reference.avoided_costs_ts
         ORDER BY commodity, avoided_cost
     """).fetch_df()
 
@@ -141,14 +141,14 @@ def update_project(project_id: str, **kwargs):
 def get_avoided_cost_subsets()->list[str]:
     return get_connection().execute(f"""
         SELECT DISTINCT avoided_cost_subset
-        FROM openbca_input.avoided_costs_ts
+        FROM openbca_reference.avoided_costs_ts
         ORDER BY avoided_cost_subset
     """).fetch_df().avoided_cost_subset.tolist()
 
 def get_electricity_value_curves():
     return get_connection().execute(f"""
         SELECT distinct load_shape 
-        FROM openbca_input.commodity_load_shape_ts 
+        FROM openbca_reference.commodity_load_shape_ts 
         where commodity = 'ELECTRICITY'
         ORDER BY load_shape
     """).fetch_df().load_shape.tolist()
@@ -157,7 +157,7 @@ def get_electricity_value_curves():
 def get_gas_value_curves():
     return get_connection().execute(f"""
         SELECT distinct load_shape 
-        FROM openbca_input.commodity_load_shape_ts 
+        FROM openbca_reference.commodity_load_shape_ts 
         where commodity = 'GAS'
         ORDER BY load_shape
     """).fetch_df().load_shape.tolist()
