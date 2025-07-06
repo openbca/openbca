@@ -61,10 +61,10 @@ def get_project_impacts(project_id: str):
             {PROJECT_IMPACT_TOTAL_BENEFITS},
             {PROJECT_IMPACT_TRC_RATIO},
             {PROJECT_IMPACT_PAC_RATIO},
-            0 AS {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS},
-            0 AS {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS},
-            0 AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH}, -- FIXME                           
-            0 AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM} -- FIXME
+            {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS},
+            {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS},
+            {PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH},                           
+            {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM}
         FROM openbca_core.project_impacts
         WHERE project_id = '{project_id}'
     """
