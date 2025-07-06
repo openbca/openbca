@@ -10,4 +10,4 @@ SELECT
     market, t_d, environment, btm_methane, upstream_methane,
     year, quarter, month
 FROM
-    read_csv_auto('projects/reference/models/avoided_costs/california/full_ca_avoided_costs_2020acc_gas.csv')
+    read_csv_auto('reference/models/avoided_costs/california/full_ca_avoided_costs_2020acc_gas.csv')

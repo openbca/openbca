@@ -17,4 +17,4 @@ RUN make install
 
 COPY config.yaml .
 
-CMD ["make", "run"]
+#CMD ["make", "run"]

@@ -86,6 +86,7 @@ with main_cols[0]:
             mwh_savings=mwh_savings, load_shape=electric_curve,
             therms_savings=therms_savings, therms_profile=gas_curve,
             admin_cost=admin_cost, incentive_cost=incentive_cost, measure_cost=measure_cost,
+            avoided_costs=''.join([*electricity_impact_selection, *gas_impact_selection])
         )
 
 with main_cols[1]:
@@ -104,7 +105,7 @@ with main_cols[1]:
         """, unsafe_allow_html=True)
 
 
-    result = get_project_impacts(PROJECT_ID, electricity_impact_selection, gas_impact_selection)
+    result = get_project_impacts(PROJECT_ID)
 
     with st.container():
         row_top = st.columns(2)

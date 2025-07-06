@@ -53,70 +53,25 @@ def get_gas_impacts_by_avoided_cost_ts(project_id: str, gas_costs: list[str]):
         GROUP BY month, avoided_cost
     """).fetch_df()
 
-def get_project_impacts(project_id: str, elec_costs: list[str], gas_costs: list[str]):
+def get_project_impacts(project_id: str):
     query = f"""
-        SELECT *,
-            {PROJECT_IMPACT_ELECTRIC_BENEFITS} + {PROJECT_IMPACT_GAS_BENEFITS}
-                AS {PROJECT_IMPACT_TOTAL_BENEFITS},
-            ({PROJECT_IMPACT_ELECTRIC_BENEFITS}::float + {PROJECT_IMPACT_GAS_BENEFITS}::float) / trc_costs
-                AS {PROJECT_IMPACT_TRC_RATIO},
-            ({PROJECT_IMPACT_ELECTRIC_BENEFITS}::float + {PROJECT_IMPACT_GAS_BENEFITS}::float) / pac_costs
-                AS {PROJECT_IMPACT_PAC_RATIO},
-            {PROJECT_IMPACT_ELECTRIC_BENEFITS}::float / {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS} 
-                AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH},                           
-            {PROJECT_IMPACT_GAS_BENEFITS}::float / {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS}::float 
-                AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM}            
+        SELECT
+            {PROJECT_IMPACT_ELECTRIC_BENEFITS},
+            {PROJECT_IMPACT_GAS_BENEFITS},
+            {PROJECT_IMPACT_TOTAL_BENEFITS},
+            {PROJECT_IMPACT_TRC_RATIO},
+            {PROJECT_IMPACT_PAC_RATIO},
+            0 AS {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS},
+            0 AS {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS},
+            0 AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH}, -- FIXME                           
+            0 AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM} -- FIXME
         FROM openbca_core.project_impacts
         WHERE project_id = '{project_id}'
-        AND (
-            ( commodity = 'ELECTRICITY' AND avoided_cost IN ({','.join([f"'{c}'" for c in elec_costs])}) )
-            OR ( commodity = 'GAS' AND avoided_cost IN ({','.join([f"'{c}'" for c in gas_costs])}) )
-        )
-        ) JOIN project.project_costs ON project_id = '{project_id}'
     """
     print(query)
     res = get_connection().execute(query, ).fetch_df()
 
     return res.iloc[0].to_dict()
-
-def get_project_impacts_old(project_id: str, elec_costs: list[str], gas_costs: list[str]):
-    query = f"""
-        SELECT *,
-            {PROJECT_IMPACT_ELECTRIC_BENEFITS} + {PROJECT_IMPACT_GAS_BENEFITS}
-                AS {PROJECT_IMPACT_TOTAL_BENEFITS},
-            ({PROJECT_IMPACT_ELECTRIC_BENEFITS}::float + {PROJECT_IMPACT_GAS_BENEFITS}::float) / trc_costs
-                AS {PROJECT_IMPACT_TRC_RATIO},
-            ({PROJECT_IMPACT_ELECTRIC_BENEFITS}::float + {PROJECT_IMPACT_GAS_BENEFITS}::float) / pac_costs
-                AS {PROJECT_IMPACT_PAC_RATIO},
-            {PROJECT_IMPACT_ELECTRIC_BENEFITS}::float / {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS} 
-                AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH},                           
-            {PROJECT_IMPACT_GAS_BENEFITS}::float / {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS}::float 
-                AS {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM}
-        FROM ( SELECT
-            SUM(CASE WHEN commodity = 'ELECTRICITY' THEN impact_dollars ELSE 0 END)
-                AS {PROJECT_IMPACT_ELECTRIC_BENEFITS},
-            SUM(CASE WHEN commodity = 'GAS' THEN impact_dollars ELSE 0 END)
-                AS {PROJECT_IMPACT_GAS_BENEFITS},        
-            SUM(CASE WHEN commodity = 'ELECTRICITY' THEN net_energy_savings ELSE 0 END)
-                AS {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS},
-            SUM(CASE WHEN commodity = 'GAS' THEN net_energy_savings ELSE 0 END)
-                AS {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS},                
-        FROM openbca_core.project_commodity_economic_impacts
-        WHERE project_id = '{project_id}'
-        AND (
-            ( commodity = 'ELECTRICITY' AND avoided_cost IN ({','.join([f"'{c}'" for c in elec_costs])}) )
-            OR ( commodity = 'GAS' AND avoided_cost IN ({','.join([f"'{c}'" for c in gas_costs])}) )
-        )
-        ) JOIN project.project_costs ON project_id = '{project_id}'
-    """
-    print(query)
-    res = get_connection().execute(query, ).fetch_df()
-
-    return res.iloc[0].to_dict()
-
-# @st.cache_resource
-# def get_context():
-#     return Context(config=load_configs(None, Context.CONFIG_TYPE, "projects/app"))
 
 def update_project(project_id: str, **kwargs):
     """
@@ -126,17 +81,10 @@ def update_project(project_id: str, **kwargs):
     project_values = [kwargs[field] for field in project_fields]
 
     get_connection().execute(f"""
-        INSERT INTO openbca_user_input.user_projects (project_id, {', '.join(project_fields)}) 
+        INSERT INTO openbca_app.projects (project_id, {', '.join(project_fields)}) 
         VALUES ('{project_id}', {','.join('?' * len(project_fields))})
         ON CONFLICT DO UPDATE SET {', '.join([f"{field} = EXCLUDED.{field}" for field in project_fields])};
     """, project_values)
-
-    #recalculate_impacts()
-
-
-# def recalculate_impacts():
-#     context = get_context()
-#     context.apply(context.plan('app'))
 
 def get_avoided_cost_subsets()->list[str]:
     return get_connection().execute(f"""

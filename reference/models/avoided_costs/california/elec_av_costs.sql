@@ -12,4 +12,4 @@ SELECT
     total, marginal_ghg,
     year, quarter, month, hour_of_day, hour_of_year
 FROM
-    read_csv_auto('projects/reference/models/avoided_costs/california/full_ca_avoided_costs_2020acc.csv.gz')
+    read_csv_auto('reference/models/avoided_costs/california/full_ca_avoided_costs_2020acc.csv.gz')

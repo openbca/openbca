@@ -31,7 +31,7 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
 
 
 def load_avoided_costs_excel_file(commodity: str, input_file: str) -> DataFrame:
-    sheets_dict = pd.read_excel(pd.ExcelFile(f"projects/demo/data/{input_file}"), sheet_name=None)
+    sheets_dict = pd.read_excel(pd.ExcelFile(f"demo/data/{input_file}"), sheet_name=None)
     return (
         pd.concat([df.assign(sheet_name=sheet) for sheet, df in sheets_dict.items()], ignore_index=True)
         .assign(commodity=commodity)

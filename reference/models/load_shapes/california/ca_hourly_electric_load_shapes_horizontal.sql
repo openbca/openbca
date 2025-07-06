@@ -4,4 +4,4 @@ MODEL (
   grain (utility, hour_of_year),
 );
 SELECT *
-FROM read_csv_auto('projects/reference/models/load_shapes/california/ca_hourly_electric_load_shapes_horizontal_copy.csv')
+FROM read_csv_auto('reference/models/load_shapes/california/ca_hourly_electric_load_shapes_horizontal_copy.csv')
