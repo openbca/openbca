@@ -15,8 +15,8 @@ PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS = "net_gas_energy_savings"
 PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH = "total_benefits_per_mwh"
 PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM = "total_benefits_per_therm"
 
-PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS = "electric_ghg_benefits"
-PROJECT_IMPACT_GAS_GHG_BENEFITS = "gas_ghg_benefits"
+PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS = "electric_ghg_savings"
+PROJECT_IMPACT_GAS_GHG_BENEFITS = "gas_ghg_savings"
 PROJECT_IMPACT_TOTAL_GHG_BENEFITS = "total_ghg_benefits"
 
 PROJECT_IMPACT_TRC_RATIO = "trc_ratio"
@@ -64,7 +64,10 @@ def get_project_impacts(project_id: str):
             {PROJECT_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS},
             {PROJECT_IMPACT_NET_GAS_ENERGY_SAVINGS},
             {PROJECT_IMPACT_TOTAL_BENEFITS_PER_MWH},                           
-            {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM}
+            {PROJECT_IMPACT_TOTAL_BENEFITS_PER_THERM},
+            {PROJECT_IMPACT_TOTAL_GHG_BENEFITS},
+            {PROJECT_IMPACT_ELECTRIC_GHG_BENEFITS},
+            {PROJECT_IMPACT_GAS_GHG_BENEFITS}
         FROM openbca_core.project_impacts
         WHERE project_id = '{project_id}'
     """

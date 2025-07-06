@@ -26,7 +26,7 @@ SELECT
     pc.project_id,
     eco.* EXCLUDE (project_id),
     env.* EXCLUDE (project_id),
-    (COALESCE(electric_ghg_savings, 0) + COALESCE(gas_ghg_savings, 0)) as lifecycle_total_ghg_savings,
+    (COALESCE(electric_ghg_savings, 0) + COALESCE(gas_ghg_savings, 0)) as total_ghg_benefits,
     (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) as total_benefits,
     (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) / trc_costs as trc_ratio,
     (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) / pac_costs as pac_ratio,
