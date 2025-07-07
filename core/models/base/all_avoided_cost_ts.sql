@@ -1,7 +1,7 @@
 MODEL(
     name openbca_core.all_avoided_costs_ts,
     kind VIEW,
-    grain (utility, region, commodity, avoided_cost, year, hour_of_year),
+    grain (commodity, avoided_cost_subset, avoided_cost, year, hour_of_year),
 );
 
 SELECT

@@ -1,7 +1,7 @@
 MODEL(
     name openbca_input.avoided_costs_ts,
     kind FULL,
-    grain (utility, region, commodity, avoided_cost, year, hour_of_year),
+    grain (commodity, avoided_cost_subset, avoided_cost, year, hour_of_year),
 );
 
 SELECT
@@ -12,6 +12,6 @@ SELECT
     month,
     hour_of_year,
     hour_of_day,
-    avoided_cost as avoided_cost,
+    avoided_cost,
     value
 FROM demo.custom_avoided_costs_tabs

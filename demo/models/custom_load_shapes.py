@@ -13,8 +13,6 @@ ID_COLUMNS = {'sheet_name', 'month', 'hour_of_year', 'hour_of_week', 'hour_of_da
     columns = {
         'load_shape': 'string',
         'commodity': 'string',
-        # 'utility': 'string',
-        # 'region': 'string',
         'quarter': 'int',
         'month': 'int',
         'hour_of_day': 'int',
