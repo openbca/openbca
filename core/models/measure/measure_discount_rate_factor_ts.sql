@@ -13,5 +13,5 @@ SELECT
         1.0 + (discount_rate_ratio / 4.0),
         ((year - start_year) * 4) + quarter - start_quarter
     ) AS discount_factor
-FROM measure.measure_cost_dollarss
+FROM measure.measure_cost_dollars
 CROSS JOIN generate_series(start_year * 4 + (start_quarter - 1), (start_year + estimated_useful_life) * 4 + (start_quarter - 1 - 1)) AS gs(quarter_index)

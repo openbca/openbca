@@ -12,7 +12,7 @@ MODEL(
     estimated_useful_life INT,
     unit_quantity FLOAT,
     net_to_gross_ratio FLOAT,
-    admin_cost_dollars_dollars FLOAT,
+    admin_cost_dollars FLOAT,
     incentive_cost_dollars FLOAT,
     measure_cost_dollars FLOAT,
     elec_savings_mwh FLOAT,

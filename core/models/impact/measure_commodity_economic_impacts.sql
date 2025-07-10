@@ -17,5 +17,5 @@ FROM (
     GROUP BY
         measure_id, commodity, avoided_cost
 ) vsb_ts
-LEFT JOIN measure.measure_cost_dollarss pc
+LEFT JOIN measure.measure_cost_dollars pc
     ON pc.measure_id = vsb_ts.measure_id

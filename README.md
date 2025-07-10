@@ -75,7 +75,7 @@ flowchart TD
         measure_csv[[📄 measures.csv]]:::fileref
         measures(["measures"]):::input
 
-        measure_cost_dollarss[(measure_cost_dollarss)]:::intermediate
+        measure_cost_dollars[(measure_cost_dollars)]:::intermediate
         measure_discount_rate_factor_ts[(measure_discount_rate_factor_ts)]:::intermediate
         measure_commodity[(measure_commodity)]:::intermediate
         measure_commodity_load_shape_ts[(measure_commodity_load_shape_ts)]:::intermediate
@@ -87,8 +87,8 @@ flowchart TD
         commodity_load_shape_ts[(commodity_load_shape_ts)]:::interface
 
         user --> measure_csv --> measures
-        measures --> measure_cost_dollarss
-        measure_cost_dollarss --> measure_discount_rate_factor_ts
+        measures --> measure_cost_dollars
+        measure_cost_dollars --> measure_discount_rate_factor_ts
         measures --> measure_commodity
         measure_commodity --> measure_commodity_load_shape_ts
         measure_discount_rate_factor_ts --> measure_commodity_load_shape_ts
@@ -96,9 +96,9 @@ flowchart TD
         avoided_cost_ts --> measure_commodity_impact_ts
         measure_commodity_load_shape_ts --> measure_commodity_impact_ts
         measure_commodity_impact_ts --> measure_commodity_impacts
-        measure_cost_dollarss --> measure_commodity_impacts
+        measure_cost_dollars --> measure_commodity_impacts
         measure_commodity_impacts --> measure_impacts
-        measure_cost_dollarss --> measure_impacts
+        measure_cost_dollars --> measure_impacts
     end
 
     %% === CLASS DEFINITIONS ===

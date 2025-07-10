@@ -3,7 +3,7 @@ import os
 import streamlit as st
 import duckdb
 
-INPUT_MEASURE_FIELDS = ['avoided_cost_subset', 'start_year', 'start_quarter', 'discount_rate_ratio', 'estimated_useful_life', 'unit_quantity', 'net_to_gross_ratio', 'admin_cost_dollars', 'incentive_cost_dollars', 'measure_cost_dollars', 'elec_savings_mwh', 'gas_saving_therms', 'load_shape', 'therms_profile']
+INPUT_MEASURE_FIELDS = ['avoided_cost_subset', 'start_year', 'start_quarter', 'discount_rate_ratio', 'estimated_useful_life', 'unit_quantity', 'net_to_gross_ratio', 'admin_cost_dollars', 'incentive_cost_dollars', 'measure_cost_dollars', 'elec_savings_mwh', 'gas_saving_therms', 'elec_load_shape_mapping', 'gas_load_shape_mapping']
 
 MEASURE_IMPACT_ELECTRIC_BENEFITS = "electric_benefits"
 MEASURE_IMPACT_TOTAL_BENEFITS = "total_benefits"
@@ -24,7 +24,7 @@ MEASURE_IMPACT_PAC_RATIO = "pac_ratio"
 
 @st.cache_resource
 def get_connection():
-    return duckdb.connect(os.environ['DB'], read_only=False)
+    return duckdb.connect(os.environ.get('DB', 'output/openbca.db'), read_only=False)
 
 def get_value_streams():
     return get_connection().execute(f"""

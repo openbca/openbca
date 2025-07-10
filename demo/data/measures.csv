@@ -1,4 +1,4 @@
-measure_id,elec_load_shape_mapping,start_year,start_quarter,avoided_cost_subset,unit_quantity,estimated_useful_life,net_to_gross_ratio,discount_rate_ratio,admin_cost_dollars_dollars,measure_cost_dollars,incentive_cost_dollars,gas_load_shape_mapping,gas_saving_therms,elec_savings_mwh,avoided_costs
+measure_id,elec_load_shape_mapping,start_year,start_quarter,avoided_cost_subset,unit_quantity,estimated_useful_life,net_to_gross_ratio,discount_rate_ratio,admin_cost_dollars,measure_cost_dollars,incentive_cost_dollars,gas_load_shape_mapping,gas_saving_therms,elec_savings_mwh,avoided_costs
 MAR101323,NONRES_INDOOR_CFL_LTG_PGE,2022,1,PGE_CZ12,1,12,0.95,0.0766,8583.76,13193.17,0,annual,0,58.46898797,
 MAR101321,NONRES_INDOOR_CFL_LTG_PGE,2022,2,PGE_CZ12,1,12,0.95,0.0766,26606.87,25013.925,0,annual,0,33.56429381,
 MAR101322,NONRES_INDOOR_CFL_LTG_PGE,2022,2,PGE_CZ12,1,12,0.95,0.0766,16409.01,11175.205,0,annual,0,71.47497671,
