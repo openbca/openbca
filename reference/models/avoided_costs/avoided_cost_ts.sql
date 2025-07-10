@@ -18,7 +18,7 @@ SELECT
     'ELECTRICITY' AS commodity,
     year, quarter, month,
     hour_of_year, hour_of_day,
-    avoided_cost, value
+    avoided_cost, value as av_cost_dollar_per_energy_unit -- measured in $/kWh
 FROM california.elec_av_costs
 UNPIVOT (
     value FOR avoided_cost IN (
@@ -34,7 +34,7 @@ SELECT
     'GAS' AS commodity,
     year, quarter, month,
     NULL AS hour_of_year, NULL AS hour_of_day,
-    avoided_cost, value
+    avoided_cost, value as av_cost_dollar_per_energy_unit -- measured in $/therm
 FROM california.gas_av_costs
 UNPIVOT (
     value FOR avoided_cost IN (
