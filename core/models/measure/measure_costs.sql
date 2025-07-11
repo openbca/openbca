@@ -1,5 +1,5 @@
 MODEL(
-    name measure.measure_cost_dollars,
+    name measure.measure_costs,
     kind VIEW,
     grain (measure_id),
 );
@@ -13,6 +13,7 @@ SELECT
         + (((1 - net_to_gross_ratio) * incentive_cost_dollars) + (net_to_gross_ratio * measure_cost_dollars))
         / (1 + (discount_rate_ratio / 4.0))
         AS trc_cost_dollars,
-    admin_cost_dollars + (incentive_cost_dollars / (1 + (discount_rate_ratio / 4.0))) as pac_cost_dollars,
+    admin_cost_dollars + (incentive_cost_dollars / (1 + (discount_rate_ratio / 4.0)))
+        AS pac_cost_dollars,
 FROM
     openbca_core.measures

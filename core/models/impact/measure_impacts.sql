@@ -32,7 +32,7 @@ SELECT
     (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) / pac_cost_dollars as pac_ratio,
     electric_benefits / net_electric_energy_savings AS total_benefits_per_mwh,
     gas_benefits / net_gas_energy_savings AS total_benefits_per_therm,
-FROM measure.measure_cost_dollars pc
+FROM measure.measure_costs pc
 LEFT JOIN pivoted_economic_impacts eco
     ON pc.measure_id = eco.measure_id
 LEFT JOIN pivoted_environmental_impacts env
