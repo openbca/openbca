@@ -5,7 +5,7 @@ ARG DUCKDB_ARCH=aarch64
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y make curl unzip \
+RUN apt-get update && apt-get install -y make curl unzip time \
     && curl -L -o duckdb_cli.zip "https://github.com/duckdb/duckdb/releases/download/v${DUCKDB_VERSION}/duckdb_cli-linux-${DUCKDB_ARCH}.zip" \
     && ln -s /app/duckdb /usr/local/bin/duckdb && unzip duckdb_cli.zip && rm duckdb_cli.zip
 
@@ -14,7 +14,5 @@ RUN pip install -r requirements.txt
 
 COPY Makefile .
 RUN make install
-
-COPY config.yaml .
 
 #CMD ["make", "run"]

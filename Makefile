@@ -5,7 +5,7 @@ DUCKDB_ARCH?=aarch64
 docker-build:
 	docker build --build-arg DUCKDB_ARCH=${DUCKDB_ARCH} -t openbca -f Dockerfile .
 
-DOCKER_RUN_ARGS=-e DB=${DB} -v $(shell pwd)/core:/app/core -v $(shell pwd)/demo:/app/demo -v $(shell pwd)/nspm:/app/nspm -v $(shell pwd)/output:/app/output -v $(shell pwd)/models:/app/models -v $(shell pwd)/logs:/app/logs -v $(shell pwd)/app:/app/app openbca
+DOCKER_RUN_ARGS=-e DB=${DB} -v $(shell pwd)/reference:/app/reference -v $(shell pwd)/core:/app/core -v $(shell pwd)/demo:/app/demo -v $(shell pwd)/nspm:/app/nspm -v $(shell pwd)/output:/app/output -v $(shell pwd)/app:/app/app -v $(shell pwd)/logs:/app/logs openbca
 
 install:
 	pip install -r requirements.txt
@@ -40,7 +40,7 @@ prepare-app:
 run-app: prepare-app
 	streamlit run app/src/main.py
 
-docker-run-app: docker-run
+docker-run-app: docker-build
 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
 
 test: test-reference test-core test-demo
