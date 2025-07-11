@@ -86,7 +86,7 @@ with main_cols[0]:
             elec_savings_mwh=elec_savings_mwh, elec_load_shape_mapping=electric_curve,
             gas_saving_therms=gas_saving_therms, gas_load_shape_mapping=gas_curve,
             admin_cost_dollars=admin_cost_dollars, incentive_cost_dollars=incentive_cost_dollars, measure_cost_dollars=measure_cost_dollars,
-            avoided_costs=''.join([*electricity_impact_selection, *gas_impact_selection])
+            avoided_costs=','.join([*electricity_impact_selection, *gas_impact_selection])
         )
 
 with main_cols[1]:
