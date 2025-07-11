@@ -4,6 +4,7 @@ logs
 duckdb.db
 .idea
 output/*.csv
+output/*.db
+output/*.wal
 __pycache__
 .DS_Store
-/output/*
