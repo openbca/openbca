@@ -28,7 +28,7 @@ MEASURE_INPUTS_COLUMNS = {
 
 
 @model(
-    name="nspm_input.measure_inputs",
+    name="nspm_raw.measure_inputs",
     kind="FULL",
     columns=MEASURE_INPUTS_COLUMNS
 )

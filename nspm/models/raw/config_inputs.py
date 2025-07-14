@@ -16,7 +16,7 @@ CONFIG_INPUT_COLUMNS = {
 
 
 @model(
-    name="nspm_input.config_inputs",
+    name="nspm_raw.config_inputs",
     kind="FULL",
     columns=CONFIG_INPUT_COLUMNS
 )

@@ -8,7 +8,7 @@ VALUE_STREAM_CONFIG_COLUMNS = {
 
 
 @model(
-    name="avoided_cost_config",
+    name="nspm_raw.avoided_cost_config",
     kind="FULL",
     columns=VALUE_STREAM_CONFIG_COLUMNS
 )

@@ -1,5 +1,5 @@
-from nspm.models.parsing import config_inputs
-from nspm.models.parsing.config_inputs import CONFIG_INPUT_COLUMNS
+from nspm.models.raw import config_inputs
+from nspm.models.raw.config_inputs import CONFIG_INPUT_COLUMNS
 
 
 def test_config_inputs_columns_match_decorator():

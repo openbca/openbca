@@ -15,7 +15,7 @@ PROGRAM_INPUT_COLUMNS = {
 
 
 @model(
-    name="nspm_input.program_inputs",
+    name="nspm_raw.program_inputs",
     kind="FULL",
     columns=PROGRAM_INPUT_COLUMNS
 )

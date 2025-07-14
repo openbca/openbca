@@ -1,5 +1,5 @@
-from nspm.models.parsing import loadshape_mapping_annual
-from nspm.models.parsing.loadshape_mapping_annual import LOAD_SHAPE_MAPPING_ANNUAL_COLUMNS
+from nspm.models.raw import loadshape_mapping_annual
+from nspm.models.raw.loadshape_mapping_annual import LOAD_SHAPE_MAPPING_ANNUAL_COLUMNS
 
 
 def test_loadshape_mapping_annual_columns_match_decorator():

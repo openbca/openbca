@@ -9,7 +9,7 @@ LOAD_SHAPE_MAPPING_HOURLY_COLUMNS = {
 
 
 @model(
-    name="loadshape_mapping_hourly",
+    name="nspm_raw.loadshape_mapping_hourly",
     kind="FULL",
     columns=LOAD_SHAPE_MAPPING_HOURLY_COLUMNS
 )

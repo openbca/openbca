@@ -1,5 +1,5 @@
-from nspm.models.parsing import program_inputs
-from nspm.models.parsing.program_inputs import PROGRAM_INPUT_COLUMNS
+from nspm.models.raw import program_inputs
+from nspm.models.raw.program_inputs import PROGRAM_INPUT_COLUMNS
 
 
 def test_program_inputs_columns_match_decorator():

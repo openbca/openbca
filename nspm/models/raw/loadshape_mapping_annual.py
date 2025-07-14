@@ -9,7 +9,7 @@ LOAD_SHAPE_MAPPING_ANNUAL_COLUMNS = {
 
 
 @model(
-    name="loadshape_mapping_annual",
+    name="nspm_raw.loadshape_mapping_annual",
     kind="FULL",
     columns=LOAD_SHAPE_MAPPING_ANNUAL_COLUMNS
 )

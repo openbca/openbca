@@ -1,5 +1,5 @@
-from nspm.models.parsing import loadshape_mapping_hourly
-from nspm.models.parsing.loadshape_mapping_hourly import LOAD_SHAPE_MAPPING_HOURLY_COLUMNS
+from nspm.models.raw import loadshape_mapping_hourly
+from nspm.models.raw.loadshape_mapping_hourly import LOAD_SHAPE_MAPPING_HOURLY_COLUMNS
 
 
 def test_loadshape_mapping_hourly_columns_match_decorator():

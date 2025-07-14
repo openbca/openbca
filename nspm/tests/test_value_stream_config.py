@@ -1,5 +1,5 @@
-from nspm.models.parsing import value_stream_config
-from nspm.models.parsing.value_stream_config import VALUE_STREAM_CONFIG_COLUMNS
+from nspm.models.raw import value_stream_config
+from nspm.models.raw.value_stream_config import VALUE_STREAM_CONFIG_COLUMNS
 
 
 def test_value_stream_config_columns_match_decorator():
