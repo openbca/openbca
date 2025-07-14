@@ -3,7 +3,8 @@ import pandas as pd
 
 LOAD_SHAPE_MAPPING_HOURLY_COLUMNS = {
     "load_shape_name": "string",
-    **{str(i): "float" for i in range(1, 8761)}
+    "hour_of_year": "int",
+    "load_shape_normalized_fraction": "float",
 }
 
 
@@ -19,13 +20,15 @@ def loadshape_mapping_hourly_model() -> pd.DataFrame:
         header=1
     )
 
-    df = df.rename(columns={"Loadshape Name": "load_shape_name"})
+    df = df.rename(columns={"Load Shape Name": "load_shape_name"}, errors="raise")
 
-    # unpivot the DataFrame to have one row per hour
+    # Filter out rows where first column is NaN
+    df = df[df["1"].notna()]
+
     df = df.melt(
         id_vars=["load_shape_name"],
         var_name="hour_of_year",
-        value_name="value"
+        value_name="load_shape_normalized_fraction"
     )
 
     df = df[df["load_shape_name"].notna()]
