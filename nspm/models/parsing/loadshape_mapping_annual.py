@@ -1,22 +1,22 @@
 from sqlmesh import model
 import pandas as pd
 
-LOAD_SHAPE_MAPPING_HOURLY_COLUMNS = {
+LOAD_SHAPE_MAPPING_ANNUAL_COLUMNS = {
     "load_shape_name": "string",
-    "hour_of_year": "int",
+    "year_ref": "string",
     "load_shape_normalized_fraction": "float",
 }
 
 
 @model(
-    name="loadshape_mapping_hourly",
+    name="loadshape_mapping_annual",
     kind="FULL",
-    columns=LOAD_SHAPE_MAPPING_HOURLY_COLUMNS
+    columns=LOAD_SHAPE_MAPPING_ANNUAL_COLUMNS
 )
-def loadshape_mapping_hourly_model() -> pd.DataFrame:
+def loadshape_mapping_annual_model() -> pd.DataFrame:
     df = pd.read_excel(
         'nspm/input/OpenBCA Code PROGRAM File.xlsx',
-        sheet_name="Loadshape Mapping Hourly",
+        sheet_name="Loadshape Mapping Annual",
         header=1
     )
 
@@ -27,7 +27,7 @@ def loadshape_mapping_hourly_model() -> pd.DataFrame:
 
     df = df.melt(
         id_vars=["load_shape_name"],
-        var_name="hour_of_year",
+        var_name="year_ref",
         value_name="load_shape_normalized_fraction"
     )
 
