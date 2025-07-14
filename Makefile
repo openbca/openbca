@@ -43,6 +43,9 @@ run-app: prepare-app
 docker-run-app: docker-build
 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
 
+run-nspm:
+	sqlmesh -p nspm plan --auto-apply
+
 test: test-reference test-core test-demo
 
 docker-test: docker-build
