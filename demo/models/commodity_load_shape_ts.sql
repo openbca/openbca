@@ -10,5 +10,5 @@ SELECT
     hour_of_year,
     hour_of_day,
     load_shape,
-    value
+    value AS load_shape_normalized_fraction
 FROM demo.custom_load_shapes
