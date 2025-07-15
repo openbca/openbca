@@ -12,3 +12,5 @@ def test_value_stream_timeseries_columns_match_decorator():
     assert len(df) > 1000
 
     assert df["value"].notna().all()
+
+    assert df.duplicated(subset=["value_stream", "year", "month", "hour"]).sum() == 0

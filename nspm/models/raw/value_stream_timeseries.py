@@ -28,7 +28,7 @@ def value_stream_ts_model(*args, **kwargs) -> pd.DataFrame:
         time_granularity_delimeters = [0, *[ i for i,c in enumerate(df.columns) if df.iloc[:, i].isnull().all()]]
 
         for i, time_granularity_delimeter in enumerate(time_granularity_delimeters):
-            next_time_granularity_delimeter = time_granularity_delimeters[i+1] if i < (len(time_granularity_delimeters)-1) else (len(df.columns) - 1 )
+            next_time_granularity_delimeter = time_granularity_delimeters[i+1] if i < (len(time_granularity_delimeters)-1) else (len(df.columns) )
 
             time_granularity_df = load_value_streams_time_granularity(df, time_granularity_delimeter, next_time_granularity_delimeter)
 

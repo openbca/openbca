@@ -5,7 +5,7 @@ MODEL(
 
 select
 	m.measure_id,
-	m.subset as avoided_cost_subset,
+	NULL as avoided_cost_subset, -- FIXME set it to m.subset once the subset is defined in the load shapes
 	m.version as avoided_cost_version,
 	m.measure_year as start_year,
 	1 AS start_quarter, -- TODO missing from input file
@@ -16,8 +16,8 @@ select
     m.administration_costs_dollar_year AS admin_cost_dollars,
 	m.measure_one_time_incentive_utility_dollar_participant_year AS incentive_cost_dollars,
 	m.measure_incremental_costs_customer_dollar_year AS measure_cost_dollars, --FIXME plenty of measures* cost but no measure_cost_dollars
-	0 AS elec_savings_mwh, -- FIXME missing from input file
-	0 AS gas_saving_therms, -- TODO missing from input file
+	1000 AS elec_savings_mwh, -- FIXME missing from input file
+	NULL AS gas_saving_therms, -- TODO missing from input file
 	m.loadshape_mapping as elec_load_shape_mapping,
 	NULL AS gas_load_shape_mapping, -- TODO missing from input file
 	NULL AS avoided_costs -- TODO get all the activated avoided cost from input file
