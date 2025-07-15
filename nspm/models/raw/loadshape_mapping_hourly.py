@@ -13,7 +13,7 @@ LOAD_SHAPE_MAPPING_HOURLY_COLUMNS = {
     kind="FULL",
     columns=LOAD_SHAPE_MAPPING_HOURLY_COLUMNS
 )
-def loadshape_mapping_hourly_model() -> pd.DataFrame:
+def loadshape_mapping_hourly_model(*args, **kwargs) -> pd.DataFrame:
     df = pd.read_excel(
         'nspm/input/OpenBCA Code PROGRAM File.xlsx',
         sheet_name="Loadshape Mapping Hourly",
