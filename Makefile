@@ -44,7 +44,7 @@ docker-run-app: docker-build
 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
 
 run-nspm:
-	sqlmesh -p nspm plan --auto-apply
+	sqlmesh -p reference -p nspm -p core plan --auto-apply
 
 test-nspm:
 	PYTHONPATH=. pytest nspm/tests

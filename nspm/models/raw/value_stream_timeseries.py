@@ -1,9 +1,9 @@
 from pandas import DataFrame
-from pandas.core.dtypes.common import is_numeric_dtype
 from sqlmesh import model
 import pandas as pd
 
 VALUE_STREAM_TS_COLUMNS = {
+    'value_stream': 'string',
     'year': 'int',
     'month': 'int',
     'hour': 'int',
