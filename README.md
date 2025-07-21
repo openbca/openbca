@@ -104,6 +104,16 @@ Run the following command to install the Python dependencies:
 make install
 ```
 
+## [Optional] Set up DBeaver to connect to the local DuckDB database
+If you want to use DBeaver to connect to the local DuckDB database, you can follow these steps:
+1. Install DBeaver from [dbeaver.io](https://dbeaver.io/download/).
+2. Open DBeaver and create a new connection.
+3. Select "DuckDB" as the database type.
+4. In the connection settings, set the database path to `<project base full path>/open-bca/output/openbca.db`. Note you need to first run the `make run-demo` command to create the database file.
+5. Click "Test Connection" to ensure the connection is successful.
+6. Click "Finish" to create the connection.
+7. You can now explore the database schema and run SQL queries against the OpenBCA tables and views.
+
 # Demo
 
 The most straightforward way to run the OpenBCA logic is to use the `demo` sub-project. It uses a minimal set of CSV/Excel files to run the OpenBCA logic and generate the output in a local CSV file `output/measure_impacts.csv`.
