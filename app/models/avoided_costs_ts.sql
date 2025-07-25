@@ -15,7 +15,7 @@ CREATE TABLE openbca_app.avoided_costs_ts (
     hour_of_year INT,
     hour_of_day INT,
     avoided_cost STRING,
-    value FLOAT
+    av_cost_dollar_per_energy_unit FLOAT
 );
 
 SELECT * FROM openbca_app.avoided_costs_ts

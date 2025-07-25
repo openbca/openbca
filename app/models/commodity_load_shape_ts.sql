@@ -13,7 +13,7 @@ CREATE TABLE openbca_app.load_shape_ts (
     hour_of_year INT,
     hour_of_day INT,
     load_shape STRING,
-    value FLOAT
+    load_shape_normalized_fraction FLOAT
 );
 
 SELECT * FROM openbca_app.load_shape_ts
