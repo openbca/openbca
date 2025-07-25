@@ -58,5 +58,5 @@ docker-shell: docker-build
 generate-flow-diagram:
 	sqlmesh -p . dag output/dag.html
 
-sqlmesh-ui:
-	sqlmesh ui
+sqlmesh-ui-core:
+	sqlmesh -p core ui
