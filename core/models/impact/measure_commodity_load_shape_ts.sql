@@ -6,6 +6,7 @@ MODEL(
 
 SELECT
     mc.measure_id,
+    mc.avoided_cost_version,
     mc.commodity, mc.avoided_cost_subset,
     m_ts.year, m_ts.quarter,
     cls_ts.month, cls_ts.hour_of_year, cls_ts.hour_of_day,

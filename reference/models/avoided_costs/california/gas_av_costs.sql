@@ -5,6 +5,7 @@ MODEL(
 );
 
 SELECT
+    'full_ca_avoided_costs_2020acc_gas' as avoided_cost_version,
     utility, region,
     total, marginal_ghg,
     market, t_d, environment, btm_methane, upstream_methane,

@@ -6,7 +6,7 @@ MODEL(
 SELECT
     measure_id::VARCHAR AS measure_id,
     avoided_cost_subset::VARCHAR AS avoided_cost_subset,
-    --avoided_cost_version::VARCHAR AS avoided_cost_version,
+    avoided_cost_version::VARCHAR AS avoided_cost_version,
     start_year::INT AS start_year,
     start_quarter::INT AS start_quarter,
     discount_rate_ratio::FLOAT AS discount_rate_ratio,

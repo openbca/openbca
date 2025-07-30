@@ -19,6 +19,7 @@ MODEL(
     gas_saving_therms FLOAT,
     elec_load_shape_mapping VARCHAR,
     gas_load_shape_mapping VARCHAR,
-    avoided_costs ARRAY<VARCHAR>
+    avoided_costs ARRAY<VARCHAR>,
+    avoided_cost_version VARCHAR
   )
 )

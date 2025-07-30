@@ -14,6 +14,7 @@ WITH regions AS (
 
 -- hourly value streams
 SELECT
+    avoided_cost_version,
     utility || '_'|| region as avoided_cost_subset,
     'ELECTRICITY' AS commodity,
     year, quarter, month,
@@ -30,6 +31,7 @@ UNPIVOT (
 UNION ALL
 -- monthly value streams
 SELECT
+    avoided_cost_version,
     utility || '_'|| r.region as avoided_cost_subset,
     'GAS' AS commodity,
     year, quarter, month,

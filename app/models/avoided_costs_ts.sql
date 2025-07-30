@@ -18,4 +18,7 @@ CREATE TABLE openbca_app.avoided_costs_ts (
     av_cost_dollar_per_energy_unit FLOAT
 );
 
-SELECT * FROM openbca_app.avoided_costs_ts
+SELECT
+    'app_avoided_cost_version' AS avoided_cost_version,
+    *
+FROM openbca_app.avoided_costs_ts

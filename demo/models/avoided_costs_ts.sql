@@ -5,6 +5,7 @@ MODEL(
 );
 
 SELECT
+    'demo_avoided_costs' AS avoided_cost_version,
     commodity,
     avoided_cost_subset,
     year,
