@@ -27,5 +27,6 @@ CREATE TABLE openbca_app.measures (
 
 SELECT
     * EXCEPT avoided_costs,
-    SPLIT(avoided_costs, ',') AS avoided_costs
+    SPLIT(avoided_costs, ',') AS avoided_costs,
+    NULL AS avoided_cost_version
 FROM openbca_app.measures
