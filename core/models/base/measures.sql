@@ -1,6 +1,20 @@
 MODEL(
   name openbca_core.measures,
   kind VIEW,
+  grain (measure_id),
+  audits (
+    not_null(columns := (measure_id, start_year, start_quarter, estimated_useful_life)),
+    unique_combination_of_columns(columns := (measure_id)),
+    accepted_range(column := start_year, min_v := 2010, max_v := 2100),
+    accepted_values(column := start_quarter, is_in := (1, 2, 3, 4)),
+    accepted_range(column := discount_rate_ratio, min_v := 0, max_v := 1),
+    accepted_range(column := net_to_gross_ratio, min_v := 0, max_v := 10),
+    accepted_range(column := estimated_useful_life, min_v := 0, max_v := 100),
+    accepted_range(column := unit_quantity, min_v := 0),
+    accepted_range(column := admin_cost_dollars, min_v := 0),
+    accepted_range(column := incentive_cost_dollars, min_v := 0),
+    accepted_range(column := measure_cost_dollars, min_v := 0),
+  )
 );
 
 SELECT
