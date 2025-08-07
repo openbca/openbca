@@ -2,6 +2,15 @@ MODEL(
     name openbca_core.all_commodity_load_shape_ts,
     kind VIEW,
     grain (commodity, load_shape, hour_of_year),
+    audits (
+        not_null(columns := (commodity, load_shape, load_shape_normalized_fraction, quarter, month)),
+        unique_combination_of_columns(columns := (commodity, load_shape, quarter, month, hour_of_year, hour_of_day)),
+        accepted_values(column := quarter, is_in := (1, 2, 3, 4)),
+        accepted_values(column := month, is_in := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)),
+        accepted_values(column := hour_of_day, is_in := (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23)),
+        accepted_range(column := hour_of_year, min_v := 0, max_v := 8760),
+        accepted_values(column := commodity, is_in := ('ELECTRICITY', 'GAS')),
+    )
 );
 
 SELECT

@@ -30,6 +30,8 @@ def unpivot(df: DataFrame) -> DataFrame:
     """
     Unpivot the elec_load_shape table to have a row for each load shape name and value.
     """
+    if 'region' in df.columns:  # drop the always null region column
+        df = df.drop(columns=['region'])
     unpivoted_df = df.melt(
             id_vars=ID_COLUMNS,
             value_vars=[col for col in df.columns if col not in ID_COLUMNS],
