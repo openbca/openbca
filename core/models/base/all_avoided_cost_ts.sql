@@ -1,7 +1,17 @@
 MODEL(
     name openbca_core.all_avoided_costs_ts,
     kind VIEW,
-    grain (commodity, avoided_cost_subset, avoided_cost, year, hour_of_year),
+    grain (commodity, avoided_cost_subset, avoided_cost, year, month, hour_of_year),
+    audits (
+        not_null(columns := (commodity, avoided_cost, av_cost_dollar_per_energy_unit, year)),
+        unique_combination_of_columns(columns := (commodity, avoided_cost_subset, avoided_cost, year, quarter, month, hour_of_year, hour_of_day)),
+        accepted_range(column := year, min_v := 2010, max_v := 2100),
+        accepted_values(column := quarter, is_in := (1, 2, 3, 4)),
+        accepted_values(column := month, is_in := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)),
+        accepted_values(column := hour_of_day, is_in := (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23)),
+        accepted_range(column := hour_of_year, min_v := 0, max_v := 8760),
+        accepted_values(column := commodity, is_in := ('ELECTRICITY', 'GAS')),
+    )
 );
 
 SELECT
