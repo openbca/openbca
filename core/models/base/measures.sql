@@ -14,6 +14,9 @@ MODEL(
     accepted_range(column := admin_cost_dollars, min_v := 0),
     accepted_range(column := incentive_cost_dollars, min_v := 0),
     accepted_range(column := measure_cost_dollars, min_v := 0),
+    unique_id_validation_audit,
+    time_slice_validation_audit,
+    avoided_cost_mapping_validation_audit
   )
 );
 
