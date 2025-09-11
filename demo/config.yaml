@@ -3,6 +3,9 @@ gateways:
     connection:
       type: duckdb
       database: {{ env_var('DB') }}
+    state_connection:
+      type: duckdb
+      database: {{ env_var('DB') | replace('.db', '') }}_state_demo.db
 
 default_gateway: local_duckdb
 

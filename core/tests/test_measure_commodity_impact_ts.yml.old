@@ -1,9 +1,10 @@
 test_impact_constant_monthly_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: constant/monthly_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           av_cost_dollar_per_energy_unit: 0.1
@@ -21,6 +22,7 @@ test_impact_constant_monthly_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -39,9 +41,10 @@ test_impact_constant_monthly_with_year:
 test_impact_constant_hourly_by_hour_of_year_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: constant/hourly_by_hour_of_year_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           av_cost_dollar_per_energy_unit: 0.11
@@ -59,6 +62,7 @@ test_impact_constant_hourly_by_hour_of_year_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -78,9 +82,10 @@ test_impact_constant_hourly_by_hour_of_year_with_year:
 test_impact_annual_monthly_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: annual/monthly_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           year: 2022
@@ -99,6 +104,7 @@ test_impact_annual_monthly_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -118,9 +124,10 @@ test_impact_annual_monthly_with_year:
 test_impact_annual_hourly_by_hour_of_year_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: annual/hourly_by_hour_of_year_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           year: 2022
@@ -139,6 +146,7 @@ test_impact_annual_hourly_by_hour_of_year_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -158,9 +166,10 @@ test_impact_annual_hourly_by_hour_of_year_with_year:
 test_impact_monthly_cross_years_monthly_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: monthly_cross_years/monthly_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           month: 7
@@ -179,6 +188,7 @@ test_impact_monthly_cross_years_monthly_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -198,9 +208,10 @@ test_impact_monthly_cross_years_monthly_with_year:
 test_impact_monthly_cross_years_hourly_by_hour_of_year_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: monthly_cross_years/hourly_by_hour_of_year_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           month: 7
@@ -220,6 +231,7 @@ test_impact_monthly_cross_years_hourly_by_hour_of_year_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -239,9 +251,10 @@ test_impact_monthly_cross_years_hourly_by_hour_of_year_with_year:
 test_impact_monthly_with_year_hourly_by_hour_of_year_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: monthly_with_year/hourly_by_hour_of_year_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           year: 2022
@@ -262,6 +275,7 @@ test_impact_monthly_with_year_hourly_by_hour_of_year_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -281,9 +295,10 @@ test_impact_monthly_with_year_hourly_by_hour_of_year_with_year:
 test_impact_hourly_cross_years_monthly_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: hourly_by_hour_of_year_cross_years/monthly_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           hour_of_year: 100
@@ -303,6 +318,7 @@ test_impact_hourly_cross_years_monthly_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -322,9 +338,10 @@ test_impact_hourly_cross_years_monthly_with_year:
 test_impact_hourly_cross_years_hourly_by_hour_of_year_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: hourly_by_hour_of_year_cross_years/hourly_by_hour_of_year_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           hour_of_year: 100
@@ -343,6 +360,7 @@ test_impact_hourly_cross_years_hourly_by_hour_of_year_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -362,9 +380,10 @@ test_impact_hourly_cross_years_hourly_by_hour_of_year_with_year:
 test_impact_hourly_with_year_monthly_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: hourly_by_hour_of_year_with_year/monthly_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           year: 2022
@@ -385,6 +404,7 @@ test_impact_hourly_with_year_monthly_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:
@@ -404,9 +424,10 @@ test_impact_hourly_with_year_monthly_with_year:
 test_impact_hourly_with_year_hourly_by_hour_of_year_with_year:
   model: openbca_core.measure_commodity_impact_ts
   inputs:
-    openbca_core.all_avoided_costs_ts:
+    openbca_input.avoided_costs_ts:
       rows:
         - avoided_cost_subset: hourly_by_hour_of_year_with_year/hourly_by_hour_of_year_with_year
+          avoided_cost_version: 1
           commodity: electricity
           avoided_cost: ac1
           year: 2022
@@ -426,6 +447,7 @@ test_impact_hourly_with_year_hourly_by_hour_of_year_with_year:
       rows:
         - measure_id: m1
           avoided_cost: ac1
+          avoided_cost_version: 1
   outputs:
     query:
       rows:

@@ -14,6 +14,7 @@ ID_COLUMNS = ['commodity', 'avoided_cost', 'utility', 'year', 'month', 'hour_of_
         'commodity': 'string',
         'avoided_cost': 'string',
         'avoided_cost_subset': 'string',
+        'avoided_cost_version': 'string',
         'year': 'int',
         'quarter': 'int',
         'month': 'int',
@@ -27,7 +28,7 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return pd.concat([
             load_avoided_costs_excel_file('ELECTRICITY', 'custom_electric_avoided_costs_tabs.xlsx'),
             load_avoided_costs_excel_file('GAS', 'custom_gas_avoided_costs_tabs.xlsx'),
-        ])
+        ]).assign(avoided_cost_version='CUSTOM')
 
 
 def load_avoided_costs_excel_file(commodity: str, input_file: str) -> DataFrame:

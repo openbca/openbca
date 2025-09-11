@@ -1,0 +1,21 @@
+- name: 'openbca_reference.avoided_costs_ts'
+  columns:
+    commodity: STRING
+    avoided_cost_subset: STRING
+    avoided_cost_version: STRING
+    avoided_cost: STRING
+    year: INTEGER
+    quarter: INTEGER
+    month: INTEGER
+    hour_of_year: INTEGER
+    hour_of_day: INTEGER
+    av_cost_dollar_per_energy_unit: FLOAT
+- name: 'openbca_reference.commodity_load_shape_ts'
+  columns:
+    commodity: STRING
+    quarter: INTEGER
+    month: INTEGER
+    hour_of_year: INTEGER
+    hour_of_day: INTEGER
+    load_shape: STRING
+    load_shape_normalized_fraction: FLOAT

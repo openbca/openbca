@@ -5,14 +5,25 @@ MODEL(
 );
 
 WITH
+avoided_costs_ts AS (
+    SELECT
+        av_ts.year, av_ts.month, av_ts.hour_of_year,
+        av_ts.commodity, m.measure_id, av_ts.avoided_cost_subset,
+        av_ts.avoided_cost,
+        av_cost_dollar_per_energy_unit
+    FROM openbca_input.avoided_costs_ts av_ts
+    JOIN openbca_input.measures m
+        ON av_ts.avoided_cost_subset IS NOT DISTINCT FROM m.avoided_cost_subset
+            AND av_ts.avoided_cost_version = m.avoided_cost_version
+),
 constant AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.av_cost_dollar_per_energy_unit
-    FROM openbca_core.all_avoided_costs_ts av_ts
+    FROM avoided_costs_ts av_ts
     JOIN openbca_core.measure_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
-        --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
+        AND pcls_ts.measure_id = av_ts.measure_id
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
     WHERE
         av_ts.year IS NULL AND av_ts.month IS NULL AND av_ts.hour_of_year IS NULL
@@ -21,10 +32,10 @@ annual AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.av_cost_dollar_per_energy_unit
-    FROM openbca_core.all_avoided_costs_ts av_ts
+    FROM avoided_costs_ts av_ts
     JOIN openbca_core.measure_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
-        --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
+        AND pcls_ts.measure_id = av_ts.measure_id
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
         AND pcls_ts.year = av_ts.year
     WHERE
@@ -34,10 +45,10 @@ monthly_cross_years AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.av_cost_dollar_per_energy_unit
-    FROM openbca_core.all_avoided_costs_ts av_ts
+    FROM avoided_costs_ts av_ts
     JOIN openbca_core.measure_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
-        --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
+        AND pcls_ts.measure_id = av_ts.measure_id
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
         AND pcls_ts.month = av_ts.month
     WHERE
@@ -47,10 +58,10 @@ monthly_with_year AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.av_cost_dollar_per_energy_unit
-    FROM openbca_core.all_avoided_costs_ts av_ts
+    FROM avoided_costs_ts av_ts
     JOIN openbca_core.measure_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
-        --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
+        AND pcls_ts.measure_id = av_ts.measure_id
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
         AND pcls_ts.year = av_ts.year
         AND pcls_ts.month = av_ts.month
@@ -61,10 +72,10 @@ hourly_by_hour_of_year_cross_years AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.av_cost_dollar_per_energy_unit
-    FROM openbca_core.all_avoided_costs_ts av_ts
+    FROM avoided_costs_ts av_ts
     JOIN openbca_core.measure_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
-        --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
+        AND pcls_ts.measure_id = av_ts.measure_id
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
         AND pcls_ts.hour_of_year = av_ts.hour_of_year
     WHERE
@@ -75,10 +86,10 @@ hourly_by_hour_of_year_with_year AS (
     SELECT
         pcls_ts.*,
         av_ts.avoided_cost, av_ts.av_cost_dollar_per_energy_unit
-    FROM openbca_core.all_avoided_costs_ts av_ts
+    FROM avoided_costs_ts av_ts
     JOIN openbca_core.measure_commodity_load_shape_ts pcls_ts
         ON pcls_ts.commodity = av_ts.commodity
-        --AND pcls_ts.avoided_cost_version = av_ts.avoided_cost_version
+        AND pcls_ts.measure_id = av_ts.measure_id
         AND pcls_ts.avoided_cost_subset IS NOT DISTINCT FROM av_ts.avoided_cost_subset
         AND pcls_ts.year = av_ts.year
         AND pcls_ts.hour_of_year = av_ts.hour_of_year

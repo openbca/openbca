@@ -21,7 +21,9 @@ test-reference:
 	sqlmesh -p reference test
 
 run-demo:
-	sqlmesh -p reference -p demo -p core plan --auto-apply
+	sqlmesh -p reference plan --auto-apply
+	sqlmesh -p demo plan --auto-apply
+	sqlmesh -p core plan --auto-apply
 	@echo "Evaluating and writing output in output/measure_impacts.csv..."
 	@time duckdb ${DB} -c "COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/measure_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
 

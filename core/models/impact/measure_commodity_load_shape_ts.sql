@@ -13,7 +13,7 @@ SELECT
     m_ts.discount_factor,
     mc.net_energy_savings,
     mc.net_energy_savings * load_shape_normalized_fraction AS net_energy_savings_ts,
-FROM openbca_core.all_commodity_load_shape_ts cls_ts
+FROM openbca_input.load_shape_ts cls_ts
 JOIN measure.measure_commodity mc
     ON cls_ts.commodity = mc.commodity
         AND cls_ts.load_shape = mc.load_shape_mapping

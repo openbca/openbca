@@ -16,4 +16,4 @@ SELECT
     admin_cost_dollars + (incentive_cost_dollars / (1 + (discount_rate_ratio / 4.0)))
         AS pac_cost_dollars,
 FROM
-    openbca_core.measures
+    openbca_input.measures

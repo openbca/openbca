@@ -1,0 +1,40 @@
+- name: 'openbca_input.avoided_costs_ts'
+  columns:
+    commodity: STRING
+    avoided_cost_subset: STRING
+    avoided_cost_version: STRING
+    avoided_cost: STRING
+    year: INTEGER
+    quarter: INTEGER
+    month: INTEGER
+    hour_of_year: INTEGER
+    hour_of_day: INTEGER
+    av_cost_dollar_per_energy_unit: FLOAT
+- name: 'openbca_input.load_shape_ts'
+  columns:
+    commodity: STRING
+    quarter: INTEGER
+    month: INTEGER
+    hour_of_year: INTEGER
+    hour_of_day: INTEGER
+    load_shape: STRING
+    load_shape_normalized_fraction: FLOAT
+- name: 'openbca_input.measures'
+  columns:
+    measure_id: STRING
+    avoided_cost_subset: STRING
+    avoided_cost_version: STRING
+    start_year: INTEGER
+    start_quarter: INTEGER
+    discount_rate_ratio: FLOAT
+    estimated_useful_life: INTEGER
+    unit_quantity: FLOAT
+    net_to_gross_ratio: FLOAT
+    admin_cost_dollars: FLOAT
+    incentive_cost_dollars: FLOAT
+    measure_cost_dollars: FLOAT
+    elec_savings_mwh: FLOAT
+    gas_saving_therms: FLOAT
+    elec_load_shape_mapping: STRING
+    gas_load_shape_mapping: STRING
+    avoided_costs: ARRAY<STRING>

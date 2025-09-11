@@ -14,11 +14,12 @@ WITH regions AS (
 
 -- hourly value streams
 SELECT
-    utility || '_'|| region as avoided_cost_subset,
+    utility || '_'|| region AS avoided_cost_subset,
+    'full_ca_avoided_costs_2020acc' AS avoided_cost_version,
     'ELECTRICITY' AS commodity,
     year, quarter, month,
     hour_of_year, hour_of_day,
-    avoided_cost, value as av_cost_dollar_per_energy_unit -- measured in $/kWh
+    avoided_cost, value AS av_cost_dollar_per_energy_unit -- measured in $/kWh
 FROM california.elec_av_costs
 UNPIVOT (
     value FOR avoided_cost IN (
@@ -30,11 +31,12 @@ UNPIVOT (
 UNION ALL
 -- monthly value streams
 SELECT
-    utility || '_'|| r.region as avoided_cost_subset,
+    utility || '_'|| r.region AS avoided_cost_subset,
+    'full_ca_avoided_costs_2020acc' AS avoided_cost_version,
     'GAS' AS commodity,
     year, quarter, month,
     NULL AS hour_of_year, NULL AS hour_of_day,
-    avoided_cost, value as av_cost_dollar_per_energy_unit -- measured in $/therm
+    avoided_cost, value AS av_cost_dollar_per_energy_unit -- measured in $/therm
 FROM california.gas_av_costs
 UNPIVOT (
     value FOR avoided_cost IN (
