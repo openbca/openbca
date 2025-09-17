@@ -30,16 +30,16 @@ ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
         "annual_other_fuels_impact_mmbtu": "float",
         "estimated_useful_life_years": "int",
         "ntg": "float",
-        "measure_incremental_costs_per_unit_doller": "float",
-        "measure_annual_o_m_cost_per_unit_doller_per_year": "float",
-        "measure_one_time_incentive_utility_per_unit_doller_per_year": "float",
-        "measure_annual_incentive_utility_per_unit_doller_per_year": "float",
-        "administration_costs_doller_per_year": "float",
-        "measure_transaction_costs_per_unit_doller_per_year": "float",
-        "measure_interconnection_costs_per_unit_doller_per_year": "float", 
-        "measure_tax_incentives_per_unit_doller_per_year": "float",
-        "measure_non_energy_impacts_per_unit_doller_per_year": "float",
-        "measure_non_energy_impacts_low_income_per_unit_doller_per_year": "float",
+        "measure_incremental_costs_per_unit_dollar": "float",
+        "measure_annual_o_m_cost_per_unit_dollar_per_year": "float",
+        "measure_one_time_incentive_utility_per_unit_dollar_per_year": "float",
+        "measure_annual_incentive_utility_per_unit_dollar_per_year": "float",
+        "administration_costs_dollar_per_year": "float",
+        "measure_transaction_costs_per_unit_dollar_per_year": "float",
+        "measure_interconnection_costs_per_unit_dollar_per_year": "float", 
+        "measure_tax_incentives_per_unit_dollar_per_year": "float",
+        "measure_non_energy_impacts_per_unit_dollar_per_year": "float",
+        "measure_non_energy_impacts_low_income_per_unit_dollar_per_year": "float",
         "change_in_host_customer_reliability_customer_minute_outages_cmo": "float", 
         "custom_1_subsector": "string",
         "custom_2_zip_code": "string",
@@ -70,11 +70,11 @@ def clean_header(col: str) -> str:
     # Replace : and & with _
     col = col.replace(":", "_").replace("&", "_")
 
-    # Replace $/ with _doller_per_
-    col = col.replace("$/", "_doller_per_")
+    # Replace $/ with _dollar_per_
+    col = col.replace("$/", "_dollar_per_")
 
-    # Replace $ with _doller_
-    col = col.replace("$", "_doller_")
+    # Replace $ with _dollar_
+    col = col.replace("$", "_dollar_")
 
     # Collapse multiple underscores
     col = re.sub(r"__+", "_", col)
