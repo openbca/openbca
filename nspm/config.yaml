@@ -1,24 +1,10 @@
 gateways:
-  duckdb:
+  local_duckdb:
     connection:
-      # For more information on configuring the connection to your execution engine, visit:
-      # https://sqlmesh.readthedocs.io/en/stable/reference/configuration/#connections
-      # https://sqlmesh.readthedocs.io/en/stable/integrations/engines/duckdb/#connection-options
       type: duckdb
-      database: testdb2.db
-      # concurrent_tasks: 1
-      # register_comments: True
-      # pre_ping: False
-      # pretty_sql: False
-      # catalogs: 
-      # extensions: 
-      # connector_config: 
-      # secrets: 
-      # token: 
+      database: {{ env_var('DB') }}
 
-
-default_gateway: duckdb
+default_gateway: local_duckdb
 
 model_defaults:
   dialect: duckdb
-  start: 2025-08-20
