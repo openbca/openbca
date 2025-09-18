@@ -6,6 +6,7 @@ MODEL (
         avaoided_cost,
         avoided_cost_subset
         year,
+        quarter
         month,
         day,
         type_of_day,
@@ -21,6 +22,7 @@ SELECT
     CAST(avoided_cost AS STRING) AS avoided_cost,
     CAST(avoided_cost_subset AS STRING) AS avoided_cost_subset,
     CAST(year AS INT) AS year,
+    CAST(quarter AS INT) AS quarter,
     CAST(month AS INT) AS month,
     CAST(day AS INT) AS day,
     CAST(type_of_day AS STRING) AS type_of_day,

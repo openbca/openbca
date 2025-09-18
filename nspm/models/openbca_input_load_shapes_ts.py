@@ -5,7 +5,7 @@ import pandas as pd
 import os
 
 ID_COLUMNS = [
-    "commodity", "year", "month", "day", "hour_of_year"
+    "commodity", "year","quarter", "month", "day", "hour_of_year"
 ]
 
 @model(
@@ -15,6 +15,7 @@ ID_COLUMNS = [
     columns={
         "commodity": "string",
         "year": "int",
+        "quarter": "int",
         "month": "int",
         "day": "int",
         "hour_of_year": "int",
@@ -80,12 +81,12 @@ def load_timeseries_from_excel(
     combined = pd.concat(all_frames, ignore_index=True)
 
     # --- Ensure required ID columns exist ---
-    for col in ["year", "month", "day", "hour_of_year"]:
+    for col in ["year","quarter" "month", "day", "hour_of_year"]:
         if col not in combined.columns:
             combined[col] = pd.NA
 
     # --- Pivot to long format ---
-    id_cols = ["commodity", "year", "month", "day", "hour_of_year"]
+    id_cols = ["commodity", "year", "quarter","month", "day", "hour_of_year"]
     value_vars = [c for c in combined.columns if c not in id_cols]
 
     long_df = combined.melt(

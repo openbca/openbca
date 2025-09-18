@@ -5,7 +5,7 @@ import pandas as pd
 import os
 
 ID_COLUMNS = [
-    "commodity","avoided_cost","year", "month", "day", "type_of_day",
+    "commodity","avoided_cost","year", "quarter","month", "day", "type_of_day",
     "period", "hour_of_day", "hour_of_year"
 ]
 
@@ -18,6 +18,7 @@ ID_COLUMNS = [
         "avoided_cost": "string",
         "avoided_cost_subset": "string",
         "year": "int",
+        "quarter": "int",
         "month": "int",
         "day": "int",
         "type_of_day": "string",
@@ -103,7 +104,7 @@ def load_timeseries_from_excel(
 
     # ✅ Enforce required column order
     desired_order = [
-        "year", "month", "day", "type_of_day",
+        "year", "quarter","month", "day", "type_of_day",
         "period", "hour_of_day", "hour_of_year"
     ]
     for col in desired_order:
