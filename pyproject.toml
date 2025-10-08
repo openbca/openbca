@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling>=1.18.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "open-bca"
+version = "0.0.0"
+description = "Open BCA project"
+authors = [
+  { name = "Open BCA" }
+]
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "sqlmesh[web]==0.189.0",
+  "duckdb==1.2.1",
+  "pytest==8.3.5",
+  "streamlit",
+  "altair",
+  "watchdog",
+  "openpyxl",
+]
+
+[tool.uv]
+package = false
+constraint-dependencies = []

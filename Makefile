@@ -8,7 +8,7 @@ docker-build:
 DOCKER_RUN_ARGS=-e DB=${DB} -v $(shell pwd)/reference:/app/reference -v $(shell pwd)/core:/app/core -v $(shell pwd)/demo:/app/demo -v $(shell pwd)/nspm:/app/nspm -v $(shell pwd)/output:/app/output -v $(shell pwd)/app:/app/app -v $(shell pwd)/logs:/app/logs openbca
 
 install:
-	pip install -r requirements.txt
+	uv sync
 
 test-core:
 	sqlmesh -p core test
