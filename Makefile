@@ -11,17 +11,17 @@ install:
 	uv sync
 
 test-core:
-	sqlmesh -p core test
+	uv run sqlmesh -p core test
 
 run-reference:
-	sqlmesh -p reference plan --auto-apply
+	uv run sqlmesh -p reference plan --auto-apply
 
 test-reference:
 	PYTHONPATH=. pytest reference/tests
-	sqlmesh -p reference test
+	uv run sqlmesh -p reference test
 
 run-demo:
-	sqlmesh -p reference -p demo -p core plan --auto-apply
+	uv run sqlmesh -p reference -p demo -p core plan --auto-apply
 	@echo "Evaluating and writing output in output/measure_impacts.csv..."
 	@time duckdb ${DB} -c "COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/measure_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
@@ -35,10 +35,10 @@ test-demo:
 	echo "TODO: Implement test for demo"
 
 prepare-app:
-	sqlmesh -p reference -p app -p core plan --auto-apply
+	uv run sqlmesh -p reference -p app -p core plan --auto-apply
 
 run-app: prepare-app
-	streamlit run app/src/main.py
+	uv run streamlit run app/src/main.py
 
 test-app: prepare-app
 	PYTHONPATH=app/src python3 app/tests/test_app.py
@@ -59,7 +59,7 @@ docker-shell: docker-build
 	docker run -it --rm ${DOCKER_RUN_ARGS} bash
 
 generate-flow-diagram:
-	sqlmesh -p . dag output/dag.html
+	uv run sqlmesh -p . dag output/dag.html
 
 sqlmesh-ui-core:
-	sqlmesh -p core ui
+	uv run sqlmesh -p core ui
