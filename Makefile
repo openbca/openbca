@@ -46,6 +46,14 @@ test-app: prepare-app
 docker-run-app: docker-build
 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
 
+run-nspm:
+	sqlmesh -p reference -p nspm -p core plan --auto-apply
+	@echo "Evaluating and writing output in output/nspm_measure_impacts.csv..."
+	@time duckdb ${DB} -c "COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/nspm_measure_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
+
+test-nspm:
+	PYTHONPATH=. pytest nspm/tests
+
 test: test-reference test-core test-demo test-app
 
 docker-test: docker-build
