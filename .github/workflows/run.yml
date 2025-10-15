@@ -27,4 +27,5 @@ jobs:
       - id: run
         name: Run openbca in SQLMesh locally
         run: |
+          make make docker-run-nspm
           make docker-run-demo DUCKDB_ARCH=amd64

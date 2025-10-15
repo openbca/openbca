@@ -1,7 +1,6 @@
 MODEL(
     name measure.measure_commodity,
     kind VIEW,
-    grain (measure_id, commodity),
 );
 SELECT
     measure_id,

@@ -51,6 +51,9 @@ run-nspm:
 	@echo "Evaluating and writing output in output/nspm_measure_impacts.csv..."
 	@time duckdb ${DB} -c "COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/nspm_measure_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
 
+docker-run-nspm: docker-build
+	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make run-nspm"
+
 test-nspm:
 	PYTHONPATH=. pytest nspm/tests
 

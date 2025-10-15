@@ -17,8 +17,8 @@ MODEL (
 SELECT
     CAST(commodity AS STRING) AS commodity,
     CAST(year AS INT) AS year,
-    CAST(quarter AS INT) AS quarter,
-    CAST(month AS INT) AS month,
+    NULL AS quarter,
+    NULL AS month,
     CAST(day AS INT) AS hour_of_day,
     CAST(hour_of_year AS INT) AS hour_of_year,
     CAST(load_shape AS STRING) AS load_shape,

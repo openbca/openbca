@@ -15,8 +15,6 @@ ID_COLUMNS = [
     columns={
         "commodity": "string",
         "year": "int",
-        "quarter": "int",
-        "month": "int",
         "day": "int",
         "hour_of_year": "int",
         "load_shape": "string",
@@ -86,7 +84,7 @@ def load_timeseries_from_excel(
             combined[col] = pd.NA
 
     # --- Pivot to long format ---
-    id_cols = ["commodity", "year", "quarter","month", "day", "hour_of_year"]
+    id_cols = ["commodity", "year", "day", "hour_of_year"]
     value_vars = [c for c in combined.columns if c not in id_cols]
 
     long_df = combined.melt(
