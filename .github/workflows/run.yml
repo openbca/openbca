@@ -31,4 +31,4 @@ jobs:
       - id: test-app
         name: Test Streamlit App
         run: |
-          make test-app
+          make docker-test-app

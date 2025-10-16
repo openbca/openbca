@@ -28,6 +28,9 @@ run-app: prepare-app
 test-app: prepare-app
 	PYTHONPATH=app/src python3 app/tests/test_app.py
 
+docker-test-app: docker-build
+	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make test-app"
+
 docker-run-app: docker-build
 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
 
