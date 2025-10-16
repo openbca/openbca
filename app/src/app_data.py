@@ -54,27 +54,72 @@ def get_gas_impacts_by_avoided_cost_ts(measure_id: str, gas_costs: list[str]):
     """).fetch_df()
 
 def get_measure_impacts(measure_id: str):
-    query = f"""
-        SELECT
-            {MEASURE_IMPACT_ELECTRIC_BENEFITS},
-            {MEASURE_IMPACT_GAS_BENEFITS},
-            {MEASURE_IMPACT_TOTAL_BENEFITS},
-            {MEASURE_IMPACT_TRC_RATIO},
-            {MEASURE_IMPACT_PAC_RATIO},
-            {MEASURE_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS},
-            {MEASURE_IMPACT_NET_GAS_ENERGY_SAVINGS},
-            {MEASURE_IMPACT_TOTAL_BENEFITS_PER_MWH},                           
-            {MEASURE_IMPACT_TOTAL_BENEFITS_PER_THERM},
-            {MEASURE_IMPACT_TOTAL_GHG_BENEFITS},
-            {MEASURE_IMPACT_ELECTRIC_GHG_BENEFITS},
-            {MEASURE_IMPACT_GAS_GHG_BENEFITS}
+    conn = get_connection()
+
+    # Totals and ratios from core
+    totals = conn.execute(f"""
+        SELECT total_benefits, trc_ratio, pac_ratio, total_ghg_benefits
         FROM openbca_core.measure_impacts
         WHERE measure_id = '{measure_id}'
-    """
-    print(query)
-    res = get_connection().execute(query, ).fetch_df()
+    """).fetch_df()
+    if totals.empty:
+        # default zeros if no record
+        totals_row = {
+            'total_benefits': 0.0,
+            'trc_ratio': 0.0,
+            'pac_ratio': 0.0,
+            'total_ghg_benefits': 0.0,
+        }
+    else:
+        totals_row = totals.iloc[0].to_dict()
 
-    return res.iloc[0].to_dict()
+    # Economic breakdown by commodity
+    econ = conn.execute(f"""
+        SELECT commodity, SUM(impact_dollars) AS benefits, SUM(net_energy_savings) AS net_savings
+        FROM openbca_core.measure_commodity_economic_impacts
+        WHERE measure_id = '{measure_id}'
+        GROUP BY commodity
+    """).fetch_df()
+    econ_dict = {row['commodity']: {'benefits': row['benefits'], 'net_savings': row['net_savings']} for _, row in econ.iterrows()}
+
+    # Environmental breakdown by commodity
+    env = conn.execute(f"""
+        SELECT commodity, SUM(impact_tons_co2e) AS ghg
+        FROM openbca_core.measure_commodity_environmental_impacts
+        WHERE measure_id = '{measure_id}'
+        GROUP BY commodity
+    """).fetch_df()
+    env_dict = {row['commodity']: row['ghg'] for _, row in env.iterrows()}
+
+    # Pull values with safe defaults
+    elec_benefits = float(econ_dict.get('ELECTRICITY', {}).get('benefits', 0.0))
+    gas_benefits = float(econ_dict.get('GAS', {}).get('benefits', 0.0))
+    elec_net = float(econ_dict.get('ELECTRICITY', {}).get('net_savings', 0.0))
+    gas_net = float(econ_dict.get('GAS', {}).get('net_savings', 0.0))
+
+    elec_ghg = float(env_dict.get('ELECTRICITY', 0.0))
+    gas_ghg = float(env_dict.get('GAS', 0.0))
+
+    def safe_div(a: float, b: float) -> float:
+        return (a / b) if b not in (0, 0.0, None) else 0.0
+
+    # Assemble the expected response dict for the app UI without changing the UI
+    result = {
+        MEASURE_IMPACT_ELECTRIC_BENEFITS: elec_benefits,
+        MEASURE_IMPACT_GAS_BENEFITS: gas_benefits,
+        MEASURE_IMPACT_TOTAL_BENEFITS: float(totals_row['total_benefits']),
+        MEASURE_IMPACT_TRC_RATIO: float(totals_row['trc_ratio']),
+        MEASURE_IMPACT_PAC_RATIO: float(totals_row['pac_ratio']),
+        MEASURE_IMPACT_NET_ELECTRIC_ENERGY_SAVINGS: elec_net,
+        MEASURE_IMPACT_NET_GAS_ENERGY_SAVINGS: gas_net,
+        MEASURE_IMPACT_TOTAL_BENEFITS_PER_MWH: safe_div(elec_benefits, elec_net),
+        MEASURE_IMPACT_TOTAL_BENEFITS_PER_THERM: safe_div(gas_benefits, gas_net),
+        MEASURE_IMPACT_TOTAL_GHG_BENEFITS: float(totals_row['total_ghg_benefits']),
+        MEASURE_IMPACT_ELECTRIC_GHG_BENEFITS: elec_ghg,
+        MEASURE_IMPACT_GAS_GHG_BENEFITS: gas_ghg,
+    }
+
+    return result
 
 def update_measure(measure_id: str, **kwargs):
     """
