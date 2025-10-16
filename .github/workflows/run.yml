@@ -24,11 +24,11 @@ jobs:
         name: Build openbca Docker image
         run: |
           make docker-build
-      - id: run NSPM
+      - id: run-nspm
         name: Run openbca in SQLMesh locally
         run: |
           make docker-run-nspm
-      - id: run
+      - id: test-app
         name: Test Streamlit App
         run: |
           make test-app
