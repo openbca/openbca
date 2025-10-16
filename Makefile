@@ -1,9 +1,8 @@
 DB?=output/openbca.db
 export DB
 
-DUCKDB_ARCH?=aarch64
 docker-build:
-	docker build --build-arg DUCKDB_ARCH=${DUCKDB_ARCH} -t openbca -f Dockerfile .
+	docker build -t openbca -f Dockerfile .
 
 DOCKER_RUN_ARGS=-e DB=${DB} -v $(shell pwd)/reference:/app/reference -v $(shell pwd)/core:/app/core -v $(shell pwd)/demo:/app/demo -v $(shell pwd)/nspm:/app/nspm -v $(shell pwd)/output:/app/output -v $(shell pwd)/app:/app/app -v $(shell pwd)/logs:/app/logs openbca
 
@@ -23,7 +22,7 @@ test-reference:
 run-demo:
 	uv run sqlmesh -p reference -p demo -p core plan --auto-apply
 	@echo "Evaluating and writing output in output/measure_impacts.csv..."
-	@time duckdb ${DB} -c "COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/measure_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
+	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/measure_impacts.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
 docker-run-demo: docker-build
 	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make run-demo"
@@ -49,7 +48,7 @@ docker-run-app: docker-build
 run-nspm:
 	sqlmesh -p reference -p nspm -p core plan --auto-apply
 	@echo "Evaluating and writing output in output/nspm_measure_impacts.csv..."
-	@time duckdb ${DB} -c "COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/nspm_measure_impacts.csv' WITH (FORMAT CSV, HEADER TRUE);"
+	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/nspm_measure_impacts.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
 docker-run-nspm: docker-build
 	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make run-nspm"
