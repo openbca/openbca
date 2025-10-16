@@ -3,19 +3,12 @@ MODEL(
     kind VIEW,
 );
 SELECT
-    measure_id,
-    'ELECTRICITY' as commodity,
-    avoided_cost_subset,
-    upper(elec_load_shape_mapping) as load_shape_mapping,
-    elec_savings_mwh as energy_savings,
-    unit_quantity * net_to_gross_ratio * elec_savings_mwh as net_energy_savings,
-FROM openbca_core.measures
-UNION ALL
-SELECT
-    measure_id,
-    'GAS' as commodity,
-    avoided_cost_subset,
-    upper(gas_load_shape_mapping) as load_shape_mapping,
-    gas_saving_therms as energy_savings,
-    unit_quantity * net_to_gross_ratio * gas_saving_therms as net_energy_savings,
-FROM openbca_core.measures
+    m.measure_id,
+    CAST(commodity AS VARCHAR) AS commodity,
+    m.avoided_cost_subset,
+    load_shape_mapping_by_commodity[commodity] as load_shape_mapping,
+    energy_savings_by_commodity[commodity] as energy_savings,
+    m.unit_quantity * m.net_to_gross_ratio * energy_savings as net_energy_savings,
+FROM openbca_core.measures m
+CROSS JOIN UNNEST(map_keys(m.energy_savings_by_commodity)) AS commodity
+
