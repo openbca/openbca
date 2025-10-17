@@ -7,7 +7,6 @@ WITH
 economic_impacts AS (
     SELECT
         measure_id,
-        SUM(net_energy_savings) AS total_net_energy_savings,
         SUM(impact_dollars) AS total_benefits
     FROM openbca_core.measure_commodity_economic_impacts
     GROUP BY measure_id
@@ -21,7 +20,6 @@ environmental_impacts AS (
 )
 SELECT
     pc.measure_id,
-    eco.total_net_energy_savings,
     env.total_ghg_benefits,
     eco.total_benefits,
     SAFE_DIVIDE(eco.total_benefits, trc_cost_dollars)  as trc_ratio,

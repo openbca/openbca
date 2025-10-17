@@ -5,7 +5,7 @@ MODEL(
 );
 SELECT
     vsb_ts.*,
-    net_energy_savings / pc.estimated_useful_life as annual_net_elec_savings_mwh
+    net_energy_savings / pc.estimated_useful_life as annual_net_energy_savings
 FROM (
     SELECT
         measure_id, commodity, avoided_cost,
