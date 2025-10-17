@@ -37,8 +37,6 @@ SELECT
         when hour_of_year between 8016 and 8750 then 12
         end
     )::INTEGER AS month,
-    --COALESCE(quarter, FLOOR((hour_of_year - 1) / (8760 / 4)) + 1)::INTEGER AS quarter, -- TODO quarter/month calculation is approximate
-    --COALESCE(month, FLOOR((hour_of_year - 1) / (8760 / 12)) + 1)::INTEGER AS month,
     COALESCE(hour_of_day, (hour_of_year - 1) % 24)::INTEGER AS hour_of_day,
     hour_of_year::INTEGER AS hour_of_year,
     upper(load_shape::VARCHAR) AS load_shape,
