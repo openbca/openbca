@@ -16,9 +16,7 @@ SELECT
     admin_cost_dollars::FLOAT AS admin_cost_dollars,
     incentive_cost_dollars::FLOAT AS incentive_cost_dollars,
     measure_cost_dollars::FLOAT AS measure_cost_dollars,
-    elec_savings_mwh::FLOAT AS elec_savings_mwh,
-    gas_saving_therms::FLOAT AS gas_saving_therms,
-    elec_load_shape_mapping::VARCHAR AS elec_load_shape_mapping,
-    gas_load_shape_mapping::VARCHAR AS gas_load_shape_mapping,
+    energy_savings_by_commodity::MAP<VARCHAR, FLOAT> AS energy_savings_by_commodity,
+    load_shape_mapping_by_commodity::MAP<VARCHAR, VARCHAR> AS load_shape_mapping_by_commodity,
     avoided_costs::ARRAY<VARCHAR> AS avoided_costs
 FROM openbca_input.measures

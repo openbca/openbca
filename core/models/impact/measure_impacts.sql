@@ -4,36 +4,28 @@ MODEL(
     grain (measure_id),
 );
 WITH
-pivoted_economic_impacts(
+economic_impacts AS (
     SELECT
         measure_id,
-        SUM(CASE WHEN commodity = 'ELECTRICITY' THEN net_energy_savings END) AS net_electric_energy_savings,
-        SUM(CASE WHEN commodity = 'GAS' THEN net_energy_savings END) AS net_gas_energy_savings,
-        SUM(IF(commodity = 'ELECTRICITY', impact_dollars)) AS electric_benefits,
-        SUM(IF(commodity = 'GAS', impact_dollars)) AS gas_benefits,
+        SUM(impact_dollars) AS total_benefits
     FROM openbca_core.measure_commodity_economic_impacts
-    GROUP BY ALL
+    GROUP BY measure_id
 ),
-pivoted_environmental_impacts(
+environmental_impacts AS (
     SELECT
         measure_id,
-        SUM(IF(commodity = 'ELECTRICITY', impact_tons_co2e)) AS electric_ghg_savings,
-        SUM(IF(commodity = 'GAS', impact_tons_co2e)) AS gas_ghg_savings,
+        SUM(impact_tons_co2e) AS total_ghg_benefits
     FROM openbca_core.measure_commodity_environmental_impacts
-    GROUP BY ALL
+    GROUP BY measure_id
 )
 SELECT
     pc.measure_id,
-    eco.* EXCLUDE (measure_id),
-    env.* EXCLUDE (measure_id),
-    (COALESCE(electric_ghg_savings, 0) + COALESCE(gas_ghg_savings, 0)) as total_ghg_benefits,
-    (COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0)) as total_benefits,
-    SAFE_DIVIDE(COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0), trc_cost_dollars)  as trc_ratio,
-    SAFE_DIVIDE(COALESCE(electric_benefits, 0) + COALESCE(gas_benefits, 0), pac_cost_dollars) as pac_ratio,
-    SAFE_DIVIDE(electric_benefits, net_electric_energy_savings) AS total_benefits_per_mwh,
-    SAFE_DIVIDE(gas_benefits, net_gas_energy_savings) AS total_benefits_per_therm,
+    env.total_ghg_benefits,
+    eco.total_benefits,
+    SAFE_DIVIDE(eco.total_benefits, trc_cost_dollars)  as trc_ratio,
+    SAFE_DIVIDE(eco.total_benefits, pac_cost_dollars) as pac_ratio
 FROM measure.measure_costs pc
-LEFT JOIN pivoted_economic_impacts eco
+LEFT JOIN economic_impacts eco
     ON pc.measure_id = eco.measure_id
-LEFT JOIN pivoted_environmental_impacts env
+LEFT JOIN environmental_impacts env
     ON pc.measure_id = env.measure_id

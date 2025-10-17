@@ -25,7 +25,21 @@ CREATE TABLE openbca_app.measures (
     avoided_costs STRING
 );
 
+-- Expose app input in the shape expected by core: include per-commodity maps and avoided_costs as array
 SELECT
-    * EXCEPT avoided_costs,
+    measure_id,
+    avoided_cost_subset,
+    start_year,
+    start_quarter,
+    discount_rate_ratio,
+    estimated_useful_life,
+    unit_quantity,
+    net_to_gross_ratio,
+    admin_cost_dollars,
+    incentive_cost_dollars,
+    measure_cost_dollars,
+    -- Build maps keyed by commodity so core can look up the right commodity
+    map(['ELECTRICITY', 'GAS'], [elec_savings_mwh, gas_saving_therms]) AS energy_savings_by_commodity,
+    map(['ELECTRICITY', 'GAS'], [elec_load_shape_mapping, gas_load_shape_mapping]) AS load_shape_mapping_by_commodity,
     SPLIT(avoided_costs, ',') AS avoided_costs
 FROM openbca_app.measures

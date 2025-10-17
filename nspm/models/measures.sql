@@ -1,43 +1,6 @@
 MODEL (
     name openbca_input.measures,
     kind FULL,
-    grain(
-        unique_row_id,
-        measure_id, 
-        project_id, 
-        program_name, 
-        measure_include, 
-        version, 
-        subset, 
-        start_year, 
-        start_quarter, 
-        measure_name, 
-        measure_unit, 
-        unit_quantity, 
-        loadshape_mapping, 
-        annual_kwh_impact, 
-        peak_kw_impact, 
-        annual_ng_impact_mmbtu, 
-        annual_other_fuels_impact_mmbtu, 
-        estimated_useful_life_years, 
-        ntg, 
-        measure_incremental_costs_per_unit_dollar, 
-        measure_annual_o_m_cost_per_unit_dollar_per_year, 
-        measure_one_time_incentive_utility_per_unit_dollar_per_year, 
-        measure_annual_incentive_utility_per_unit_dollar_per_year, 
-        administration_costs_dollar_per_year, 
-        measure_transaction_costs_per_unit_dollar_per_year, 
-        measure_interconnection_costs_per_unit_dollar_per_year, 
-        measure_tax_incentives_per_unit_dollar_per_year, 
-        measure_non_energy_impacts_per_unit_dollar_per_year, 
-        measure_non_energy_impacts_low_income_per_unit_dollar_per_year, 
-        change_in_host_customer_reliability_customer_minute_outages_cmo, 
-        custom_1_subsector, 
-        custom_2_zip_code, 
-        custom_3, 
-        custom_4, 
-        custom_5
-    )
 );
 
 SELECT
@@ -53,7 +16,6 @@ SELECT
     CAST(measure_name AS STRING) AS measure_name,
     CAST(measure_unit AS STRING) AS measure_unit,
     CAST(unit_quantity AS FLOAT) AS unit_quantity,
-    CAST(loadshape_mapping AS STRING) AS elec_load_shape_mapping,
     CAST(peak_kw_impact AS FLOAT) AS peak_kw_impact,
     CAST(annual_other_fuels_impact_mmbtu AS FLOAT) AS annual_other_fuels_impact_mmbtu,
     CAST(estimated_useful_life_years AS INT) AS estimated_useful_life_years,
@@ -81,8 +43,13 @@ SELECT
     0 AS admin_cost_dollars, -- FIXME
     0 AS incentive_cost_dollars, -- FIXME
     0 AS measure_cost_dollars, -- FIXME
-    - annual_kwh_impact / 1000.0 AS elec_savings_mwh,
-    - annual_ng_impact_mmbtu * 10.0 AS gas_saving_therms,
-    NULL AS gas_load_shape_mapping, -- FIXME
+    MAP {
+        'ELECTRICITY': - annual_kwh_impact / 1000.0,
+        'GAS': - annual_ng_impact_mmbtu * 10.0
+    } AS energy_savings_by_commodity,
+    MAP {
+        'ELECTRICITY': CAST(loadshape_mapping AS STRING),
+        'GAS': NULL -- FIXME
+    } AS load_shape_mapping_by_commodity,
     NULL AS avoided_costs, -- FIXME
 FROM nspm.openbca_input_measures
