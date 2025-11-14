@@ -35,8 +35,7 @@ docker-run-app: docker-build
 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
 
 run-nspm:
-	uv run sqlmesh -p nspm -p core plan --run --auto-apply
-	uv run sqlmesh -p nspm plan --restate-model "nspm.*" --auto-apply
+	uv run sqlmesh -p nspm -p core plan --auto-apply --run --ignore-cron
 	@echo "Evaluating and writing output in output/nspm_measure_impacts.csv..."
 	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/nspm_measure_impacts.csv' (HEADER, DELIMITER ',');\"); con.close()"
 

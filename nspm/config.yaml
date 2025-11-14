@@ -8,3 +8,4 @@ default_gateway: local_duckdb
 
 model_defaults:
   dialect: duckdb
+  allow_partials: true # We only have FULL models, this forces SQLMesh to refresh the full model when uses with --ignore-cron
