@@ -11,41 +11,52 @@ ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
     kind="FULL",
     grain=ID_COLUMNS,
     columns={
-        "unique_row_id": "int",  
+        "unique_row_id": "string",
         "measure_id": "string",
         "project_id": "string",
         "program_name": "string",
         "measure_include": "string",
         "version": "string",
-        "subset": "string",
+        "avoided_cost_subset": "string",
         "start_year": "int",
-        "start_quarter": "string",
+        "start_quarter": "int",
+        "discount_rate": "float", 
         "measure_name": "string",
         "measure_unit": "string",
         "unit_quantity": "float",
-        "loadshape_mapping": "string",
+        "electric_load_shape": "string",
         "annual_kwh_impact": "float",
-        "peak_kw_impact": "float",
-        "annual_ng_impact_mmbtu": "float",
-        "annual_other_fuels_impact_mmbtu": "float",
+        "coincident_peak_kw_impact": "float",
+        "natural_gas_load_shape": "string",
+        "annual_natural_gas_impact_mmbtu": "float",
+        "annual_other_fuel_propane_mmbtu": "float",
+        "annual_other_fuel_heating_oil_mmbtu": "float",
+        "annual_other_fuel_diesel_mmbtu": "float",
         "estimated_useful_life_years": "int",
         "ntg": "float",
-        "measure_incremental_costs_per_unit_dollar": "float",
-        "measure_annual_o_m_cost_per_unit_dollar_per_year": "float",
-        "measure_one_time_incentive_utility_per_unit_dollar_per_year": "float",
-        "measure_annual_incentive_utility_per_unit_dollar_per_year": "float",
-        "administration_costs_dollar_per_year": "float",
-        "measure_transaction_costs_per_unit_dollar_per_year": "float",
-        "measure_interconnection_costs_per_unit_dollar_per_year": "float", 
-        "measure_tax_incentives_per_unit_dollar_per_year": "float",
-        "measure_non_energy_impacts_per_unit_dollar_per_year": "float",
-        "measure_non_energy_impacts_low_income_per_unit_dollar_per_year": "float",
-        "change_in_host_customer_reliability_customer_minute_outages_cmo": "float", 
-        "custom_1_subsector": "string",
-        "custom_2_zip_code": "string",
-        "custom_3": "string",
-        "custom_4": "string", 
-        "custom_5": "string",
+        "incremental_costs_upfront_per_unit_dollar": "float",
+        "annual_o_m_cost_per_unit_dollar_per_year": "float",
+        "utility_upfront_incentive_per_unit_dollar": "float",
+        "utility_annual_incentive_per_unit_dollar_per_year": "float",
+        "administration_costs_per_unit_dollar": "float",
+        "host_customer_transaction_costs_per_unit_dollar": "float",
+        "host_customer_interconnection_costs_per_unit_dollar": "float",
+        "host_customer_tax_incentives_per_unit_dollar": "float",
+        "host_customer_non_energy_impacts_per_unit_dollar": "float",
+        "host_customer_non_energy_impacts_low_income_per_unit_dollar": "float",
+        "change_in_host_customer_reliability_per_unit": "float",
+        "change_in_host_customer_resilience_per_unit": "float",
+        "change_in_societal_resilience_per_unit": "float",
+        "custom_v1": "string",
+        "custom_v2": "string", 
+        "custom_v3": "string",
+        "custom_v4": "string",
+        "custom_v5": "string",
+        "label_1": "string",    
+        "label_2": "string",
+        "label_3": "string",
+        "label_4": "string",
+        "label_5": "string",
     },
 )
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
@@ -56,7 +67,7 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
 
 
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file
-DATA_DIR = os.path.join(BASE_DIR, "..", "Input")  # adjust if needed
+DATA_DIR = os.path.join(BASE_DIR, "..", "input_templates")  # adjust if needed
 
 def clean_header(col: str) -> str:
     col = str(col).strip().lower()
@@ -99,4 +110,11 @@ def load_measure_inputs_from_excel(
     # Apply header cleaning
     df.columns = [clean_header(c) for c in df.columns]
 
+    for col in df.columns:
+        print(col)
+
+    print('\n\n')
+    print(df.head(3))
+
     return df
+ 

@@ -3,29 +3,52 @@ MODEL(
     kind VIEW,
     grain (measure_id),
 );
-WITH
-economic_impacts AS (
-    SELECT
-        measure_id,
-        SUM(impact_dollars) AS total_benefits
-    FROM openbca_core.measure_commodity_economic_impacts
-    GROUP BY measure_id
-),
-environmental_impacts AS (
-    SELECT
-        measure_id,
-        SUM(impact_tons_co2e) AS total_ghg_benefits
-    FROM openbca_core.measure_commodity_environmental_impacts
-    GROUP BY measure_id
-)
+
 SELECT
-    pc.measure_id,
-    env.total_ghg_benefits,
-    eco.total_benefits,
-    SAFE_DIVIDE(eco.total_benefits, trc_cost_dollars)  as trc_ratio,
-    SAFE_DIVIDE(eco.total_benefits, pac_cost_dollars) as pac_ratio
-FROM measure.measure_costs pc
-LEFT JOIN economic_impacts eco
-    ON pc.measure_id = eco.measure_id
-LEFT JOIN environmental_impacts env
-    ON pc.measure_id = env.measure_id
+    unique_row_id::VARCHAR AS unique_row_id,
+    measure_id::VARCHAR AS measure_id,
+    project_id::VARCHAR AS project_id,
+    program_name::VARCHAR AS program_name,
+    measure_include::VARCHAR AS measure_include,
+    version::VARCHAR AS version,
+    avoided_cost_subset::VARCHAR AS avoided_cost_subset,
+    start_year::INT AS start_year,
+    start_quarter::INT AS start_quarter,
+    discount_rate::FLOAT AS discount_rate, 
+    measure_name::VARCHAR AS measure_name,
+    measure_unit::VARCHAR AS measure_unit,
+    unit_quantity::FLOAT AS unit_quantity,
+    electric_load_shape::VARCHAR AS electric_load_shape,
+    annual_kwh_savings::FLOAT AS annual_kwh_savings,
+    coincident_peak_kw_impact::FLOAT AS coincident_peak_kw_impact,
+    natural_gas_load_shape::VARCHAR AS natural_gas_load_shape,
+    annual_natural_gas_mmbtu_savings::FLOAT AS annual_natural_gas_mmbtu_savings,
+    annual_propane_mmbtu_savings::FLOAT AS annual_propane_mmbtu_savings,
+    annual_heating_oil_mmbtu_savings::FLOAT AS annual_heating_oil_mmbtu_savings,
+    annual_diesel_mmbtu_savings::FLOAT AS annual_diesel_mmbtu_savings,
+    estimated_useful_life::INT AS estimated_useful_life,
+    ntg::FLOAT AS ntg,
+    incremental_costs_upfront_per_unit_dollar::FLOAT AS incremental_costs_upfront_per_unit_dollar,
+    annual_o_m_cost_per_unit_dollar_per_year::FLOAT AS annual_o_m_cost_per_unit_dollar_per_year,
+    utility_upfront_incentive_per_unit_dollar::FLOAT AS utility_upfront_incentive_per_unit_dollar,
+    utility_annual_incentive_per_unit_dollar_per_year::FLOAT AS utility_annual_incentive_per_unit_dollar_per_year,
+    administration_costs_per_unit_dollar::FLOAT AS administration_costs_per_unit_dollar,
+    host_customer_transaction_costs_per_unit_dollar::FLOAT AS host_customer_transaction_costs_per_unit_dollar,
+    host_customer_interconnection_costs_per_unit_dollar::FLOAT AS host_customer_interconnection_costs_per_unit_dollar,
+    host_customer_tax_incentives_per_unit_dollar::FLOAT AS host_customer_tax_incentives_per_unit_dollar,
+    host_customer_non_energy_impacts_per_unit_dollar::FLOAT AS host_customer_non_energy_impacts_per_unit_dollar,
+    host_customer_non_energy_impacts_low_income_per_unit_dollar::FLOAT AS host_customer_non_energy_impacts_low_income_per_unit_dollar,
+    change_in_host_customer_reliability_per_unit::FLOAT AS change_in_host_customer_reliability_per_unit,
+    change_in_host_customer_resilience_per_unit::FLOAT AS change_in_host_customer_resilience_per_unit,
+    change_in_societal_resilience_per_unit::FLOAT AS change_in_societal_resilience_per_unit,
+    custom_v1::VARCHAR AS custom_v1,
+    custom_v2::VARCHAR AS custom_v2, 
+    custom_v3::VARCHAR AS custom_v3,
+    custom_v4::VARCHAR AS custom_v4,
+    custom_v5::VARCHAR AS custom_v5,
+    label_1::VARCHAR AS label_1,    
+    label_2::VARCHAR AS label_2,
+    label_3::VARCHAR AS label_3,
+    label_4::VARCHAR AS label_4,
+    label_5::VARCHAR AS label_5,
+FROM openbca_core.measures

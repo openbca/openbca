@@ -34,10 +34,10 @@ SELECT
         when hour_of_year between 5832 and 6551 then 9
         when hour_of_year between 6552 and 7295 then 10
         when hour_of_year between 7296 and 8015 then 11
-        when hour_of_year between 8016 and 8750 then 12
+        when hour_of_year between 8016 and 8759 then 12
         end
     )::INTEGER AS month,
-    COALESCE(hour_of_day, (hour_of_year - 1) % 24)::INTEGER AS hour_of_day,
+    COALESCE(hour_of_day, (hour_of_year) % 24)::INTEGER AS hour_of_day,
     hour_of_year::INTEGER AS hour_of_year,
     upper(load_shape::VARCHAR) AS load_shape,
     load_shape_normalized_fraction::FLOAT AS load_shape_normalized_fraction

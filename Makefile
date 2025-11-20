@@ -39,6 +39,10 @@ run-nspm:
 	@echo "Evaluating and writing output in output/nspm_measure_impacts.csv..."
 	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca_core.measure_impacts) TO 'output/nspm_measure_impacts.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
+test-parsing:
+	@echo "\nTesting parsing of Excel input templates."
+	cd nspm && PYTHONPATH=.. uv run python test_parsing.py
+
 docker-run-nspm: docker-build
 	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make run-nspm"
 

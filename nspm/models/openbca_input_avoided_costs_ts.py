@@ -1,11 +1,12 @@
 from typing import Any
-from pandas import DataFrame
+#from pandas import DataFrame
 from sqlmesh import model, ExecutionContext
 import pandas as pd
+#from tabulate import tabulate
 import os
 
 ID_COLUMNS = [
-    "commodity","avoided_cost","year", "quarter","month", "day", "type_of_day",
+    "avoided_cost", "year", "quarter", "month", "day", "type_of_day",
     "period", "hour_of_day", "hour_of_year"
 ]
 
@@ -14,7 +15,7 @@ ID_COLUMNS = [
     kind="FULL",
     grain=ID_COLUMNS,
     columns={
-        "commodity": "string",
+        #"commodity": "string",
         "avoided_cost": "string",
         "avoided_cost_subset": "string",
         "year": "int",
@@ -28,27 +29,28 @@ ID_COLUMNS = [
         "value": "float",
     },
 )
+
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
-    return load_timeseries_from_excel(
+    return load_avoided_costs_from_excel(
         input_file="OpenBCA Code CONFIG File - with Data.xlsm",
-        skip_sheets={"Front Page", "Common Data", "Validations", "Configuration Data", "Dictionary"},
-        skiprows=2
+        skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary"},
+        skiprows=3
     )
 
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file
-DATA_DIR = os.path.join(BASE_DIR, "..", "Input")  # adjust if needed
+DATA_DIR = os.path.join(BASE_DIR, "..", "input_templates")  # adjust if needed
 
-def load_timeseries_from_excel(
+def load_avoided_costs_from_excel(
     input_file: str,
     skip_sheets: set,
     skiprows: int = 2
-) -> DataFrame:
+) -> pd.DataFrame:
     """
-    Load and consolidate timeseries data from an Excel workbook,
-    enforce schema, and pivot to long format.
+    Load and consolidate timeseries data from an Excel workbook, enforce schema, and pivot to long format.
     """
     file_path = os.path.join(DATA_DIR, input_file)
     xls = pd.ExcelFile(file_path)
+
     all_frames = []
     unified_cols = []  # global column order (excluding metadata)
 
@@ -58,8 +60,10 @@ def load_timeseries_from_excel(
 
         # --- Find "Calculation Type" from row 2 ---
         row2 = pd.read_excel(xls, sheet_name=sheet, header=None, nrows=2).iloc[1]  # row index 1 = Excel row 2
+
         avoided_cost = None
         for cell in row2.dropna().astype(str):
+
             if "calculation type" in cell.lower():
                 # take everything after "Calculation Type:"
                 parts = cell.split(":", 1)
@@ -83,10 +87,7 @@ def load_timeseries_from_excel(
 
         df.columns = cleaned_headers
         df = df[1:]
-
-        # Add metadata columns
-        df["commodity"] = sheet
-        df["avoided_cost"] = avoided_cost
+        df["avoided_cost"] = sheet
 
         # Update global order
         for col in df.columns:
@@ -104,16 +105,16 @@ def load_timeseries_from_excel(
 
     # ✅ Enforce required column order
     desired_order = [
-        "year", "quarter","month", "day", "type_of_day",
+        "year", "quarter", "month", "day", "type_of_day",
         "period", "hour_of_day", "hour_of_year"
     ]
     for col in desired_order:
         if col not in combined.columns:
             combined[col] = pd.NA
 
-    # Final order = desired + other inputs + commodity + avoided_cost
-    other_cols = [c for c in combined.columns if c not in desired_order and c not in ["commodity", "avoided_cost"]]
-    final_order = ["commodity", "avoided_cost"]+desired_order + other_cols 
+    # Final order = desired + other inputs + avoided_cost
+    other_cols = [c for c in combined.columns if c not in desired_order and c not in ["avoided_cost"]]
+    final_order = ["avoided_cost"] + desired_order + other_cols 
     combined = combined.reindex(columns=final_order)
 
     # ✅ Pivot to long format
@@ -125,6 +126,6 @@ def load_timeseries_from_excel(
     )
 
     # Trim "Input" text if present
-    df_long["avoided_cost_subset"] = df_long["avoided_cost_subset"].str.replace("Inputs", "", regex=False)
+    df_long["avoided_cost_subset"] = df_long["avoided_cost_subset"].str.replace(" Inputs", "", regex=False)
 
     return df_long

@@ -1,11 +1,10 @@
 MODEL(
     name openbca_core.all_avoided_costs_ts,
     kind VIEW,
-    grain (commodity, avoided_cost_subset, avoided_cost, year, hour_of_year),
+    grain (avoided_cost, avoided_cost_subset, year, hour_of_year),
 );
 
 SELECT
-    commodity::VARCHAR AS commodity,
     avoided_cost_subset::VARCHAR AS avoided_cost_subset,
     year::INTEGER AS year,
     quarter::INTEGER AS quarter,

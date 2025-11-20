@@ -2,7 +2,7 @@ MODEL (
     name openbca_input.avoided_costs_ts,
     kind FULL,
     grain (
-        commodity,
+        --commodity,
         avaoided_cost,
         avoided_cost_subset
         year,
@@ -18,7 +18,7 @@ MODEL (
 );
 
 SELECT
-    CAST(commodity AS STRING) AS commodity,
+    --CAST(commodity AS STRING) AS commodity,
     CAST(avoided_cost AS STRING) AS avoided_cost,
     CAST(avoided_cost_subset AS STRING) AS avoided_cost_subset,
     CAST(year AS INT) AS year,
