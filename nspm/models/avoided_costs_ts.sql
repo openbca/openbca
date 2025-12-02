@@ -24,10 +24,10 @@ SELECT
     CAST(year AS INT) AS year,
     CAST(quarter AS INT) AS quarter,
     CAST(month AS INT) AS month,
-    CAST(day AS INT) AS day,
+    CAST(day_of_year AS INT) AS day_of_year,
     CAST(type_of_day AS STRING) AS type_of_day,
     CAST(period AS STRING) AS period,
     CAST(hour_of_day AS INT) AS hour_of_day,
     CAST(hour_of_year AS INT) AS hour_of_year,
-    CAST(value AS FLOAT) AS av_cost_dollar_per_energy_unit
+    CAST(avoided_cost_value AS FLOAT) AS avoided_cost_value
 FROM nspm.openbca_input_avoided_costs_ts

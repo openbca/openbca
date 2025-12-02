@@ -22,8 +22,9 @@ def test_measures_parsing():
     print("\nTesting measures parsing...")
     try:
         df = load_measure_inputs_from_excel(
-            input_file="OpenBCA Code PROGRAM INPUT.xlsx",
-            sheet_name="Measure Inputs"
+            input_file="OpenBCA Program Input.xlsx",
+            sheet_name="Measure Inputs",
+            skiprows=2
         )
         print(f"  ✓ Successfully parsed measures: {len(df)} rows")
         return True
@@ -37,8 +38,8 @@ def test_load_shapes_parsing():
     print("\nTesting load shapes parsing...")
     try:
         df = load_load_shapes_from_excel(
-            input_file="OpenBCA Code PROGRAM INPUT.xlsx",
-            skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Updates & Improvements"},
+            input_file="OpenBCA Program Input.xlsx",
+            skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Updates & Improvements", "Custom Period - LS Support"},
             skiprows=1,
         )
         print(f"  ✓ Successfully parsed load shapes: {len(df)} rows")
@@ -53,7 +54,7 @@ def test_avoided_costs_parsing():
     print("\nTesting avoided costs parsing...")
     try:
         df = load_avoided_costs_from_excel(
-            input_file="OpenBCA Code CONFIG File - with Data.xlsm",
+            input_file="OpenBCA Configuration.xlsm",
             skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary"},
             skiprows=3
         )
@@ -69,7 +70,7 @@ def test_value_stream_groups_parsing():
     print("\nTesting value stream groups parsing...")
     try:
         df = load_value_stream_groups_from_excel(
-            input_file='OpenBCA Code CONFIG File - with Data.xlsm'
+            input_file='OpenBCA Configuration.xlsm'
         )
         print(f"  ✓ Successfully parsed value stream groups: {len(df)} rows")
         return True
@@ -83,7 +84,7 @@ def test_global_parameters_parsing():
     print("\nTesting global parameters parsing...")
     try:
         df = compile_global_parameters_from_excel(
-            input_file='OpenBCA Code CONFIG File - with Data.xlsm'
+            input_file='OpenBCA Configuration.xlsm'
         )
         print(f"  ✓ Successfully parsed global parameters: {len(df)} rows")
         return True
@@ -99,10 +100,10 @@ def main():
     
     results = []
     results.append(test_measures_parsing())
-    #results.append(test_load_shapes_parsing())
-    #results.append(test_avoided_costs_parsing())
-    #results.append(test_value_stream_groups_parsing())
-    #results.append(test_global_parameters_parsing())
+    # results.append(test_load_shapes_parsing())
+    # results.append(test_avoided_costs_parsing())
+    # results.append(test_value_stream_groups_parsing())
+    # results.append(test_global_parameters_parsing())
     
     print("=" * 60)
     passed = sum(results)

@@ -24,14 +24,14 @@ ID_COLUMNS = [
         "day_of_year": "int",
         "hour_of_year": "int",
         "load_shape": "string",
-        "value": "float",
+        "load_shape_value": "float",
     },
 )
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_load_shapes_from_excel(
-        input_file="OpenBCA Code PROGRAM INPUT.xlsx",
-        skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Updates & Improvements"},
+        input_file="OpenBCA Program Input.xlsx",
+        skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Updates & Improvements", "Custom Period - LS Support"},
         skiprows=1,
     )
 
@@ -52,9 +52,8 @@ def load_load_shapes_from_excel(
     file_path = os.path.join(DATA_DIR, input_file)
     xls = pd.ExcelFile(file_path)
     all_frames = []
-
     for sheet in xls.sheet_names:
-        print(sheet)
+
         if sheet in skip_sheets:
             continue
 
@@ -84,26 +83,26 @@ def load_load_shapes_from_excel(
     if not all_frames:
         return pd.DataFrame()
 
-    combined = pd.concat(all_frames, ignore_index=True)
+    combined_df = pd.concat(all_frames, ignore_index=True)
 
     # --- Ensure required ID columns exist ---
     for col in ["quarter", "month", "day", "hour_of_year"]:
-        print(col)
-        if col not in combined.columns:
-            combined[col] = pd.NA
+
+        if col not in combined_df.columns:
+            combined_df[col] = pd.NA
 
     # --- Pivot to long format ---
     id_cols = ["commodity", "quarter", "month", "day", "hour_of_year"]
-    value_vars = [c for c in combined.columns if c not in id_cols]
-    print(value_vars)
+    value_vars = [c for c in combined_df.columns if c not in id_cols]
 
-    print(combined.head().to_markdown())
-
-    long_df = combined.melt(
+    long_df = combined_df.melt(
         id_vars=id_cols,
         value_vars=value_vars,
         var_name="load_shape",
-        value_name="value",
-    ).rename({'day': 'day_of_year'}, axis = 1)
+        value_name="load_shape_value",
+    ).dropna(axis=0, subset=['load_shape_value']).rename({'day': 'day_of_year'}, axis = 1)
+
+    # Adjust hour_of_year from 1 - 8760 to 0 - 8759
+    long_df['hour_of_year'] = long_df['hour_of_year'] - 1
 
     return long_df

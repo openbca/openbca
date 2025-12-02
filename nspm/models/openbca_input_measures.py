@@ -6,6 +6,7 @@ import os
 import re
 
 ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
+
 @model(
     name="nspm.openbca_input_measures",
     kind="FULL",
@@ -25,13 +26,13 @@ ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
         "measure_unit": "string",
         "unit_quantity": "float",
         "electric_load_shape": "string",
-        "annual_kwh_impact": "float",
-        "coincident_peak_kw_impact": "float",
+        "annual_kwh_savings": "float",
+        "coincident_peak_kw_savings": "float",
         "natural_gas_load_shape": "string",
-        "annual_natural_gas_impact_mmbtu": "float",
-        "annual_other_fuel_propane_mmbtu": "float",
-        "annual_other_fuel_heating_oil_mmbtu": "float",
-        "annual_other_fuel_diesel_mmbtu": "float",
+        "annual_natural_gas_savings_mmbtu": "float",
+        "annual_propane_savings_mmbtu": "float",
+        "annual_heating_oil_savings_mmbtu": "float",
+        "annual_diesel_savings_mmbtu": "float",
         "estimated_useful_life_years": "int",
         "ntg": "float",
         "incremental_costs_upfront_per_unit_dollar": "float",
@@ -47,11 +48,21 @@ ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
         "change_in_host_customer_reliability_per_unit": "float",
         "change_in_host_customer_resilience_per_unit": "float",
         "change_in_societal_resilience_per_unit": "float",
-        "custom_v1": "string",
-        "custom_v2": "string", 
-        "custom_v3": "string",
-        "custom_v4": "string",
-        "custom_v5": "string",
+        "custom_1_value_stream_name": "string",
+        "custom_1_value_stream_commodity": "string",
+        "custom_1_annual_savings": "float", 
+        "custom_2_value_stream_name": "string",
+        "custom_2_value_stream_commodity": "string",
+        "custom_2_annual_savings": "float", 
+        "custom_3_value_stream_name": "string",
+        "custom_3_value_stream_commodity": "string",
+        "custom_3_annual_savings": "float", 
+        "custom_4_value_stream_name": "string",
+        "custom_4_value_stream_commodity": "string",
+        "custom_4_annual_savings": "float", 
+        "custom_5_value_stream_name": "string",
+        "custom_5_value_stream_commodity": "string",
+        "custom_5_annual_savings": "float", 
         "label_1": "string",    
         "label_2": "string",
         "label_3": "string",
@@ -61,8 +72,9 @@ ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
 )
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_measure_inputs_from_excel(
-        input_file="OpenBCA Code PROGRAM INPUT.xlsx",
-        sheet_name="Measure Inputs"
+        input_file="OpenBCA Program Input.xlsx",
+        sheet_name="Measure Inputs",
+        skiprows=2
     )
 
 
@@ -97,7 +109,8 @@ def clean_header(col: str) -> str:
 
 def load_measure_inputs_from_excel(
     input_file: str,
-    sheet_name: str
+    sheet_name: str,
+    skiprows: int
 ) -> DataFrame:
     """
     Load Measure Inputs sheet from Excel into a DataFrame.
@@ -105,16 +118,68 @@ def load_measure_inputs_from_excel(
     file_path = os.path.join(DATA_DIR, input_file)
 
     # Read sheet
-    df = pd.read_excel(file_path, sheet_name=sheet_name)
+    df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=skiprows)
 
     # Apply header cleaning
     df.columns = [clean_header(c) for c in df.columns]
 
-    for col in df.columns:
-        print(col)
+    df['discount_rate'] = df['discount_rate']/100
 
-    print('\n\n')
-    print(df.head(3))
+    def fill_savings_for_dimensioned_load_shapes(load_shape_col: str, savings_col: float):
+        """
+        Check two values from dataframe columns:
+        - If savings_col is not NaN/None, return it
+        - Else if load_shape_col is not NaN/None/empty, return 1
+        - Else return None
+        """
+        # Check if savings_col is valid (not NaN/None)
+        if pd.notna(savings_col):
+            return savings_col
+        
+        # Check if load_shape_col is valid (not NaN/None and not empty string)
+        if pd.notna(load_shape_col) and (not isinstance(load_shape_col, str) or load_shape_col != ""):
+            return 1
+        
+        # Both are invalid, return None (will become NaN in pandas)
+        return None
+
+    df['annual_kwh_savings'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['electric_load_shape'], x['annual_kwh_savings']), axis = 1)
+    
+    df['annual_natural_gas_savings_mmbtu'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['natural_gas_load_shape'], x['annual_natural_gas_savings_mmbtu']), axis = 1)
+    
+
+    def load_value_stream_groups_from_excel(df) -> pd.DataFrame:
+        '''
+        Generate dataframe to classify value stream grouping from the Configuration Data sheet in the OpenBCA CONFIG file.
+        '''
+        file_path_config = os.path.join(DATA_DIR, 'OpenBCA Configuration.xlsm')
+        xls_config = pd.ExcelFile(file_path_config)
+        
+        custom_avoided_cost_names_df = pd.read_excel(
+            xls_config, 
+            sheet_name='Configuration Data', 
+            header=0, 
+            skiprows=3, 
+            usecols='C:D').tail(5)
+
+        #value_stream_col_name = custom_avoided_cost_names_df.columns[0]
+
+        #value_stream_names = custom_avoided_cost_names_df[value_stream_col_name].to_list()
+        custom_avoided_cost_names_df['Commodity'] = custom_avoided_cost_names_df['Commodity'].astype(str)
+
+        value_stream_names_commodity_dict = dict(zip(custom_avoided_cost_names_df['Value Stream'], custom_avoided_cost_names_df['Commodity']))
+
+        for i, (name, commodity) in enumerate(value_stream_names_commodity_dict.items()):
+            df[f"custom_{i+1}_value_stream_name"] = name
+            
+            if commodity.upper() in ['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'HEATING OIL', 'NON-SYSTEM', 'NAN']:
+                df[f"custom_{i+1}_value_stream_commodity"] = f"STANDARD_{i+1}"
+                df[f"custom_{i+1}_annual_savings"] = None
+            else:
+                df[f"custom_{i+1}_value_stream_commodity"] = commodity.upper()
+
+        return df
+    
+    df = load_value_stream_groups_from_excel(df = df)
 
     return df
- 

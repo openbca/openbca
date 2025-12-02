@@ -1,5 +1,5 @@
 MODEL(
-    name openbca_core.measure_impacts,
+    name measure_impacts.measure_impacts,
     kind VIEW,
     grain (measure_id),
 );
@@ -20,7 +20,7 @@ SELECT
     unit_quantity::FLOAT AS unit_quantity,
     electric_load_shape::VARCHAR AS electric_load_shape,
     annual_kwh_savings::FLOAT AS annual_kwh_savings,
-    coincident_peak_kw_impact::FLOAT AS coincident_peak_kw_impact,
+    coincident_peak_kw_savings::FLOAT AS coincident_peak_kw_savings,
     natural_gas_load_shape::VARCHAR AS natural_gas_load_shape,
     annual_natural_gas_mmbtu_savings::FLOAT AS annual_natural_gas_mmbtu_savings,
     annual_propane_mmbtu_savings::FLOAT AS annual_propane_mmbtu_savings,
@@ -41,14 +41,14 @@ SELECT
     change_in_host_customer_reliability_per_unit::FLOAT AS change_in_host_customer_reliability_per_unit,
     change_in_host_customer_resilience_per_unit::FLOAT AS change_in_host_customer_resilience_per_unit,
     change_in_societal_resilience_per_unit::FLOAT AS change_in_societal_resilience_per_unit,
-    custom_v1::VARCHAR AS custom_v1,
-    custom_v2::VARCHAR AS custom_v2, 
-    custom_v3::VARCHAR AS custom_v3,
-    custom_v4::VARCHAR AS custom_v4,
-    custom_v5::VARCHAR AS custom_v5,
+    -- custom_v1::VARCHAR AS custom_v1,
+    -- custom_v2::VARCHAR AS custom_v2, 
+    -- custom_v3::VARCHAR AS custom_v3,
+    -- custom_v4::VARCHAR AS custom_v4,
+    -- custom_v5::VARCHAR AS custom_v5,
     label_1::VARCHAR AS label_1,    
     label_2::VARCHAR AS label_2,
     label_3::VARCHAR AS label_3,
     label_4::VARCHAR AS label_4,
     label_5::VARCHAR AS label_5,
-FROM openbca_core.measures
+FROM core_layer0_base.measures

@@ -19,7 +19,7 @@ import os
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return compile_global_parameters_from_excel(
-        input_file='OpenBCA Code CONFIG File - with Data.xlsm'
+        input_file='OpenBCA Configuration.xlsm'
     )
 
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file

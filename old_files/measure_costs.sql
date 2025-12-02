@@ -1,0 +1,22 @@
+-- MODEL(
+--     name measure.measure_costs,
+--     kind full,
+--     grain (measure_id),
+-- );
+-- SELECT
+--     measure_id,
+--     avoided_cost_subset,
+--     start_year, 
+--     start_quarter,
+--     coalesce(m.discount_rate, gp.discount_rate) as discount_rate, 
+--     estimated_useful_life,
+--     unit_quantity, 
+--     ntg,
+--     -- admin_cost_dollars
+--     --     + (((1 - net_to_gross_ratio) * incentive_cost_dollars) + (ntg * measure_cost_dollars))
+--     --     / (1 + (discount_rate_ratio / 4.0))
+--     --     AS trc_cost_dollars,
+--     -- admin_cost_dollars + (incentive_cost_dollars / (1 + (discount_rate_ratio / 4.0)))
+--     --     AS pac_cost_dollars,
+-- FROM
+--     openbca_core.measures m, openbca_core.global_parameters gp

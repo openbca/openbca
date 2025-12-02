@@ -23,7 +23,7 @@ ID_COLUMNS = ['avoided_cost', 'commodity', 'include_in_test', 'calc_type', 'pct_
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_value_stream_groups_from_excel(
-        input_file='OpenBCA Code CONFIG File - with Data.xlsm'
+        input_file='OpenBCA Configuration.xlsm'
     )
 
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file
@@ -64,7 +64,7 @@ def load_value_stream_groups_from_excel(
             if commodity == 'Electric':
                 return 'electric_%_adder'
             if commodity == 'Natural Gas':
-                return 'gas_%_adder'
+                return 'natural_gas_%_adder'
             else:
                 return 'all_fuels_%_adder'
 
@@ -78,7 +78,7 @@ def load_value_stream_groups_from_excel(
             if commodity == 'Electric':
                 return 'electric'
             if commodity == 'Natural Gas':
-                return 'gas'
+                return 'natural_gas'
             else:
                 return 'annual'
 

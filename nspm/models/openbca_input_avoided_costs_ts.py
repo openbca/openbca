@@ -21,18 +21,18 @@ ID_COLUMNS = [
         "year": "int",
         "quarter": "int",
         "month": "int",
-        "day": "int",
+        "day_of_year": "int",
         "type_of_day": "string",
         "period": "string",
         "hour_of_day": "int",
         "hour_of_year": "int",
-        "value": "float",
+        "avoided_cost_value": "float",
     },
 )
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_avoided_costs_from_excel(
-        input_file="OpenBCA Code CONFIG File - with Data.xlsm",
+        input_file="OpenBCA Configuration.xlsm",
         skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary"},
         skiprows=3
     )
@@ -59,16 +59,7 @@ def load_avoided_costs_from_excel(
             continue
 
         # --- Find "Calculation Type" from row 2 ---
-        row2 = pd.read_excel(xls, sheet_name=sheet, header=None, nrows=2).iloc[1]  # row index 1 = Excel row 2
-
-        avoided_cost = None
-        for cell in row2.dropna().astype(str):
-
-            if "calculation type" in cell.lower():
-                # take everything after "Calculation Type:"
-                parts = cell.split(":", 1)
-                avoided_cost = parts[1].strip() if len(parts) > 1 else cell.strip()
-                break
+        avoided_cost = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=1, nrows=1, usecols='A').values[0][0]
 
         # --- Load actual data starting at skiprows ---
         df = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=skiprows)
@@ -87,7 +78,8 @@ def load_avoided_costs_from_excel(
 
         df.columns = cleaned_headers
         df = df[1:]
-        df["avoided_cost"] = sheet
+
+        df["avoided_cost"] = avoided_cost
 
         # Update global order
         for col in df.columns:
@@ -118,14 +110,17 @@ def load_avoided_costs_from_excel(
     combined = combined.reindex(columns=final_order)
 
     # ✅ Pivot to long format
-    df_long = combined.melt(
+    long_df = combined.melt(
         id_vars=ID_COLUMNS,
         value_vars=[c for c in combined.columns if c not in ID_COLUMNS],
         var_name="avoided_cost_subset",
-        value_name="value"
-    )
+        value_name="avoided_cost_value"
+    ).dropna(axis=0, subset=['avoided_cost_value']).rename({'day': 'day_of_year'}, axis = 1)
 
     # Trim "Input" text if present
-    df_long["avoided_cost_subset"] = df_long["avoided_cost_subset"].str.replace(" Inputs", "", regex=False)
-
-    return df_long
+    long_df["avoided_cost_subset"] = long_df["avoided_cost_subset"].str.replace(" Inputs", "", regex=False)
+    
+    # Adjust hour_of_year from 1 - 8760 to 0 - 8759
+    long_df['hour_of_year'] = long_df['hour_of_year'] - 1
+    
+    return long_df
