@@ -60,5 +60,4 @@ SELECT
     CAST(label_3 AS STRING) AS label_3,
     CAST(label_4 AS STRING) AS label_4,
     CAST(label_5 AS STRING) AS label_5,
---    NULL AS avoided_costs, -- FIXME
 FROM nspm.openbca_input_measures

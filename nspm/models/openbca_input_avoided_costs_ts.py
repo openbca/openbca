@@ -1,8 +1,6 @@
 from typing import Any
-#from pandas import DataFrame
 from sqlmesh import model, ExecutionContext
 import pandas as pd
-#from tabulate import tabulate
 import os
 
 ID_COLUMNS = [
@@ -11,11 +9,10 @@ ID_COLUMNS = [
 ]
 
 @model(
-    name="nspm.openbca_input_avoided_costs_ts",
+    name="openbca_input.avoided_costs_ts", 
     kind="FULL",
     grain=ID_COLUMNS,
     columns={
-        #"commodity": "string",
         "avoided_cost": "string",
         "avoided_cost_subset": "string",
         "year": "int",

@@ -8,7 +8,7 @@ import re
 ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
 
 @model(
-    name="nspm.openbca_input_measures",
+    name="openbca_input.measures",
     kind="FULL",
     grain=ID_COLUMNS,
     columns={
@@ -29,11 +29,11 @@ ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
         "annual_kwh_savings": "float",
         "coincident_peak_kw_savings": "float",
         "natural_gas_load_shape": "string",
-        "annual_natural_gas_savings_mmbtu": "float",
-        "annual_propane_savings_mmbtu": "float",
-        "annual_heating_oil_savings_mmbtu": "float",
-        "annual_diesel_savings_mmbtu": "float",
-        "estimated_useful_life_years": "int",
+        "annual_natural_gas_mmbtu_savings": "float",
+        "annual_propane_mmbtu_savings": "float",
+        "annual_heating_oil_mmbtu_savings": "float",
+        "annual_diesel_mmbtu_savings": "float",
+        "estimated_useful_life": "int",
         "ntg": "float",
         "incremental_costs_upfront_per_unit_dollar": "float",
         "annual_o_m_cost_per_unit_dollar_per_year": "float",
@@ -140,7 +140,7 @@ def load_measure_inputs_from_excel(
         if pd.notna(load_shape_col) and (not isinstance(load_shape_col, str) or load_shape_col != ""):
             return 1
         
-        # Both are invalid, return None (will become NaN in pandas)
+        # Both are invalid, return None (will become NaN in Pandas)
         return None
 
     df['annual_kwh_savings'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['electric_load_shape'], x['annual_kwh_savings']), axis = 1)
@@ -162,8 +162,6 @@ def load_measure_inputs_from_excel(
             skiprows=3, 
             usecols='C:D').tail(5)
 
-        #value_stream_col_name = custom_avoided_cost_names_df.columns[0]
-
         #value_stream_names = custom_avoided_cost_names_df[value_stream_col_name].to_list()
         custom_avoided_cost_names_df['Commodity'] = custom_avoided_cost_names_df['Commodity'].astype(str)
 
@@ -181,5 +179,15 @@ def load_measure_inputs_from_excel(
         return df
     
     df = load_value_stream_groups_from_excel(df = df)
+
+    df.rename(
+        {
+            'estimated_useful_life_years':'estimated_useful_life',
+            'annual_natural_gas_savings_mmbtu':'annual_natural_gas_mmbtu_savings',
+            'annual_propane_savings_mmbtu':'annual_propane_mmbtu_savings',
+            'annual_heating_oil_savings_mmbtu':'annual_heating_oil_mmbtu_savings',
+            'annual_diesel_savings_mmbtu':'annual_diesel_mmbtu_savings'
+        }, 
+        axis = 1, inplace = True)
 
     return df

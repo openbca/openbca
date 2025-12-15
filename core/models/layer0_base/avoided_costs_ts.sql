@@ -1,11 +1,14 @@
 MODEL(
-    name core_layer0_base.all_commodity_load_shape_ts,
+    name core_layer0_base.avoided_costs_ts,
     kind VIEW,
-    grain (commodity, load_shape, hour_of_year),
+    grain (avoided_cost, avoided_cost_subset, year, hour_of_year),
 );
 
 SELECT
-    UPPER(commodity)::VARCHAR AS commodity,
+    avoided_cost::VARCHAR AS avoided_cost,
+    avoided_cost_subset::VARCHAR AS avoided_cost_subset,
+    year::INTEGER AS year,
+
     COALESCE(
         quarter, 
         CASE 
@@ -63,7 +66,6 @@ SELECT
     COALESCE(day_of_year, 1 + FLOOR(hour_of_year/24)) as day_of_year,
     (hour_of_year) % 24::INTEGER AS hour_of_day,
     hour_of_year::INTEGER AS hour_of_year,
-    UPPER(load_shape::VARCHAR) AS load_shape,
-    load_shape_value::FLOAT AS load_shape_value
 
-FROM openbca_input.load_shape_ts
+    avoided_cost_value::NUMERIC AS avoided_cost_value
+FROM openbca_input.avoided_costs_ts

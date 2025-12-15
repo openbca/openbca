@@ -1,14 +1,11 @@
 from typing import Any
-#from pandas import DataFrame
 from sqlmesh import model, ExecutionContext
 import pandas as pd
-#from tabulate import tabulate
 import os
 
 @model(
-    name='nspm.openbca_input_global_parameters',
+    name='openbca_input.global_parameters',
     kind='FULL',
-    #grain=ID_COLUMNS,
     columns={
         'discount_rate': 'float',
         'electric_line_loss': 'float',

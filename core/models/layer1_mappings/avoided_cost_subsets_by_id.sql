@@ -21,7 +21,7 @@ MODEL(
         avoided_cost 
         , avoided_cost_subset AS available_avoided_cost_subset 
     FROM 
-        core_layer0_base.all_avoided_costs_ts
+        core_layer0_base.avoided_costs_ts
     )
 
     , ac_subset_measure_combos AS (
@@ -41,7 +41,7 @@ MODEL(
         , start_year
         , start_quarter
         , estimated_useful_life
-        , concat(measure_id, avoided_cost) as measure_id_ac
+        , CONCAT(measure_id, avoided_cost) as measure_id_ac
     FROM 
         ac_subset_measure_combos
     WHERE 
@@ -78,4 +78,4 @@ MODEL(
     WHERE 
         avoided_cost_subset != available_avoided_cost_subset
         AND available_avoided_cost_subset = 'System-wide'
-        AND concat(measure_id, smc.avoided_cost) not in (select measure_id_ac from first_assignments)
+        AND CONCAT(measure_id, smc.avoided_cost) NOT IN (SELECT measure_id_ac FROM first_assignments)

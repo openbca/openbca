@@ -60,6 +60,7 @@ SELECT
     label_3::VARCHAR AS label_3,
     label_4::VARCHAR AS label_4,
     label_5::VARCHAR AS label_5,
-    map(['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'HEATING OIL', UPPER(custom_1_value_stream_commodity), UPPER(custom_2_value_stream_commodity), UPPER(custom_3_value_stream_commodity), UPPER(custom_4_value_stream_commodity), UPPER(custom_5_value_stream_commodity)], [annual_kwh_savings, annual_natural_gas_mmbtu_savings, annual_propane_mmbtu_savings, annual_diesel_mmbtu_savings, annual_heating_oil_mmbtu_savings, custom_1_annual_savings, custom_2_annual_savings, custom_3_annual_savings, custom_4_annual_savings, custom_5_annual_savings])::MAP<VARCHAR, FLOAT> AS energy_savings_by_commodity,
-    map(['ELECTRIC', 'NATURAL GAS'], [UPPER(electric_load_shape), UPPER(natural_gas_load_shape)])::MAP<VARCHAR, VARCHAR> AS load_shape_mapping_by_commodity,
-FROM openbca_input.measures
+    MAP(['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'HEATING OIL', UPPER(custom_1_value_stream_commodity), UPPER(custom_2_value_stream_commodity), UPPER(custom_3_value_stream_commodity), UPPER(custom_4_value_stream_commodity), UPPER(custom_5_value_stream_commodity)], [annual_kwh_savings, annual_natural_gas_mmbtu_savings, annual_propane_mmbtu_savings, annual_diesel_mmbtu_savings, annual_heating_oil_mmbtu_savings, custom_1_annual_savings, custom_2_annual_savings, custom_3_annual_savings, custom_4_annual_savings, custom_5_annual_savings])::MAP<VARCHAR, FLOAT> AS energy_savings_by_commodity,
+    MAP(['ELECTRIC', 'NATURAL GAS'], [UPPER(electric_load_shape), UPPER(natural_gas_load_shape)])::MAP<VARCHAR, VARCHAR> AS load_shape_mapping_by_commodity,
+FROM 
+  openbca_input.measures

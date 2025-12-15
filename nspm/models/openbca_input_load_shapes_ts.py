@@ -4,21 +4,17 @@ from sqlmesh import model, ExecutionContext
 import pandas as pd
 import os
 
-# ID_COLUMNS = [
-#     "commodity", "year", "quarter", "month", "day", "hour_of_year"
-# ]
 
 ID_COLUMNS = [
     "commodity", "quarter", "month", "day", "hour_of_year" # Need Quarter?
 ]
 
 @model(
-    name="nspm.openbca_input_load_shapes_ts",
+    name="openbca_input.load_shapes_ts",
     kind="FULL",
     grain=ID_COLUMNS,
     columns={
         "commodity": "string",
-        #"year": "int",
         "quarter": "int",
         "month": "int",
         "day_of_year": "int",

@@ -1,14 +1,12 @@
 from typing import Any
-#from pandas import DataFrame
 from sqlmesh import model, ExecutionContext
 import pandas as pd
-#from tabulate import tabulate
 import os
 
 ID_COLUMNS = ['avoided_cost', 'commodity', 'include_in_test', 'calc_type', 'pct_adder', 'value_stream_group']
 
 @model(
-    name='nspm.openbca_input_value_stream_groups',
+    name='openbca_input.value_stream_groups', 
     kind='FULL',
     grain=ID_COLUMNS,
     columns={
@@ -83,5 +81,5 @@ def load_value_stream_groups_from_excel(
                 return 'annual'
 
     value_stream_groups_df['value_stream_group'] = value_stream_groups_df.apply(lambda x: assign_value_stream_group(x['calc_type'], x['commodity']), axis=1)
-    #print(value_stream_groups_df.head(10)[['avoided_cost', 'include_in_test']].to_markdown())
+
     return value_stream_groups_df
