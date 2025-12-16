@@ -47,7 +47,7 @@ WHERE
     AND value_stream_group IN ('electric', 'natural_gas')
     AND ac.hour_of_year IS NOT NULL
     AND ac.year BETWEEN min_start_year AND max_last_year
-    AND ac.hour_of_year in (0, 1, 2, 8757, 8758, 8759, 8760) --Testing only
+    --AND ac.hour_of_year in (0, 1, 2, 8757, 8758, 8759, 8760) --Testing only
 )
 
 UNION ALL 
@@ -84,7 +84,7 @@ UNION ALL
     AND ac.hour_of_year IS NULL
     AND ac.day_of_year IS NOT NULL 
     AND ac.year BETWEEN min_start_year AND max_last_year
-    AND ac.day_of_year in (0, 1, 2, 3, 363, 364, 365, 366) --Testing only
+    --AND ac.day_of_year in (0, 1, 2, 3, 363, 364, 365, 366) --Testing only
     GROUP BY 
     ac.avoided_cost
     , ac.avoided_cost_subset 

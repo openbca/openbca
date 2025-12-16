@@ -5,7 +5,7 @@ MODEL(
 );
 
 SELECT
-    unique_row_id::VARCHAR AS unique_row_id,
+    id::VARCHAR AS id,
     measure_id::VARCHAR AS measure_id,
     project_id::VARCHAR AS project_id,
     program_name::VARCHAR AS program_name,
@@ -24,12 +24,11 @@ SELECT
     natural_gas_load_shape::VARCHAR AS natural_gas_load_shape,
     annual_natural_gas_mmbtu_savings::FLOAT AS annual_natural_gas_mmbtu_savings,
     annual_propane_mmbtu_savings::FLOAT AS annual_propane_mmbtu_savings,
-    annual_heating_oil_mmbtu_savings::FLOAT AS annual_heating_oil_mmbtu_savings,
+    annual_oil_mmbtu_savings::FLOAT AS annual_oil_mmbtu_savings,
     annual_diesel_mmbtu_savings::FLOAT AS annual_diesel_mmbtu_savings,
     estimated_useful_life::INT AS estimated_useful_life,
     ntg::FLOAT AS ntg,
     incremental_costs_upfront_per_unit_dollar::FLOAT AS incremental_costs_upfront_per_unit_dollar,
-    annual_o_m_cost_per_unit_dollar_per_year::FLOAT AS annual_o_m_cost_per_unit_dollar_per_year,
     utility_upfront_incentive_per_unit_dollar::FLOAT AS utility_upfront_incentive_per_unit_dollar,
     utility_annual_incentive_per_unit_dollar_per_year::FLOAT AS utility_annual_incentive_per_unit_dollar_per_year,
     administration_costs_per_unit_dollar::FLOAT AS administration_costs_per_unit_dollar,

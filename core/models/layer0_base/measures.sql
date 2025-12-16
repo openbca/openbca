@@ -4,13 +4,13 @@ MODEL(
 );
 
 SELECT
-    unique_row_id::VARCHAR AS unique_row_id,
+    id::VARCHAR AS id,
     measure_id::VARCHAR AS measure_id,
     project_id::VARCHAR AS project_id,
     program_name::VARCHAR AS program_name,
     measure_include::VARCHAR AS measure_include,
     version::VARCHAR AS version,
-    avoided_cost_subset::VARCHAR AS avoided_cost_subset,
+    CASE WHEN avoided_cost_subset IS NULL THEN 'System-wide' ELSE avoided_cost_subset END::VARCHAR AS avoided_cost_subset,
     start_year::INT AS start_year,
     start_quarter::INT AS start_quarter,
     discount_rate::FLOAT AS discount_rate, 
@@ -23,12 +23,12 @@ SELECT
     UPPER(natural_gas_load_shape)::VARCHAR AS natural_gas_load_shape,
     annual_natural_gas_mmbtu_savings::FLOAT AS annual_natural_gas_mmbtu_savings,
     annual_propane_mmbtu_savings::FLOAT AS annual_propane_mmbtu_savings,
-    annual_heating_oil_mmbtu_savings::FLOAT AS annual_heating_oil_mmbtu_savings,
+    annual_oil_mmbtu_savings::FLOAT AS annual_oil_mmbtu_savings,
     annual_diesel_mmbtu_savings::FLOAT AS annual_diesel_mmbtu_savings,
     estimated_useful_life::INT AS estimated_useful_life,
     ntg::FLOAT AS ntg,
     incremental_costs_upfront_per_unit_dollar::FLOAT AS incremental_costs_upfront_per_unit_dollar,
-    annual_o_m_cost_per_unit_dollar_per_year::FLOAT AS annual_o_m_cost_per_unit_dollar_per_year,
+    incremental_costs_annual_per_unit_dollar_per_year::FLOAT AS incremental_costs_annual_per_unit_dollar_per_year,
     utility_upfront_incentive_per_unit_dollar::FLOAT AS utility_upfront_incentive_per_unit_dollar,
     utility_annual_incentive_per_unit_dollar_per_year::FLOAT AS utility_annual_incentive_per_unit_dollar_per_year,
     administration_costs_per_unit_dollar::FLOAT AS administration_costs_per_unit_dollar,
@@ -60,7 +60,7 @@ SELECT
     label_3::VARCHAR AS label_3,
     label_4::VARCHAR AS label_4,
     label_5::VARCHAR AS label_5,
-    MAP(['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'HEATING OIL', UPPER(custom_1_value_stream_commodity), UPPER(custom_2_value_stream_commodity), UPPER(custom_3_value_stream_commodity), UPPER(custom_4_value_stream_commodity), UPPER(custom_5_value_stream_commodity)], [annual_kwh_savings, annual_natural_gas_mmbtu_savings, annual_propane_mmbtu_savings, annual_diesel_mmbtu_savings, annual_heating_oil_mmbtu_savings, custom_1_annual_savings, custom_2_annual_savings, custom_3_annual_savings, custom_4_annual_savings, custom_5_annual_savings])::MAP<VARCHAR, FLOAT> AS energy_savings_by_commodity,
+    MAP(['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'OIL', UPPER(custom_1_value_stream_commodity), UPPER(custom_2_value_stream_commodity), UPPER(custom_3_value_stream_commodity), UPPER(custom_4_value_stream_commodity), UPPER(custom_5_value_stream_commodity)], [annual_kwh_savings, annual_natural_gas_mmbtu_savings, annual_propane_mmbtu_savings, annual_diesel_mmbtu_savings, annual_oil_mmbtu_savings, custom_1_annual_savings, custom_2_annual_savings, custom_3_annual_savings, custom_4_annual_savings, custom_5_annual_savings])::MAP<VARCHAR, FLOAT> AS energy_savings_by_commodity,
     MAP(['ELECTRIC', 'NATURAL GAS'], [UPPER(electric_load_shape), UPPER(natural_gas_load_shape)])::MAP<VARCHAR, VARCHAR> AS load_shape_mapping_by_commodity,
 FROM 
   openbca_input.measures

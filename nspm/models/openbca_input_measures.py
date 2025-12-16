@@ -12,7 +12,7 @@ ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
     kind="FULL",
     grain=ID_COLUMNS,
     columns={
-        "unique_row_id": "string",
+        "id": "string",
         "measure_id": "string",
         "project_id": "string",
         "program_name": "string",
@@ -31,12 +31,12 @@ ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
         "natural_gas_load_shape": "string",
         "annual_natural_gas_mmbtu_savings": "float",
         "annual_propane_mmbtu_savings": "float",
-        "annual_heating_oil_mmbtu_savings": "float",
+        "annual_oil_mmbtu_savings": "float",
         "annual_diesel_mmbtu_savings": "float",
         "estimated_useful_life": "int",
         "ntg": "float",
         "incremental_costs_upfront_per_unit_dollar": "float",
-        "annual_o_m_cost_per_unit_dollar_per_year": "float",
+        "incremental_costs_annual_per_unit_dollar_per_year": "float",
         "utility_upfront_incentive_per_unit_dollar": "float",
         "utility_annual_incentive_per_unit_dollar_per_year": "float",
         "administration_costs_per_unit_dollar": "float",
@@ -123,7 +123,12 @@ def load_measure_inputs_from_excel(
     # Apply header cleaning
     df.columns = [clean_header(c) for c in df.columns]
 
-    df['discount_rate'] = df['discount_rate']/100
+    # Rescale discount rate for use in NPV calculations
+    # df['discount_rate'] = df['discount_rate']/100
+
+    # Fill in null values of avoided cost subset with 'System-wide'
+
+    df['avoided_cost_subset'].fillna('System-wide', inplace=True)
 
     def fill_savings_for_dimensioned_load_shapes(load_shape_col: str, savings_col: float):
         """
@@ -146,7 +151,6 @@ def load_measure_inputs_from_excel(
     df['annual_kwh_savings'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['electric_load_shape'], x['annual_kwh_savings']), axis = 1)
     
     df['annual_natural_gas_savings_mmbtu'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['natural_gas_load_shape'], x['annual_natural_gas_savings_mmbtu']), axis = 1)
-    
 
     def load_value_stream_groups_from_excel(df) -> pd.DataFrame:
         '''
@@ -170,7 +174,7 @@ def load_measure_inputs_from_excel(
         for i, (name, commodity) in enumerate(value_stream_names_commodity_dict.items()):
             df[f"custom_{i+1}_value_stream_name"] = name
             
-            if commodity.upper() in ['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'HEATING OIL', 'NON-SYSTEM', 'NAN']:
+            if commodity.upper() in ['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'OIL', 'NON-SYSTEM', 'NAN']:
                 df[f"custom_{i+1}_value_stream_commodity"] = f"STANDARD_{i+1}"
                 df[f"custom_{i+1}_annual_savings"] = None
             else:
@@ -185,7 +189,7 @@ def load_measure_inputs_from_excel(
             'estimated_useful_life_years':'estimated_useful_life',
             'annual_natural_gas_savings_mmbtu':'annual_natural_gas_mmbtu_savings',
             'annual_propane_savings_mmbtu':'annual_propane_mmbtu_savings',
-            'annual_heating_oil_savings_mmbtu':'annual_heating_oil_mmbtu_savings',
+            'annual_oil_savings_mmbtu':'annual_oil_mmbtu_savings',
             'annual_diesel_savings_mmbtu':'annual_diesel_mmbtu_savings'
         }, 
         axis = 1, inplace = True)

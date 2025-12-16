@@ -1,11 +1,11 @@
 MODEL(
     name core_layer1_mappings.commodity_load_shape_by_id,
     kind VIEW,
-    grain (measure_id, commodity),
+    grain (id, commodity),
 );
 
     SELECT
-        measure_id
+        id
         , commodity
         , CASE 
         WHEN commodity = 'ELECTRIC' THEN electric_load_shape

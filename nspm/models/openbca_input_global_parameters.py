@@ -8,6 +8,7 @@ import os
     kind='FULL',
     columns={
         'discount_rate': 'float',
+        'discount_cadence': 'int',
         'electric_line_loss': 'float',
         'natural_gas_line_loss': 'float',
         'cost_treatment': 'string',
@@ -23,8 +24,9 @@ BASE_DIR = os.path.dirname(__file__)  # directory of the model file
 DATA_DIR = os.path.join(BASE_DIR, '..', 'input_templates')  # adjust if needed
 
 discount_rate_row = 9
+discount_cadence_row = 10
 line_losses_rows = [12, 13]
-cost_treatment_row = 15
+cost_treatment_row = 14
 
 def compile_global_parameters_from_excel(
     input_file: str,
@@ -45,6 +47,19 @@ def compile_global_parameters_from_excel(
     discount_rate_df.columns = ['discount_rate']
     discount_rate_df.drop([0], inplace=True)
 
+    discount_cadence_df = pd.read_excel(
+        xls, 
+        sheet_name='Common Data', 
+        header=0, 
+        skiprows=lambda x: x != discount_cadence_row, 
+        usecols='B,C').T.reset_index()
+
+    discount_cadence_dict = {'Annual': 1, 'Quarterly': 4}
+
+    discount_cadence_df.columns = ['discount_cadence']
+    discount_cadence_df.drop([0], inplace=True)
+    discount_cadence_df['discount_cadence'] = discount_cadence_df['discount_cadence'].apply(lambda x: discount_cadence_dict[x])
+
     line_losses_df = pd.read_excel(
         xls, 
         sheet_name='Common Data', 
@@ -64,6 +79,6 @@ def compile_global_parameters_from_excel(
     cost_treatment_df.columns = ['cost_treatment']
     cost_treatment_df.drop([0], inplace=True)
 
-    global_parameters_df = pd.concat([discount_rate_df.reset_index(drop=True), line_losses_df.reset_index(drop=True), cost_treatment_df.reset_index(drop=True)], axis = 1)
-    
+    global_parameters_df = pd.concat([discount_rate_df.reset_index(drop=True), discount_cadence_df.reset_index(drop=True), line_losses_df.reset_index(drop=True), cost_treatment_df.reset_index(drop=True)], axis = 1)
+
     return global_parameters_df

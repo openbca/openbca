@@ -23,7 +23,7 @@ SELECT
     CAST(natural_gas_load_shape AS STRING) AS natural_gas_load_shape,
     CAST(annual_natural_gas_savings_mmbtu as FLOAT) AS annual_natural_gas_mmbtu_savings,
     CAST(annual_propane_savings_mmbtu as FLOAT) AS annual_propane_mmbtu_savings,
-    CAST(annual_heating_oil_savings_mmbtu as FLOAT) AS annual_heating_oil_mmbtu_savings,
+    CAST(annual_oil_savings_mmbtu as FLOAT) AS annual_oil_mmbtu_savings,
     CAST(annual_diesel_savings_mmbtu as FLOAT) AS annual_diesel_mmbtu_savings,
     CAST(estimated_useful_life_years AS INT) AS estimated_useful_life,
     CAST(ntg AS FLOAT) AS ntg,
