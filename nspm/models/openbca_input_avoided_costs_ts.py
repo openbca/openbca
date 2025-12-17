@@ -4,8 +4,8 @@ import pandas as pd
 import os
 
 ID_COLUMNS = [
-    "avoided_cost", "year", "quarter", "month", "day", "type_of_day",
-    "period", "hour_of_day", "hour_of_year"
+    "avoided_cost", "year", "quarter", "month", "day_of_year", "type_of_day",
+    "hour_of_day", "hour_of_year"
 ]
 
 @model(
@@ -20,7 +20,7 @@ ID_COLUMNS = [
         "month": "int",
         "day_of_year": "int",
         "type_of_day": "string",
-        "period": "string",
+        #"period": "string",
         "hour_of_day": "int",
         "hour_of_year": "int",
         "avoided_cost_value": "float",
@@ -48,6 +48,36 @@ def load_avoided_costs_from_excel(
     file_path = os.path.join(DATA_DIR, input_file)
     xls = pd.ExcelFile(file_path)
 
+    def custom_period_to_hour_of_year_map():
+
+        custom_period_df = pd.read_excel(
+            xls, 
+            sheet_name='Common Data', 
+            usecols='C:Z', 
+            skiprows=28
+            ).reset_index().rename({'index':'month'}, axis=1)
+
+        custom_period_df['month'] = custom_period_df['month'] + 1
+
+        custom_period_df = pd.melt(custom_period_df, id_vars=['month'], value_vars=list(range(1,25)))
+
+        custom_period_df.rename({'variable': 'hour_of_day', 'value': 'custom_period'}, inplace=True, axis = 1)
+        custom_period_df['hour_of_day'] = custom_period_df['hour_of_day'] - 1 
+
+        month_hod_hoy_map = pd.date_range('2023-01-01', periods=8760, freq='h')
+        
+        month_hod_hoy_map_df = pd.DataFrame({
+            'month': month_hod_hoy_map.month,
+            'hour_of_day': month_hod_hoy_map.hour,
+            'hour_of_year': range(1, 8761)
+        })
+
+        custom_period_df = custom_period_df.merge(month_hod_hoy_map_df, on=['month', 'hour_of_day'])
+        
+        return custom_period_df.sort_values(by=['hour_of_year'])
+
+    custom_period_df = custom_period_to_hour_of_year_map()
+
     all_frames = []
     unified_cols = []  # global column order (excluding metadata)
 
@@ -61,6 +91,7 @@ def load_avoided_costs_from_excel(
         # --- Load actual data starting at skiprows ---
         df = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=skiprows)
         df = df.dropna(how="all").dropna(axis=1, how="all")
+            
         if df.empty:
             continue
 
@@ -75,6 +106,9 @@ def load_avoided_costs_from_excel(
 
         df.columns = cleaned_headers
         df = df[1:]
+
+        if 'custom_period' in df.columns:
+            df = df.merge(custom_period_df, on = ['custom_period']).drop(['custom_period'], axis=1)
 
         df["avoided_cost"] = avoided_cost
 
@@ -94,8 +128,8 @@ def load_avoided_costs_from_excel(
 
     # ✅ Enforce required column order
     desired_order = [
-        "year", "quarter", "month", "day", "type_of_day",
-        "period", "hour_of_day", "hour_of_year"
+        "year", "quarter", "month", "day_of_year", "type_of_day",
+        "hour_of_day", "hour_of_year"
     ]
     for col in desired_order:
         if col not in combined.columns:
@@ -112,7 +146,7 @@ def load_avoided_costs_from_excel(
         value_vars=[c for c in combined.columns if c not in ID_COLUMNS],
         var_name="avoided_cost_subset",
         value_name="avoided_cost_value"
-    ).dropna(axis=0, subset=['avoided_cost_value']).rename({'day': 'day_of_year'}, axis = 1)
+    ).dropna(axis=0, subset=['avoided_cost_value'])#.rename({'day': 'day_of_year'}, axis = 1)
 
     # Trim "Input" text if present
     long_df["avoided_cost_subset"] = long_df["avoided_cost_subset"].str.replace(" Inputs", "", regex=False)
