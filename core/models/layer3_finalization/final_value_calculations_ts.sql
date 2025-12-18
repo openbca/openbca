@@ -1,5 +1,5 @@
 MODEL(
-    name core_layer3_finalization.final_value_calculations,
+    name core_layer3_finalization.final_value_calculations_ts,
     kind FULL,
 );
 
@@ -7,12 +7,13 @@ WITH standard_value_streams AS (
 SELECT 
     factors.id
     , factors.commodity 
-    , acs.avoided_cost
+    , acs.avoided_cost AS value_stream 
     , ac_ls.year
     , COALESCE(ac_ls.quarter, acs.start_quarter) AS quarter
     , ac_ls.month
     , ac_ls.day_of_year 
     , ac_ls.hour_of_year
+	, ac_ls.hour_of_day
     , factors.energy_savings_factors_applied * ac_ls.avoided_cost_x_load_shape as final_dollar_value
 FROM 
     core_layer2_precompute.savings_factors factors
@@ -40,19 +41,20 @@ UNION ALL
 SELECT 
 	svs.id 
 	, vsg.commodity 
-	, vsg.avoided_cost 
+	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
 	, svs.month  
 	, svs.day_of_year 
 	, svs.hour_of_year 
+	, svs.hour_of_day
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
 	svs.commodity = vsg.commodity 
 WHERE 
-	svs.avoided_cost = 'Energy Generation (Electric)'
+	svs.value_stream = 'Energy Generation (Electric)'
 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
 	AND UPPER(vsg.commodity) = 'ELECTRIC'
 	AND include_in_test 
@@ -62,19 +64,20 @@ UNION ALL
 SELECT 
 	svs.id 
 	, vsg.commodity 
-	, vsg.avoided_cost 
+	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
 	, svs.month  
 	, svs.day_of_year 
 	, svs.hour_of_year 
+	, svs.hour_of_day
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
 	svs.commodity = vsg.commodity 
 WHERE 
-	svs.avoided_cost = 'Fuel Supply and O&M (NG)'
+	svs.value_stream = 'Fuel Supply and O&M (NG)'
 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
 	AND UPPER(vsg.commodity) = 'NATURAL GAS'
 	AND include_in_test 
@@ -84,19 +87,20 @@ UNION ALL
 SELECT 
 	svs.id 
 	, vsg.commodity 
-	, vsg.avoided_cost 
+	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
 	, svs.month  
 	, svs.day_of_year 
-	, svs.hour_of_year 
+	, svs.hour_of_year
+	, svs.hour_of_day 
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
 	svs.commodity = vsg.commodity 
 WHERE 
-	svs.avoided_cost = 'Propane Supply'
+	svs.value_stream = 'Propane Supply'
 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
 	AND UPPER(vsg.commodity) = 'PROPANE'
 	AND include_in_test 
@@ -106,19 +110,20 @@ UNION ALL
 SELECT 
 	svs.id 
 	, vsg.commodity 
-	, vsg.avoided_cost 
+	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
 	, svs.month  
 	, svs.day_of_year 
-	, svs.hour_of_year 
+	, svs.hour_of_year
+	, svs.hour_of_day 
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
 	svs.commodity = vsg.commodity 
 WHERE 
-	svs.avoided_cost = 'Oil Supply'
+	svs.value_stream = 'Oil Supply'
 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
 	AND UPPER(vsg.commodity) = 'OIL'
 	AND include_in_test 
@@ -128,19 +133,20 @@ UNION ALL
 SELECT 
 	svs.id 
 	, vsg.commodity 
-	, vsg.avoided_cost 
+	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
 	, svs.month  
 	, svs.day_of_year 
 	, svs.hour_of_year 
+	, svs.hour_of_day
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
 	svs.commodity = vsg.commodity 
 WHERE 
-	svs.avoided_cost = 'Diesel Supply'
+	svs.value_stream = 'Diesel Supply'
 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
 	AND UPPER(vsg.commodity) = 'DIESEL'
 	AND include_in_test 
@@ -150,18 +156,19 @@ UNION ALL
 SELECT 
 	svs.id 
 	, vsg.commodity 
-	, vsg.avoided_cost 
+	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, NULL AS quarter
 	, NULL AS month  
 	, NULL AS day_of_year 
 	, NULL AS hour_of_year 
+	, NULL AS hour_of_day
 	, SUM(svs.final_dollar_value) * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
 	, openbca.core_layer0_base.value_stream_groups vsg  
 WHERE 
-	svs.avoided_cost IN ('Energy Generation (Electric)', 'Fuel Supply and O&M (NG)', 'Propane Supply', 'Oil Supply', 'Diesel Supply')
+	svs.value_stream IN ('Energy Generation (Electric)', 'Fuel Supply and O&M (NG)', 'Propane Supply', 'Oil Supply', 'Diesel Supply')
 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
 	AND UPPER(vsg.commodity) NOT IN ('ELECTRIC', 'NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL')
 	AND include_in_test 

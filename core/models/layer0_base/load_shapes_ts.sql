@@ -4,8 +4,19 @@ MODEL(
     grain (commodity, load_shape, hour_of_year),
 );
 
+WITH other_commodities as (
 SELECT
-    UPPER(load_shape::VARCHAR) AS load_shape,
+    DISTINCT commodity
+FROM 
+    core_layer0_base.measures 
+CROSS JOIN UNNEST(map_keys(energy_savings_by_commodity)) AS k(commodity)
+WHERE 
+    commodity NOT IN ('ELECTRIC', 'NATURAL GAS')
+    AND commodity NOT LIKE 'STANDARD%'
+)
+
+SELECT
+    UPPER(load_shape)::VARCHAR AS load_shape,
     UPPER(commodity)::VARCHAR AS commodity,
     COALESCE(
         quarter, 
@@ -62,9 +73,23 @@ SELECT
     )::INTEGER AS month,
 
     COALESCE(day_of_year, 1 + FLOOR(hour_of_year/24)) as day_of_year,
-    (hour_of_year) % 24::INTEGER AS hour_of_day,
     hour_of_year::INTEGER AS hour_of_year,
+    (hour_of_year) % 24::INTEGER AS hour_of_day,
     load_shape_value::FLOAT AS load_shape_value
 
 FROM 
     openbca_input.load_shapes_ts ls
+
+UNION ALL
+
+SELECT
+    'ANNUAL'::VARCHAR AS load_shape 
+    , commodity::VARCHAR
+    , NULL::INTEGER AS quarter
+    , NULL::INTEGER AS month
+    , NULL::INTEGER AS day_of_year
+    , NULL::INTEGER AS hour_of_year
+    , NULL::INTEGER AS hour_of_day
+    , 1.0::FLOAT AS load_shape_value
+FROM 
+    other_commodities

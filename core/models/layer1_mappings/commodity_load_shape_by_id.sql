@@ -7,6 +7,7 @@ MODEL(
     SELECT
         id
         , commodity
+        , energy_savings_by_commodity[k.commodity] * unit_quantity * ntg AS total_net_annual_energy_savings
         , CASE 
         WHEN commodity = 'ELECTRIC' THEN electric_load_shape
         WHEN commodity = 'NATURAL GAS' THEN natural_gas_load_shape 
@@ -16,4 +17,4 @@ MODEL(
         core_layer0_base.measures 
     CROSS JOIN UNNEST(map_keys(energy_savings_by_commodity)) AS k(commodity)
     WHERE 
-        commodity NOT LIKE 'STANDARD%'
+        energy_savings_by_commodity[k.commodity] IS NOT NULL

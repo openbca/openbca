@@ -37,12 +37,12 @@ docker-run-app: docker-build
 run-nspm:
 	uv run sqlmesh -p nspm -p core plan --auto-apply
 	#@echo "Evaluating and writing output in output/final_value_calculations.csv..."
-	#@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.final_value_calculations) TO 'output/final_value_calculations.csv' (HEADER, DELIMITER ',');\"); con.close()"
+	#@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.final_value_calculations_ts) TO 'output/final_value_calculations.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
 run-nspm-group-outputs:
 	uv run sqlmesh -p nspm -p core plan --auto-apply
 	@echo "Evaluating and writing output in output/final_value_calculations.csv..."
-	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT $(GB), sum(final_dollar_value) AS final_dollar_value FROM openbca.core_layer3_finalization.final_value_calculations GROUP BY $(GB)) TO 'output/final_value_calculations.csv' (HEADER, DELIMITER ',');\"); con.close()"
+	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT $(GB), sum(final_dollar_value) AS final_dollar_value FROM openbca.core_layer3_finalization.final_value_calculations_ts GROUP BY $(GB)) TO 'output/final_value_calculations.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
 test-parsing:
 	@echo "\nTesting parsing of Excel input templates."
