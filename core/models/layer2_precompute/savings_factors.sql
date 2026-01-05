@@ -5,53 +5,51 @@ MODEL(
 
 
 WITH discount_rates AS (
-SELECT
-    id
-    , start_year  
-    , start_quarter 
-    , estimated_useful_life
-    , COALESCE(m.discount_rate, gp.discount_rate) AS discount_rate, 
-    , discount_cadence
-FROM
-    core_layer0_base.measures m, core_layer0_base.global_parameters gp
+    SELECT
+        id
+        , start_year  
+        , start_quarter 
+        , estimated_useful_life
+        , COALESCE(m.discount_rate, gp.discount_rate) AS discount_rate, 
+        , discount_cadence
+    FROM
+        core_layer0_base.measures m, core_layer0_base.global_parameters gp
 )
 
 , measure_discount_rate_factor_quarterly_ts AS (
-SELECT
-    id,
-    ((quarter_index - quarter_index % 4) / 4) AS year,
-    (quarter_index % 4 + 1) AS quarter,
-    1.0 / POW(
-        1.0 + (discount_rate / 4),
-        ((year - start_year) * 4) + quarter - start_quarter
-    ) AS discount_factor
-    , discount_cadence
-FROM 
-discount_rates
-CROSS JOIN GENERATE_SERIES(start_year * 4 + (start_quarter - 1), (start_year + estimated_useful_life) * 4 + (start_quarter - 2)) AS gs(quarter_index)
+    SELECT
+        id,
+        ((quarter_index - quarter_index % 4) / 4) AS year,
+        (quarter_index % 4 + 1) AS quarter,
+        1.0 / POW(
+            1.0 + (discount_rate / 4),
+            ((year - start_year) * 4) + quarter - start_quarter
+        ) AS discount_factor
+        , discount_cadence
+    FROM 
+        discount_rates
+    CROSS JOIN GENERATE_SERIES(start_year * 4 + (start_quarter - 1), (start_year + estimated_useful_life) * 4 + (start_quarter - 2)) AS gs(quarter_index)
 )
 
 , measure_discount_rate_factor_annual_ts AS (
-SELECT
-    id,
-    start_quarter,
-    year_index AS year,
-    quarter_index AS quarter,
-    1.0 / POW(
-        1.0 + discount_rate,
-        (year - start_year) 
-    ) AS discount_factor
-    , discount_cadence
-FROM 
-discount_rates
-CROSS JOIN GENERATE_SERIES(start_year, (start_year + estimated_useful_life)) AS gs(year_index)
-CROSS JOIN GENERATE_SERIES(1, 4) AS gs(quarter_index)
-WHERE
-    (year = start_year
-    AND quarter >= start_quarter)
-    OR (year BETWEEN start_year + 1 AND (start_year + estimated_useful_life - 1))
-    OR (year = start_year + estimated_useful_life
-    AND quarter <= start_quarter - 1)
+    SELECT
+        id,
+        start_quarter,
+        year_index AS year,
+        quarter_index AS quarter,
+        1.0 / POW(
+            1.0 + discount_rate,
+            (year - start_year) 
+        ) AS discount_factor
+        , discount_cadence
+    FROM 
+        discount_rates
+    CROSS JOIN GENERATE_SERIES(start_year, (start_year + estimated_useful_life)) AS gs(year_index)
+    CROSS JOIN GENERATE_SERIES(1, 4) AS gs(quarter_index)
+    WHERE
+        (year = start_year AND quarter >= start_quarter)
+        OR (year BETWEEN start_year + 1 AND (start_year + estimated_useful_life - 1))
+        OR (year = start_year + estimated_useful_life AND quarter <= start_quarter - 1)
 )
 
 , measure_discount_rate_factor_ts AS (
@@ -109,3 +107,23 @@ CROSS JOIN UNNEST(map_keys(m.energy_savings_by_commodity)) AS k(commodity)
 , core_layer0_base.global_parameters gp
 WHERE 
     energy_savings IS NOT NULL 
+
+UNION ALL
+
+SELECT 
+    m.id
+    , k.commodity
+    , year 
+    , quarter
+    , NULL AS energy_savings
+    , discount_factor
+    , ntg  
+    , unit_quantity
+    , NULL AS line_loss_factor
+    , NULL AS energy_savings_factors_applied
+    , NULL AS coincident_peak_savings_factors_applied
+FROM 
+    measure_discount_rate_factor_ts d
+JOIN core_layer0_base.measures m ON 
+    m.id = d.id
+CROSS JOIN UNNEST(cost_commodities) AS k(commodity)

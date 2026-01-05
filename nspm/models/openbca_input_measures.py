@@ -5,7 +5,7 @@ import pandas as pd
 import os
 import re
 
-ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
+ID_COLUMNS = ["id", "measure_id", "project_id"]
 
 @model(
     name="openbca_input.measures",
@@ -45,6 +45,7 @@ ID_COLUMNS = ["unique_row_id", "measure_id", "project_id"]
         "host_customer_tax_incentives_per_unit_dollar": "float",
         "host_customer_non_energy_impacts_per_unit_dollar": "float",
         "host_customer_non_energy_impacts_low_income_per_unit_dollar": "float",
+        "change_in_host_customer_risk_per_unit": "float",
         "change_in_host_customer_reliability_per_unit": "float",
         "change_in_host_customer_resilience_per_unit": "float",
         "change_in_societal_resilience_per_unit": "float",
@@ -174,7 +175,7 @@ def load_measure_inputs_from_excel(
         for i, (name, commodity) in enumerate(value_stream_names_commodity_dict.items()):
             df[f"custom_{i+1}_value_stream_name"] = name
             
-            if commodity.upper() in ['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'OIL', 'NON-SYSTEM', 'NAN']:
+            if commodity.upper() in ['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'OIL', 'NON-SYSTEM', 'ALL FUELS', 'NAN']:
                 df[f"custom_{i+1}_value_stream_commodity"] = f"STANDARD_{i+1}"
                 df[f"custom_{i+1}_annual_savings"] = None
             else:

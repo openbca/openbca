@@ -37,6 +37,7 @@ SELECT
     host_customer_tax_incentives_per_unit_dollar::FLOAT AS host_customer_tax_incentives_per_unit_dollar,
     host_customer_non_energy_impacts_per_unit_dollar::FLOAT AS host_customer_non_energy_impacts_per_unit_dollar,
     host_customer_non_energy_impacts_low_income_per_unit_dollar::FLOAT AS host_customer_non_energy_impacts_low_income_per_unit_dollar,
+    change_in_host_customer_risk_per_unit::FLOAT AS change_in_host_customer_risk_per_unit,
     change_in_host_customer_reliability_per_unit::FLOAT AS change_in_host_customer_reliability_per_unit,
     change_in_host_customer_resilience_per_unit::FLOAT AS change_in_host_customer_resilience_per_unit,
     change_in_societal_resilience_per_unit::FLOAT AS change_in_societal_resilience_per_unit,
@@ -60,7 +61,81 @@ SELECT
     label_3::VARCHAR AS label_3,
     label_4::VARCHAR AS label_4,
     label_5::VARCHAR AS label_5,
-    MAP(['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'OIL', UPPER(custom_1_value_stream_commodity), UPPER(custom_2_value_stream_commodity), UPPER(custom_3_value_stream_commodity), UPPER(custom_4_value_stream_commodity), UPPER(custom_5_value_stream_commodity)], [annual_kwh_savings, annual_natural_gas_mmbtu_savings, annual_propane_mmbtu_savings, annual_diesel_mmbtu_savings, annual_oil_mmbtu_savings, custom_1_annual_savings, custom_2_annual_savings, custom_3_annual_savings, custom_4_annual_savings, custom_5_annual_savings])::MAP<VARCHAR, FLOAT> AS energy_savings_by_commodity,
-    MAP(['ELECTRIC', 'NATURAL GAS'], [UPPER(electric_load_shape), UPPER(natural_gas_load_shape)])::MAP<VARCHAR, VARCHAR> AS load_shape_mapping_by_commodity,
+    MAP(
+        [
+          'ELECTRIC', 
+          'NATURAL GAS', 
+          'PROPANE', 
+          'DIESEL', 
+          'OIL',
+          'HOST CUSTOMER RISK',
+          'HOST CUSTOMER RELIABILITY', 
+          'HOST CUSTOMER RESILIENCE',
+          'HOST CUSTOMER NEIs',
+          'HOST CUSTOMER NEIs - LI',
+          'SOCIETAL RESILIENCE',
+          UPPER(custom_1_value_stream_commodity), 
+          UPPER(custom_2_value_stream_commodity), 
+          UPPER(custom_3_value_stream_commodity), 
+          UPPER(custom_4_value_stream_commodity), 
+          UPPER(custom_5_value_stream_commodity)
+        ], 
+        [
+          annual_kwh_savings, 
+          annual_natural_gas_mmbtu_savings, 
+          annual_propane_mmbtu_savings, 
+          annual_diesel_mmbtu_savings, 
+          annual_oil_mmbtu_savings, 
+          change_in_host_customer_risk_per_unit,
+          change_in_host_customer_reliability_per_unit,
+          change_in_host_customer_resilience_per_unit,
+          host_customer_non_energy_impacts_per_unit_dollar,
+          host_customer_non_energy_impacts_low_income_per_unit_dollar,
+          change_in_societal_resilience_per_unit,
+          custom_1_annual_savings, 
+          custom_2_annual_savings, 
+          custom_3_annual_savings, 
+          custom_4_annual_savings, 
+          custom_5_annual_savings
+          ]
+        )::MAP<VARCHAR, FLOAT> AS energy_savings_by_commodity,
+        [
+          'ADMIN',
+          'INCENTIVE',
+          'MEASURE',
+          'TAX INCENTIVE',
+        ]::ARRAY<VARCHAR> AS cost_commodities,
+    MAP(
+        [
+          'administration_costs_per_unit_dollar', 
+          'utility_upfront_incentive_per_unit_dollar', 
+          'utility_annual_incentive_per_unit_dollar_per_year', 
+          'incremental_costs_upfront_per_unit_dollar',
+          'host_customer_transaction_costs_per_unit_dollar',
+          'host_customer_interconnection_costs_per_unit_dollar',
+          'host_customer_tax_incentives_per_unit_dollar'
+          --'annual_o_m_cost_per_unit_dollar_per_year'
+        ], 
+        [
+          administration_costs_per_unit_dollar, 
+          utility_upfront_incentive_per_unit_dollar, 
+          utility_annual_incentive_per_unit_dollar_per_year, 
+          incremental_costs_upfront_per_unit_dollar,
+          host_customer_transaction_costs_per_unit_dollar,
+          host_customer_interconnection_costs_per_unit_dollar,
+          host_customer_tax_incentives_per_unit_dollar
+          --annual_o_m_cost_per_unit_dollar_per_year
+          ]
+        )::MAP<VARCHAR, FLOAT> AS costs_by_type,
+    MAP(
+        [
+          'ELECTRIC', 
+          'NATURAL GAS'
+        ], 
+        [
+          UPPER(electric_load_shape), 
+          UPPER(natural_gas_load_shape)
+        ]
+      )::MAP<VARCHAR, VARCHAR> AS load_shape_mapping_by_commodity,
 FROM 
   openbca_input.measures

@@ -4,6 +4,14 @@ MODEL(
     grain (avoided_cost, avoided_cost_subset, year, hour_of_year),
 );
 
+WITH min_max_year AS (
+    SELECT 
+        MIN(year) AS min_year
+        , MAX(year) AS max_year
+FROM 
+    openbca_input.avoided_costs_ts
+)
+
 SELECT
     avoided_cost::VARCHAR AS avoided_cost,
     avoided_cost_subset::VARCHAR AS avoided_cost_subset,
@@ -63,9 +71,42 @@ SELECT
         END
     )::INTEGER AS month,
 
-    COALESCE(day_of_year, 1 + FLOOR(hour_of_year/24)) as day_of_year,
+    COALESCE(day_of_year, 1 + FLOOR(hour_of_year/24)) AS day_of_year,
     (hour_of_year) % 24::INTEGER AS hour_of_day,
     hour_of_year::INTEGER AS hour_of_year,
 
     avoided_cost_value::NUMERIC AS avoided_cost_value
-FROM openbca_input.avoided_costs_ts
+FROM 
+    openbca_input.avoided_costs_ts
+
+UNION ALL
+
+SELECT
+    k.avoided_cost::VARCHAR AS avoided_cost,
+    'System-wide'::VARCHAR AS avoided_cost_subset,
+    y.year::INTEGER,
+    NULL::INTEGER AS quarter,
+    NULL::INTEGER AS month,
+    NULL::INTEGER AS day_of_year,
+    NULL::INTEGER AS hour_of_day,
+    NULL::INTEGER AS hour_of_year,
+    1.0::NUMERIC AS avoided_cost_value
+FROM
+    min_max_year
+	CROSS JOIN UNNEST(
+        [			
+            'administration_costs_per_unit_dollar',
+            'program_admin_costs_dollar_per_year',
+            'utility_upfront_incentive_per_unit_dollar',
+            'utility_annual_incentive_per_unit_dollar_per_year',
+            'program_incentive_utility_dollar_per_year',
+            'program_performance_incentive_utility_dollar_per_year',
+            'incremental_costs_upfront_per_unit_dollar',
+            -- 'annual_o_m_cost_per_unit_dollar_per_year',
+            'host_customer_transaction_costs_per_unit_dollar',
+            'host_customer_interconnection_costs_per_unit_dollar',
+            'host_customer_tax_incentives_per_unit_dollar',
+            'program_federal_incentives_dollar_per_year'
+        ]
+        ) AS k(avoided_cost)
+	CROSS JOIN GENERATE_SERIES(min_year, max_year) AS y(year)

@@ -99,10 +99,10 @@ def main():
     print("=" * 60)
     
     results = []
-    #results.append(test_measures_parsing())
+    # results.append(test_measures_parsing())
     # results.append(test_load_shapes_parsing())
-    results.append(test_avoided_costs_parsing())
-    # results.append(test_value_stream_groups_parsing())
+    # results.append(test_avoided_costs_parsing())
+    results.append(test_value_stream_groups_parsing())
     # results.append(test_global_parameters_parsing())
     
     print("=" * 60)

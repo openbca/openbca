@@ -209,7 +209,7 @@ UNION ALL
     AND ac.avoided_cost_subset = y.avoided_cost_subset
     WHERE 
     vsg.include_in_test
-    AND vsg.value_stream_group = 'annual'
+    AND vsg.value_stream_group IN ('annual', 'first_year')
     AND ac.hour_of_year IS NULL
     AND ac.day_of_year IS NULL
     AND ac.month IS NULL
