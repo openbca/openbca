@@ -13,11 +13,18 @@ WITH lifecycle_savings_calc AS (
 		, m.estimated_useful_life
 		, m.unit_quantity 
 		, cls.commodity
+		, label_1
+		, label_2
+		, label_3
+		, label_4
+		, label_5
 		, cls.total_net_annual_energy_savings * m.estimated_useful_life as total_net_lifecycle_energy_savings
 	FROM
 		core_layer1_mappings.commodity_load_shape_by_id cls 
-	JOIN core_layer0_base.measures m on 
+	JOIN core_layer0_base.measures m ON 
 		cls.id = m.id
+	WHERE 
+		cls.commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
 )
 
 , lifecycle_savings AS (
@@ -35,6 +42,11 @@ WITH lifecycle_savings_calc AS (
 			WHEN commodity IN ('NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL') THEN commodity || ' Lifecycle MMBtu Savings'
 			ELSE commodity || ' Lifecycle Savings'
 			END AS commodity
+			, label_1
+			, label_2
+			, label_3
+			, label_4
+			, label_5
 			, total_net_lifecycle_energy_savings
 		FROM 
 			lifecycle_savings_calc
@@ -96,7 +108,7 @@ WITH lifecycle_savings_calc AS (
 , total_values AS (
 	SELECT 
 		id
-		, sum(final_dollar_value) as Total_Dollar_Value
+		, sum(final_dollar_value) AS total_dollar_value
 	FROM  
 		core_layer3_finalization.final_value_calculations_ts
 	GROUP BY
@@ -116,4 +128,3 @@ JOIN commodity_values cv ON
 	lc.id = cv.id
 JOIN value_stream_values vs ON  
 	lc.id = vs.id
-

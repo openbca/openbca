@@ -101,8 +101,8 @@ SELECT
         )::MAP<VARCHAR, FLOAT> AS energy_savings_by_commodity,
         [
           'ADMIN',
-          'INCENTIVE',
-          'MEASURE',
+          'UTILITY INCENTIVE',
+          'MEASURE COST',
           'TAX INCENTIVE',
         ]::ARRAY<VARCHAR> AS cost_commodities,
     MAP(

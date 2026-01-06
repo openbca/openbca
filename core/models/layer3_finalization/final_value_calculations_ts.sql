@@ -16,10 +16,6 @@ SELECT
 	, ac_ls.hour_of_day
     , factors.energy_savings_factors_applied * ac_ls.avoided_cost_x_load_shape AS final_dollar_value
 	, factors.discount_factor
-	-- , factors.cost_factor_1
-    -- , factors.cost_factor_neg_1
-    -- , factors.cost_factor_ntg
-    -- , factors.cost_factor_1_minus_ntg
 FROM 
     core_layer2_precompute.savings_factors factors
 JOIN core_layer1_mappings.commodity_load_shape_by_id cls ON 
@@ -37,11 +33,11 @@ JOIN core_layer2_precompute.avoided_cost_load_shape_combos ac_ls ON
 )
 
 SELECT 
-    * EXCEPT(discount_factor)--EXCEPT(cost_factor_1, cost_factor_neg_1, cost_factor_ntg, cost_factor_1_minus_ntg)
+    * EXCEPT(discount_factor)
 FROM 
     standard_value_streams 
 WHERE
-	commodity NOT IN ('ADMIN', 'INCENTIVE', 'MEASURE', 'TAX INCENTIVE')
+	commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
 
 UNION ALL  
 
@@ -55,8 +51,7 @@ SELECT
     , svs.day_of_year 
     , svs.hour_of_year
 	, svs.hour_of_day
-	, c.cost_value * discount_factor * cost_treatment_factor
-
+	, -c.cost_value * discount_factor * cost_treatment_factor AS final_dollar_value
 FROM 
 	standard_value_streams svs 
 JOIN core_layer1_mappings.cost_components_by_id c ON  

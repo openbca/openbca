@@ -36,14 +36,16 @@ non_system_commodities = [
     'Societal Resilience'
     ]
 
-config_cost_name_map_dict = {
+config_cost_name_commodity_map_dict = {
     'Utility Program Admin Costs': 'ADMIN',
-    'Utility Financial Incentives': 'INCENTIVE',
-    'Host Customer Incremental Cost': 'MEASURE',
+    'Utility Financial Incentives': 'UTILITY INCENTIVE',
+    'Host Customer Incremental Cost': 'MEASURE COST',
+    'Host Customer Transaction Cost': 'MEASURE COST',
+    'Host Customer Interconn Cost': 'MEASURE COST',
     'Host Customer Tax Incentives': 'TAX INCENTIVE'
 }
 
-config_cost_fields_map_dict = {
+config_measure_cost_fields_map_dict = {
     'Utility Program Admin Costs': [
             'administration_costs_per_unit_dollar',
             'program_admin_costs_dollar_per_year'
@@ -56,10 +58,13 @@ config_cost_fields_map_dict = {
         ],
     'Host Customer Incremental Cost': [
             'incremental_costs_upfront_per_unit_dollar',
-            # 'annual_o_m_cost_per_unit_dollar_per_year',
-            'host_customer_transaction_costs_per_unit_dollar',
-            'host_customer_interconnection_costs_per_unit_dollar'
         ],
+    'Host Customer Transaction Cost': [
+        'host_customer_transaction_costs_per_unit_dollar'
+    ],        
+    'Host Customer Interconn Cost': [
+        'host_customer_interconnection_costs_per_unit_dollar'
+    ],
     'Host Customer Tax Incentives': [
             'host_customer_tax_incentives_per_unit_dollar',
             'program_federal_incentives_dollar_per_year'
@@ -140,7 +145,7 @@ def load_value_stream_groups_from_excel(
     value_stream_groups_df['value_stream_group'] = value_stream_groups_df.apply(lambda x: assign_value_stream_group(x['calc_type'], x['commodity'], x['avoided_cost']), axis=1)
 
     value_stream_groups_costs_dfs = []
-    for field in config_cost_name_map_dict.keys():
+    for field in config_cost_name_commodity_map_dict.keys():
         
         if field in value_stream_groups_df['avoided_cost'].unique():
             include_in_test = value_stream_groups_df.query(f"avoided_cost == '{field}'")['include_in_test'].values[0]
@@ -150,12 +155,12 @@ def load_value_stream_groups_from_excel(
             include_in_test = False
             print(f"{field} not found in the configuration file.")
 
-        for col in config_cost_fields_map_dict[field]:
+        for col in config_measure_cost_fields_map_dict[field]:
 
             df = pd.DataFrame(
                 [[
                     col, 
-                    config_cost_name_map_dict[field], 
+                    config_cost_name_commodity_map_dict[field], 
                     include_in_test, 
                     'Time Series - Annual' if col in repeating_annual_costs else 'Single Value - First Year', 
                     None, 
