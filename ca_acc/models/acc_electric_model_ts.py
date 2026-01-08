@@ -24,10 +24,14 @@ ID_COLUMNS = ["utility", "region", "year", "hour_of_year", "month", "quarter"]
 
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file
 DATA_DIR = os.path.join(BASE_DIR, "..", "raw_acc_files")  # adjust if needed
+
+###SETUP START###
 FILE_NAME = "2024 ACC Electric Model v1b.xlsb"
 AVOIDED_COSTS_VERSION = "2024"
 OUTPUT_TABLE_NAME = f"full_ca_avoided_costs_{AVOIDED_COSTS_VERSION}acc"
 
+# First numeric data row in the Detailed Output sheet
+detailed_output_first_data_row = 9
 detailed_output_utility_validation_cell = 'H2'
 detailed_output_climate_zone_validation_cell = 'H3'
 
@@ -41,6 +45,7 @@ UTILITY_CLIMATE_ZONES = {
     'SDG&E': ['CZ7', 'CZ10', 'CZ14', 'CZ15']
 }
 
+# Check cell ranges and value stream ordering in the Detailed Output sheet
 value_stream_ranges_dict = {
     'total': ['P', 'AU'],
     'cap_and_trade': ['AW', 'CB'],
@@ -57,6 +62,7 @@ value_stream_ranges_dict = {
     'marginal_ghg': ['OW', 'QB']
 }
 
+# Define the metadata and temporal columns for the output table
 columns = {
             "utility": "string",
             "region": "string",
@@ -67,8 +73,7 @@ columns = {
             "hour_of_day": "int",
         }
 
-# First numeric data row in the Detailed Output sheet
-first_data_row = 9
+###SETUP END###
         
 # Add all value_stream columns as float
 for value_stream in value_stream_ranges_dict.keys():
@@ -245,7 +250,7 @@ def scrape_all_combinations(input_file, combinations):
                         output_sheet,
                         value_stream_ranges_dict[value_stream][0],
                         value_stream_ranges_dict[value_stream][1],
-                        first_data_row, first_data_row + 8759,
+                        detailed_output_first_data_row, detailed_output_first_data_row + 8759,
                         chunk_size=8760
                     )
                     df = pd.DataFrame(avoided_costs, columns=years).reset_index(names='hour_of_year')

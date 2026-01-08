@@ -39,7 +39,7 @@ run-nspm:
 	#@echo "Evaluating and writing output in output/final_value_calculations.csv..."
 	#@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.final_value_calculations_ts) TO 'output/final_value_calculations.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
-run-ca-acc:
+run-ca-electric-acc:
 	@echo "Starting ACC Electric Model data scraping..."
 	@echo "This will process all valid utility/climate zone combinations:"
 	@echo "  PG&E: CZ1, CZ2, CZ3A, CZ3B, CZ4, CZ5, CZ11, CZ12, CZ13, CZ16"

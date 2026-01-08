@@ -1,151 +1,169 @@
 # ACC Data Scraping
 
-This directory contains both a standalone scraping script and a SQLMesh model for scraping data from the 2024 ACC Electric Model Excel file (`2024 ACC Electric Model v1b.xlsb`).
+This directory contains a SQLMesh model for scraping data from the 2024 ACC Electric Model Excel file (`2024 ACC Electric Model v1b.xlsb`).
 
-## SQLMesh Model (Recommended)
+## SQLMesh Model
 
-The SQLMesh model (`models/acc_electric_model_ts.py`) is the recommended way to load ACC data into DuckDB.
+The SQLMesh model (`models/acc_electric_model_ts.py`) is used to load ACC data into DuckDB.
 
 ### Requirements
 
-1. **xlwings**: Install with `pip install xlwings`
+1. **xlwings**: Install with `pip install xlwings` (or via `uv sync`)
 2. **Excel**: Must be installed on macOS (xlwings requires Excel to be installed)
 3. **File must be closed**: Make sure the Excel file is closed before running
 4. **SQLMesh**: Should be installed as part of the project dependencies
 
+### Prerequesits
+
+1. Upload the CA electric ACC workbook into the ca_acc/raw_acc_files folder.
+2. Save this file with 0% entered as the discount rate.
+3. Review the ACC workbook, in particiular the Dashboard Viewer and Detailed Outputs pages. Make any necessary changes within the SETUP section of the ca_acc/models/acc_electric_model_ts.py file.
+
 ### Usage
 
-1. Set environment variables for utilities and climate zones:
+Run the model using the Makefile command:
+
 ```bash
-export ACC_UTILITIES="PG&E,SCE,SDG&E"
-export ACC_CLIMATE_ZONES="CZ1,CZ2,CZ3,CZ4,CZ5,CZ6,CZ7,CZ8,CZ9,CZ10,CZ11,CZ12,CZ13,CZ14,CZ15,CZ16"
-export ACC_UTILITY_FILTER="Utility"  # Optional, auto-detected if not provided
-export ACC_CLIMATE_ZONE_FILTER="Climate Zone"  # Optional, auto-detected if not provided
-export ACC_MACRO_WAIT="2.0"  # Optional, default is 2.0 seconds
-export DB="output/openbca.db"  # DuckDB database path
+make run-ca-electric-acc
 ```
 
-2. Run SQLMesh to execute the model:
-```bash
-cd ca_acc
-sqlmesh run
-```
+This command will:
+1. Create the `ca_acc/output` directory if it doesn't exist
+2. Run SQLMesh with the `ca_acc` project to scrape all combinations
+3. Output data to `ca_acc/output/ca_acc.db`
+4. Export the final table to `ca_acc/output/full_ca_avoided_costs_2024acc.csv`
 
-The model will:
-- Scrape data for all combinations of utilities and climate zones
-- Output the data to the DuckDB database specified by the `DB` environment variable
-- Create a table named `acc_electric_model.ts` (or as configured in your SQLMesh project)
+The model processes all combinations defined in the `UTILITY_CLIMATE_ZONES` dictionary:
+- **PG&E**: CZ1, CZ2, CZ3A, CZ3B, CZ4, CZ5, CZ11, CZ12, CZ13, CZ16
+- **SCE**: CZ6, CZ8, CZ9, CZ10, CZ13, CZ14, CZ15, CZ16
+- **SDG&E**: CZ7, CZ10, CZ14, CZ15
+
+**Total: 26 combinations**
+
+### Interactive Process
+
+The model uses an **interactive approach** where you manually update Excel filters for each combination:
+
+1. Excel opens automatically in visible mode
+2. For each combination, the script will prompt you to:
+   - **Set the discount rate to 0** in the Dashboard Viewer sheet (cell G11)
+   - Set the Utility filter to the specified utility
+   - Set the Climate Zone filter to the specified climate zone
+   - Run the macro in Excel (if needed)
+   - Save the Excel file
+   - Press ENTER in the terminal to continue
+
+3. The script verifies the macro ran by checking cells H2 and H3 in the Detailed Output sheet
+4. If verification fails, you'll be prompted to correct the values
+5. Data is scraped after confirmation
+
+This manual process is necessary because Excel macros on macOS don't reliably trigger from programmatic cell changes via xlwings.
 
 ### Model Schema
 
-The output table has the following structure:
-- `utility`: string - The utility name
-- `climate_zone`: string - The climate zone name  
+The output table (`acc_electric_model.full_ca_avoided_costs_2024acc`) has the following structure:
+
+#### ID Columns (Grain)
+- `utility`: string - The utility name (with '&' removed, e.g., "PGE", "SCE", "SDGE")
+- `region`: string - The climate zone name (e.g., "CZ1", "CZ2", etc.)
+- `year`: int - The year
 - `hour_of_year`: int - Hour of year (0-8759)
-- `[metric_name]`: float - Various metrics (dynamically determined from the Excel file)
+- `month`: int - Month (1-12), derived from hour_of_year
+- `quarter`: int - Quarter (1-4), derived from month
 
-The metrics are extracted from:
-- **First range**: P9:AU8768 (headers from P5:AU5)
-- **Second range**: AW9:NM8768 (headers from AW5:NM5)
+#### Value Stream Columns (All float)
+- `total`: Total annual values
+- `cap_and_trade`: Cap and trade hourly marginal emissions
+- `ghg_adder`: GHG adder
+- `ghg_rebalancing`: GHG rebalancing
+- `energy`: Energy value stream
+- `capacity`: Capacity value stream
+- `transmission`: Transmission value stream
+- `distribution`: Distribution value stream
+- `ancillary_services`: Ancillary services value stream
+- `losses`: Losses value stream
+- `methane_leakage`: Methane leakage value stream
+- `air_quality_adder`: Air quality adder value stream
+- `marginal_ghg`: Marginal GHG (multiplied by 1000)
 
-Column headers are extracted from row 5 by taking the text before ' (' (if present), converting to lowercase, and replacing spaces with underscores. For example, "Losses (something)" becomes "losses".
+#### Computed Columns
+- `ghg_adder_rebalancing`: float - Sum of `ghg_adder` + `ghg_rebalancing`
+- `hour_of_day`: int - Hour of day (0-23), derived from `hour_of_year % 24`
 
-## Standalone Script
+### Data Sources
 
-The standalone script (`scrape_acc_data.py`) can be used for testing or one-off data extraction.
+The metrics are extracted from multiple column ranges in the Detailed Output sheet:
 
-## Requirements
+| Value Stream | Column Range | Data Range |
+|-------------|--------------|------------|
+| total | P:AU | P9:AU8768 |
+| cap_and_trade | AW:CB | AW9:CB8768 |
+| ghg_adder | CD:DI | CD9:DI8768 |
+| ghg_rebalancing | DK:EP | DK9:EP8768 |
+| energy | ER:FW | ER9:FW8768 |
+| capacity | FY:HD | FY9:HD8768 |
+| transmission | HF:IK | HF9:IK8768 |
+| distribution | IM:JR | IM9:JR8768 |
+| ancillary_services | JT:KY | JT9:KY8768 |
+| losses | LA:MF | LA9:MF8768 |
+| methane_leakage | MH:NM | MH9:NM8768 |
+| air_quality_adder | NO:OT | NO9:OT8768 |
+| marginal_ghg | OW:QB | OW9:QB8768 |
 
-1. **xlwings**: Install with `pip install xlwings`
-2. **Excel**: Must be installed on macOS (xlwings requires Excel to be installed)
-3. **File must be closed**: Make sure the Excel file is closed before running the script
+**Years are read from**: P6:AU6
 
-## Usage
+**Verification cells**:
+- Utility: H2
+- Climate Zone: H3
 
-### Interactive Mode
+### Data Transformations
 
-Run the script without arguments to use interactive mode:
+1. **Utility name normalization**: The '&' character is removed from utility names (e.g., "PG&E" → "PGE")
 
-```bash
-python ca_acc/scrape_acc_data.py
-```
+2. **Month mapping**: Hours of year (0-8759) are mapped to months (1-12) using a 2023 calendar year (8760 hours = 365 days × 24 hours)
 
-The script will:
-1. Read the filter structure from the Dashboard Viewer sheet
-2. Auto-detect Utility and Climate Zone filters (or prompt you)
-3. Ask you to provide the unique values for Utility and Climate Zone
+3. **Quarter mapping**: Months are mapped to quarters:
+   - Q1: January-March (months 1-3)
+   - Q2: April-June (months 4-6)
+   - Q3: July-September (months 7-9)
+   - Q4: October-December (months 10-12)
+
+4. **Hour of day**: Calculated as `hour_of_year % 24`
+
+5. **marginal_ghg scaling**: The `marginal_ghg` value stream is multiplied by 1000
+
+6. **ghg_adder_rebalancing**: Computed as the sum of `ghg_adder` + `ghg_rebalancing`
+
+### Output Files
+
+After running `make run-ca-acc`, the following files are created:
+
+- **Database**: `ca_acc/output/ca_acc.db` - DuckDB database containing the table `ca_acc.acc_electric_model.full_ca_avoided_costs_2024acc`
+- **CSV Export**: `ca_acc/output/full_ca_avoided_costs_2024acc.csv` - CSV export of the complete table
+
+### How It Works
+
+1. Opens the Excel file using xlwings in **visible mode** so you can interact with it
+2. Reads years from row 6 (P6:AU6) in the Detailed Output sheet
+3. Iterates through all utility/climate zone combinations from `UTILITY_CLIMATE_ZONES`
 4. For each combination:
-   - Set discount rate (G11) to 0
-   - Set filter values and wait for macros to execute
-   - Scrape data from Detailed Output sheet (P9:AU8768 and AW9:NM8768)
-   - Extract column headers from row 5 (text before ' (')
-   - Add hour_of_year, utility, and climate_zone columns
-   - Save as pivoted vertical format
+   - Prompts you to manually set filters and discount rate in Excel
+   - Waits for your confirmation (ENTER key)
+   - Verifies the macro ran by checking H2 and H3
+   - Reads data from all 13 value stream ranges (8760 rows each)
+   - Combines all value streams into a single DataFrame
+   - Pivots data from wide format to long format (one row per hour/year/utility/region combination)
+5. After all combinations are processed:
+   - Combines all DataFrames
+   - Adds computed columns (`ghg_adder_rebalancing`, `hour_of_day`, `month`, `quarter`)
+   - Applies transformations (marginal_ghg scaling, utility name normalization)
+   - Returns the final DataFrame to SQLMesh
+6. SQLMesh writes the data to DuckDB and exports to CSV
 
-### Command-Line Mode
+### Notes
 
-You can provide all parameters via command-line arguments:
-
-```bash
-python ca_acc/scrape_acc_data.py \
-  --utilities "PG&E,SCE,SDG&E" \
-  --climate-zones "CZ1,CZ2,CZ3,CZ4,CZ5,CZ6,CZ7,CZ8,CZ9,CZ10,CZ11,CZ12,CZ13,CZ14,CZ15,CZ16" \
-  --utility-filter "Utility" \
-  --climate-zone-filter "Climate Zone" \
-  --macro-wait 3.0
-```
-
-### Arguments
-
-- `--utilities`: Comma-separated list of Utility values
-- `--climate-zones`: Comma-separated list of Climate Zone values
-- `--utility-filter`: Name of the Utility filter (auto-detected if not provided)
-- `--climate-zone-filter`: Name of the Climate Zone filter (auto-detected if not provided)
-- `--macro-wait`: Seconds to wait after setting filters for macros to execute (default: 2.0)
-
-## Output
-
-The script saves CSV files in `ca_acc/models/` with the naming pattern:
-```
-acc_data_{utility}_{climate_zone}.csv
-```
-
-Each CSV file contains data in a pivoted vertical format with the following schema:
-
-- `utility`: string - The utility name
-- `climate_zone`: string - The climate zone name
-- `hour_of_year`: int - Hour of year (0-8759)
-- `[metric_name]`: float - Various metrics extracted from the data
-
-The metrics are extracted from:
-- **First range**: P9:AU8768 (headers from P5:AU5)
-- **Second range**: AW9:NM8768 (headers from AW5:NM5)
-
-Column headers are extracted from row 5 by taking the text before ' (' (if present), converting to lowercase, and replacing spaces with underscores. For example, "Losses (something)" becomes "losses".
-
-## How It Works
-
-1. Opens the Excel file using xlwings (invisible Excel instance)
-2. Reads the Dashboard Viewer sheet to identify filters (cells F3:F12 and G3:G12)
-3. For each combination of Utility and Climate Zone:
-   - Sets discount rate (G11) to 0
-   - Sets the filter values in cells G3:G12
-   - Waits for Excel macros to execute (which filter the data)
-   - Reads column headers from row 5 (P5:AU5 and AW5:NM5)
-   - Extracts header names (text before ' ('), converts to lowercase, replaces spaces with underscores
-   - Reads the filtered data from the Detailed Output sheet:
-     - First range: P9:AU8768
-     - Second range: AW9:NM8768
-   - Combines both ranges horizontally
-   - Adds `hour_of_year` column (0-8759)
-   - Adds `utility` and `climate_zone` columns
-   - Reorders columns: utility, climate_zone, hour_of_year, then all metrics
-   - Saves the data to a CSV file
-
-## Notes
-
-- The script automatically identifies filters containing "Utility" and "Climate Zone" in their names
-- If auto-detection fails, you'll be prompted to provide the filter names
-- The macro wait time can be adjusted if macros take longer to execute
-- Make sure Excel is not running or the file is closed before starting
-
+- **Manual intervention required**: You must manually set filter values and run macros in Excel for each combination. This is a limitation of Excel macros on macOS when triggered programmatically.
+- **Discount rate**: Must be manually set to 0 in the Dashboard Viewer sheet (cell G11) before scraping each combination.
+- **File must be closed**: Ensure the Excel file is closed before running the command, or Excel may refuse to open it programmatically.
+- **Process time**: With 26 combinations and manual steps, the full process can take 30-60 minutes depending on how quickly you complete each step.
+- **Chunk size**: Data is read in chunks of 8760 rows (one full year of hourly data) to avoid buffer overflow errors.
