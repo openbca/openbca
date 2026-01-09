@@ -41,16 +41,21 @@ run-nspm:
 
 run-ca-electric-acc:
 	@echo "Starting ACC Electric Model data scraping..."
-	@echo "This will process all valid utility/climate zone combinations:"
-	@echo "  PG&E: CZ1, CZ2, CZ3A, CZ3B, CZ4, CZ5, CZ11, CZ12, CZ13, CZ16"
-	@echo "  SCE: CZ6, CZ8, CZ9, CZ10, CZ13, CZ14, CZ15, CZ16"
-	@echo "  SDG&E: CZ7, CZ10, CZ14, CZ15"
 	@echo ""
 	@mkdir -p ca_acc/output
-	@DB=ca_acc/output/ca_acc.db uv run sqlmesh -p ca_acc plan --auto-apply
-	@echo "Exporting table to CSV..."
-	@time DB=ca_acc/output/ca_acc.db uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM ca_acc.acc_electric_model.full_ca_avoided_costs_2024acc) TO 'ca_acc/output/full_ca_avoided_costs_2024acc.csv' (HEADER, DELIMITER ',');\"); con.close()"
-	@echo "CSV file saved to: ca_acc/output/full_ca_avoided_costs_2024acc.csv"
+	@DB=ca_acc/output/ca_electric_acc.db uv run sqlmesh -p ca_acc/electric plan --auto-apply
+	@echo "Exporting electric ACC table to CSV..."
+	@time DB=ca_acc/output/ca_electric_acc.db uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM ca_electric_acc.ca_acc_layer1_smoothing.electric_acc_smoothed) TO 'ca_acc/output/full_ca_avoided_costs_acc_smoothed.csv' (HEADER, DELIMITER ',');\"); con.close()"
+	@echo "CSV file saved to: ca_acc/output/full_ca_avoided_costs_acc_smoothed.csv"
+
+run-ca-gas-acc:
+	@echo "Starting ACC Gas Model data scraping..."
+	@echo ""
+	@mkdir -p ca_acc/output
+	@DB=ca_acc/output/ca_gas_acc.db uv run sqlmesh -p ca_acc/gas plan --auto-apply
+	@echo "Exporting gas ACC table to CSV..."
+	@time DB=ca_acc/output/ca_gas_acc.db uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM ca_gas_acc.gas.acc_gas_model_ts) TO 'ca_acc/output/full_ca_avoided_costs_acc_gas.csv' (HEADER, DELIMITER ',');\"); con.close()"
+	@echo "CSV file saved to: ca_acc/output/full_ca_avoided_costs_acc_gas.csv"
 
 
 run-nspm-group-outputs:
@@ -59,7 +64,6 @@ run-nspm-group-outputs:
 	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id) TO 'output/results_summary_by_id.csv' (HEADER, DELIMITER ',');\"); con.close()"
 	@echo "Evaluating and writing output in output/custom_aggregation_results_summary.csv..."
 	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT $(GB), sum(final_dollar_value) AS final_dollar_value FROM openbca.core_layer3_finalization.final_value_calculations_ts GROUP BY $(GB)) TO 'output/custom_aggregation_results_summary.csv' (HEADER, DELIMITER ',');\"); con.close()"
-
 
 test-parsing:
 	@echo "\nTesting parsing of Excel input templates."

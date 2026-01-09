@@ -20,7 +20,6 @@ ID_COLUMNS = [
         "month": "int",
         "day_of_year": "int",
         "type_of_day": "string",
-        #"period": "string",
         "hour_of_day": "int",
         "hour_of_year": "int",
         "avoided_cost_value": "float",
