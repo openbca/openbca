@@ -44,14 +44,6 @@ ID_COLUMNS = ["id", "measure_id", "project_id"]
         "host_customer_transaction_costs_dollar_per_unit": "float",
         "host_customer_interconnection_costs_dollar_per_unit": "float",
         "host_customer_tax_incentives_upfront_dollar_per_unit": "float",
-        #"incremental_costs_upfront_per_unit_dollar": "float",
-        #"incremental_costs_annual_per_unit_dollar_per_year": "float",
-        #"utility_upfront_incentive_per_unit_dollar": "float",
-        #"utility_annual_incentive_per_unit_dollar_per_year": "float",
-        #"administration_costs_per_unit_dollar": "float",
-        #"host_customer_transaction_costs_per_unit_dollar": "float",
-        #"host_customer_interconnection_costs_per_unit_dollar": "float",
-        #"host_customer_tax_incentives_per_unit_dollar": "float",
         "host_customer_non_energy_impacts_dollar_per_unit": "float",
         "host_customer_non_energy_impacts_low_income_dollar_per_unit": "float",
         "change_in_host_customer_risk_dollar_per_unit": "float",
@@ -197,10 +189,6 @@ def load_measure_inputs_from_excel(
     df.rename(
         {
             'estimated_useful_life_years':'estimated_useful_life',
-            # 'annual_natural_gas_savings_mmbtu':'annual_natural_gas_mmbtu_savings',
-            # 'annual_propane_savings_mmbtu':'annual_propane_mmbtu_savings',
-            # 'annual_oil_savings_mmbtu':'annual_oil_mmbtu_savings',
-            # 'annual_diesel_savings_mmbtu':'annual_diesel_mmbtu_savings'
         }, 
         axis = 1, inplace = True)
 
