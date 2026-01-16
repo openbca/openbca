@@ -26,29 +26,38 @@ ID_COLUMNS = ["id", "measure_id", "project_id"]
         "measure_unit": "string",
         "unit_quantity": "float",
         "electric_load_shape": "string",
-        "annual_kwh_savings": "float",
-        "coincident_peak_kw_savings": "float",
+        "annual_electric_savings_kwh": "float",
+        "coincident_peak_savings_kw": "float",
         "natural_gas_load_shape": "string",
-        "annual_natural_gas_mmbtu_savings": "float",
-        "annual_propane_mmbtu_savings": "float",
-        "annual_oil_mmbtu_savings": "float",
-        "annual_diesel_mmbtu_savings": "float",
+        "annual_natural_gas_savings_mmbtu": "float",
+        "annual_propane_savings_mmbtu": "float",
+        "annual_oil_savings_mmbtu": "float",
+        "annual_diesel_savings_mmbtu": "float",
         "estimated_useful_life": "int",
         "ntg": "float",
-        "incremental_costs_upfront_per_unit_dollar": "float",
-        "incremental_costs_annual_per_unit_dollar_per_year": "float",
-        "utility_upfront_incentive_per_unit_dollar": "float",
-        "utility_annual_incentive_per_unit_dollar_per_year": "float",
-        "administration_costs_per_unit_dollar": "float",
-        "host_customer_transaction_costs_per_unit_dollar": "float",
-        "host_customer_interconnection_costs_per_unit_dollar": "float",
-        "host_customer_tax_incentives_per_unit_dollar": "float",
-        "host_customer_non_energy_impacts_per_unit_dollar": "float",
-        "host_customer_non_energy_impacts_low_income_per_unit_dollar": "float",
-        "change_in_host_customer_risk_per_unit": "float",
-        "change_in_host_customer_reliability_per_unit": "float",
-        "change_in_host_customer_resilience_per_unit": "float",
-        "change_in_societal_resilience_per_unit": "float",
+        "administration_costs_upfront_dollar_per_unit": "float",
+        "administration_costs_annual_dollar_per_unit_year": "float",
+        "utility_incentive_upfront_dollar_per_unit": "float",
+        "utility_incentive_annual_dollar_per_unit_year": "float",
+        "incremental_costs_upfront_dollar_per_unit": "float",
+        "incremental_costs_annual_dollar_per_unit_year": "float",
+        "host_customer_transaction_costs_dollar_per_unit": "float",
+        "host_customer_interconnection_costs_dollar_per_unit": "float",
+        "host_customer_tax_incentives_upfront_dollar_per_unit": "float",
+        #"incremental_costs_upfront_per_unit_dollar": "float",
+        #"incremental_costs_annual_per_unit_dollar_per_year": "float",
+        #"utility_upfront_incentive_per_unit_dollar": "float",
+        #"utility_annual_incentive_per_unit_dollar_per_year": "float",
+        #"administration_costs_per_unit_dollar": "float",
+        #"host_customer_transaction_costs_per_unit_dollar": "float",
+        #"host_customer_interconnection_costs_per_unit_dollar": "float",
+        #"host_customer_tax_incentives_per_unit_dollar": "float",
+        "host_customer_non_energy_impacts_dollar_per_unit": "float",
+        "host_customer_non_energy_impacts_low_income_dollar_per_unit": "float",
+        "change_in_host_customer_risk_dollar_per_unit": "float",
+        "change_in_host_customer_reliability_dollar_per_unit": "float",
+        "change_in_host_customer_resilience_dollar_per_unit": "float",
+        "change_in_societal_resilience_dollar_per_unit": "float",
         "custom_1_value_stream_name": "string",
         "custom_1_value_stream_commodity": "string",
         "custom_1_annual_savings": "float", 
@@ -149,7 +158,7 @@ def load_measure_inputs_from_excel(
         # Both are invalid, return None (will become NaN in Pandas)
         return None
 
-    df['annual_kwh_savings'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['electric_load_shape'], x['annual_kwh_savings']), axis = 1)
+    df['annual_electric_savings_kwh'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['electric_load_shape'], x['annual_electric_savings_kwh']), axis = 1)
     
     df['annual_natural_gas_savings_mmbtu'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['natural_gas_load_shape'], x['annual_natural_gas_savings_mmbtu']), axis = 1)
 
@@ -188,10 +197,10 @@ def load_measure_inputs_from_excel(
     df.rename(
         {
             'estimated_useful_life_years':'estimated_useful_life',
-            'annual_natural_gas_savings_mmbtu':'annual_natural_gas_mmbtu_savings',
-            'annual_propane_savings_mmbtu':'annual_propane_mmbtu_savings',
-            'annual_oil_savings_mmbtu':'annual_oil_mmbtu_savings',
-            'annual_diesel_savings_mmbtu':'annual_diesel_mmbtu_savings'
+            # 'annual_natural_gas_savings_mmbtu':'annual_natural_gas_mmbtu_savings',
+            # 'annual_propane_savings_mmbtu':'annual_propane_mmbtu_savings',
+            # 'annual_oil_savings_mmbtu':'annual_oil_mmbtu_savings',
+            # 'annual_diesel_savings_mmbtu':'annual_diesel_mmbtu_savings'
         }, 
         axis = 1, inplace = True)
 

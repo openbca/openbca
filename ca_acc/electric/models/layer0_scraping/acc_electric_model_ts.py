@@ -24,6 +24,7 @@ ID_COLUMNS = ["utility", "region", "year", "hour_of_year", "month", "quarter"]
 
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file
 DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "..", "raw_acc_files"))  # adjust if needed
+
 ###SETUP START###
 FILE_NAME = "2024 ACC Electric Model v1b.xlsb"
 OUTPUT_TABLE_NAME = f"full_ca_avoided_costs_acc"
@@ -38,9 +39,9 @@ detialed_output_years_cell_final = 'AU6'
 
 # Utility to Climate Zone mapping
 UTILITY_CLIMATE_ZONES = {
-    'PG&E': ['CZ1', 'CZ2', 'CZ3A', 'CZ3B', 'CZ4', 'CZ5', 'CZ11', 'CZ12', 'CZ13', 'CZ16'],
-    'SCE': ['CZ6', 'CZ8', 'CZ9', 'CZ10', 'CZ13', 'CZ14', 'CZ15', 'CZ16'],
-    'SDG&E': ['CZ7', 'CZ10', 'CZ14', 'CZ15']
+    'PG&E': ['CZ1'],#, 'CZ2', 'CZ3A', 'CZ3B', 'CZ4', 'CZ5', 'CZ11', 'CZ12', 'CZ13', 'CZ16'],
+    'SCE': ['CZ6'],# 'CZ8', 'CZ9', 'CZ10', 'CZ13', 'CZ14', 'CZ15', 'CZ16'],
+    #'SDG&E': ['CZ7', 'CZ10', 'CZ14', 'CZ15']
 }
 
 # Check cell ranges and value stream ordering in the Detailed Output sheet

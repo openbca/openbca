@@ -47,33 +47,37 @@ config_cost_name_commodity_map_dict = {
 
 config_measure_cost_fields_map_dict = {
     'Utility Program Admin Costs': [
-            'administration_costs_per_unit_dollar',
+            'administration_costs_upfront_dollar_per_unit',
+            'administration_costs_annual_dollar_per_unit_year',
             'program_admin_costs_dollar_per_year'
         ],
     'Utility Financial Incentives': [
-            'utility_upfront_incentive_per_unit_dollar',
-            'utility_annual_incentive_per_unit_dollar_per_year',
+            'utility_incentive_upfront_dollar_per_unit',
+            'utility_incentive_annual_dollar_per_unit_year',
             'program_incentive_utility_dollar_per_year',
             'program_performance_incentive_utility_dollar_per_year'
         ],
     'Host Customer Incremental Cost': [
-            'incremental_costs_upfront_per_unit_dollar',
+            'incremental_costs_upfront_dollar_per_unit',
+            'incremental_costs_annual_dollar_per_unit_year'
         ],
     'Host Customer Transaction Cost': [
-        'host_customer_transaction_costs_per_unit_dollar'
+        'host_customer_transaction_costs_dollar_per_unit'
     ],        
     'Host Customer Interconn Cost': [
-        'host_customer_interconnection_costs_per_unit_dollar'
+        'host_customer_interconnection_costs_dollar_per_unit'
     ],
     'Host Customer Tax Incentives': [
-            'host_customer_tax_incentives_per_unit_dollar',
+            'host_customer_tax_incentives_upfront_dollar_per_unit',
             'program_federal_incentives_dollar_per_year'
         ]
 }
 
 repeating_annual_costs = [
+    'administration_costs_annual_dollar_per_unit_year',
     'program_admin_costs_dollar_per_year', 
-    'utility_annual_incentive_per_unit_dollar_per_year',
+    'utility_incentive_annual_dollar_per_unit_year',
+    'incremental_costs_annual_dollar_per_unit_year',
     'program_incentive_utility_dollar_per_year',
     'program_performance_incentive_utility_dollar_per_year',
     'program_federal_incentives_dollar_per_year'

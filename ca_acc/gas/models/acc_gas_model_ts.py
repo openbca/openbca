@@ -65,6 +65,7 @@ columns = {
 for value_stream in value_stream_ranges_dict.keys():
     columns[value_stream] = "float"
 
+columns['marginal_ghg'] = "float"
 
 @model(
     name="gas.acc_gas_model_ts",

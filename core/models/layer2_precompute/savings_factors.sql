@@ -96,7 +96,7 @@ SELECT
     ELSE energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor 
     END AS energy_savings_factors_applied
     , CASE 
-    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN coincident_peak_kw_savings * unit_quantity * ntg * discount_factor / (1-electric_line_loss) 
+    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN coincident_peak_savings_kw * unit_quantity * ntg * discount_factor / (1-electric_line_loss) 
     ELSE NULL 
     END AS coincident_peak_savings_factors_applied
 FROM 
