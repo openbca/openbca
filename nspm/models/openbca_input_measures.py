@@ -4,6 +4,7 @@ from sqlmesh import model, ExecutionContext
 import pandas as pd
 import os
 import re
+from parsing_helper_functions import clean_header
 
 ID_COLUMNS = ["id", "measure_id", "project_id"]
 
@@ -83,31 +84,31 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file
 DATA_DIR = os.path.join(BASE_DIR, "..", "input_templates")  # adjust if needed
 
-def clean_header(col: str) -> str:
-    col = str(col).strip().lower()
+# def clean_header(col: str) -> str:
+#     col = str(col).strip().lower()
 
-    # Replace spaces, hyphens with underscore
-    col = col.replace(" ", "_").replace("-", "_")
+#     # Replace spaces, hyphens with underscore
+#     col = col.replace(" ", "_").replace("-", "_")
 
-    # Remove parentheses
-    col = re.sub(r"[()]", "", col)
+#     # Remove parentheses
+#     col = re.sub(r"[()]", "", col)
 
-    # Replace : and & with _
-    col = col.replace(":", "_").replace("&", "_")
+#     # Replace : and & with _
+#     col = col.replace(":", "_").replace("&", "_")
 
-    # Replace $/ with _dollar_per_
-    col = col.replace("$/", "_dollar_per_")
+#     # Replace $/ with _dollar_per_
+#     col = col.replace("$/", "_dollar_per_")
 
-    # Replace $ with _dollar_
-    col = col.replace("$", "_dollar_")
+#     # Replace $ with _dollar_
+#     col = col.replace("$", "_dollar_")
 
-    # Collapse multiple underscores
-    col = re.sub(r"__+", "_", col)
+#     # Collapse multiple underscores
+#     col = re.sub(r"__+", "_", col)
 
-    # Strip trailing/leading underscores
-    col = col.strip("_")
+#     # Strip trailing/leading underscores
+#     col = col.strip("_")
 
-    return col
+#     return col
 
 def load_measure_inputs_from_excel(
     input_file: str,
@@ -124,9 +125,6 @@ def load_measure_inputs_from_excel(
 
     # Apply header cleaning
     df.columns = [clean_header(c) for c in df.columns]
-
-    # Rescale discount rate for use in NPV calculations
-    # df['discount_rate'] = df['discount_rate']/100
 
     # Fill in null values of avoided cost subset with 'System-wide'
 

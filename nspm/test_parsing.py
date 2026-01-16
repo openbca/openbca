@@ -15,6 +15,7 @@ from models.openbca_input_load_shapes_ts import load_load_shapes_from_excel
 from models.openbca_input_avoided_costs_ts import load_avoided_costs_from_excel
 from models.openbca_input_value_stream_groups import load_value_stream_groups_from_excel
 from models.openbca_input_global_parameters import compile_global_parameters_from_excel
+from models.openbca_input_program_value_streams import load_program_value_streams_from_excel
 
 
 def test_measures_parsing():
@@ -93,17 +94,32 @@ def test_global_parameters_parsing():
         return False
 
 
+def test_program_value_streams_parsing():
+    """Test parsing of program value streams."""
+    print("\nTesting program value streams parsing...")
+    try:
+        df = load_program_value_streams_from_excel(
+            input_file='OpenBCA Program Input.xlsx'
+        )
+        print(f"  ✓ Successfully parsed program value streams: {len(df)} rows")
+        return True
+    except Exception as e:
+        print(f"  ✗ Failed to parse program value streams: {e}")
+        return False
+
+
 def main():
     """Run all parsing tests."""
     #print("\nTesting parsing of Excel input templates.")
     print("=" * 60)
     
     results = []
-    results.append(test_measures_parsing())
+    # results.append(test_measures_parsing())
     # results.append(test_load_shapes_parsing())
     # results.append(test_avoided_costs_parsing())
     # results.append(test_value_stream_groups_parsing())
     # results.append(test_global_parameters_parsing())
+    results.append(test_program_value_streams_parsing())
     
     print("=" * 60)
     passed = sum(results)
