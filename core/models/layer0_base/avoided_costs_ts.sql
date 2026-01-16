@@ -1,5 +1,5 @@
 MODEL(
-    name core_layer0_base.avoided_costs_ts,
+    name core_layer0_base.avoided_costs_ts, 
     kind VIEW,
     grain (avoided_cost, avoided_cost_subset, year, hour_of_year),
 );
