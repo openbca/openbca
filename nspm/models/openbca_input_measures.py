@@ -44,7 +44,7 @@ ID_COLUMNS = ["id", "measure_id", "project_id"]
         "incremental_costs_annual_dollar_per_unit_year": "float",
         "host_customer_transaction_costs_dollar_per_unit": "float",
         "host_customer_interconnection_costs_dollar_per_unit": "float",
-        "host_customer_tax_incentives_upfront_dollar_per_unit": "float",
+        "host_customer_tax_incentive_upfront_dollar_per_unit": "float",
         "host_customer_non_energy_impacts_dollar_per_unit": "float",
         "host_customer_non_energy_impacts_low_income_dollar_per_unit": "float",
         "change_in_host_customer_risk_dollar_per_unit": "float",

@@ -107,8 +107,8 @@ FROM
             -- 'annual_o_m_cost_per_unit_dollar_per_year',
             'host_customer_transaction_costs_dollar_per_unit',
             'host_customer_interconnection_costs_dollar_per_unit',
-            'host_customer_tax_incentives_upfront_dollar_per_unit',
-            'program_federal_incentives_dollar_per_year'
+            'host_customer_tax_incentive_upfront_dollar_per_unit',
+            'program_federal_incentive_dollar_per_year'
         ]
         ) AS k(avoided_cost)
 	CROSS JOIN GENERATE_SERIES(min_year, max_year) AS y(year)

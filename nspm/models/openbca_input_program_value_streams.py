@@ -16,7 +16,7 @@ ID_COLUMNS = ['program_name', 'year']
         'program_admin_costs_dollar_per_year': 'float',
         'program_incentive_utility_dollar_per_year': 'float',
         'program_performance_incentive_utility_dollar_per_year': 'float',
-        'program_federal_incentives_dollar_per_year': 'float'
+        'program_federal_incentive_dollar_per_year': 'float'
 
     },
 )
@@ -53,5 +53,5 @@ def load_program_value_streams_from_excel(
         'program_admin_costs_dollar_per_year',
         'program_incentive_utility_dollar_per_year',
         'program_performance_incentive_utility_dollar_per_year',
-        'program_federal_incentives_dollar_per_year'
+        'program_federal_incentive_dollar_per_year'
         ]]

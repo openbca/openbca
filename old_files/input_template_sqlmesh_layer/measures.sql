@@ -34,7 +34,7 @@ SELECT
     CAST(administration_costs_per_unit_dollar AS FLOAT) AS administration_costs_per_unit_dollar,
     CAST(host_customer_transaction_costs_per_unit_dollar AS FLOAT) AS host_customer_transaction_costs_per_unit_dollar,
     CAST(host_customer_interconnection_costs_per_unit_dollar AS FLOAT) AS host_customer_interconnection_costs_per_unit_dollar,
-    CAST(host_customer_tax_incentives_per_unit_dollar AS FLOAT) AS host_customer_tax_incentives_per_unit_dollar,
+    CAST(host_customer_tax_incentive_per_unit_dollar AS FLOAT) AS host_customer_tax_incentive_per_unit_dollar,
     CAST(host_customer_non_energy_impacts_per_unit_dollar AS FLOAT) AS host_customer_non_energy_impacts_per_unit_dollar,
     CAST(host_customer_non_energy_impacts_low_income_per_unit_dollar AS FLOAT) AS host_customer_non_energy_impacts_low_income_per_unit_dollar,
     CAST(change_in_host_customer_reliability_per_unit AS FLOAT) AS change_in_host_customer_reliability_per_unit,

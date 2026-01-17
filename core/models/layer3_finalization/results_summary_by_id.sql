@@ -18,7 +18,7 @@ WITH lifecycle_savings_calc AS (
 		, label_3
 		, label_4
 		, label_5
-		, cls.total_net_annual_energy_savings * m.estimated_useful_life as total_net_lifecycle_energy_savings
+		, cls.total_net_annual_energy_savings * m.estimated_useful_life AS total_net_lifecycle_energy_savings
 	FROM
 		core_layer1_mappings.commodity_load_shape_by_id cls 
 	JOIN core_layer0_base.measures m ON 
@@ -108,7 +108,7 @@ WITH lifecycle_savings_calc AS (
 , total_values AS (
 	SELECT 
 		id
-		, sum(final_dollar_value) AS total_dollar_value
+		, SUM(final_dollar_value) AS total_dollar_value
 	FROM  
 		core_layer3_finalization.final_value_calculations_ts
 	GROUP BY

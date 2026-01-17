@@ -9,4 +9,5 @@ SELECT
     electric_line_loss::FLOAT AS electric_line_loss,
     natural_gas_line_loss::FLOAT AS natural_gas_line_loss,
     cost_treatment::VARCHAR AS cost_treatment,
-FROM openbca_input.global_parameters
+FROM 
+    openbca_input.global_parameters

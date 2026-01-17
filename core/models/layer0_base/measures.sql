@@ -35,7 +35,7 @@ SELECT
     incremental_costs_annual_dollar_per_unit_year::FLOAT AS incremental_costs_annual_dollar_per_unit_year,
     host_customer_transaction_costs_dollar_per_unit::FLOAT AS host_customer_transaction_costs_dollar_per_unit,
     host_customer_interconnection_costs_dollar_per_unit::FLOAT AS host_customer_interconnection_costs_dollar_per_unit,
-    host_customer_tax_incentives_upfront_dollar_per_unit::FLOAT AS host_customer_tax_incentives_upfront_dollar_per_unit,
+    host_customer_tax_incentive_upfront_dollar_per_unit::FLOAT AS host_customer_tax_incentive_upfront_dollar_per_unit,
     host_customer_non_energy_impacts_dollar_per_unit::FLOAT AS host_customer_non_energy_impacts_dollar_per_unit,
     host_customer_non_energy_impacts_low_income_dollar_per_unit::FLOAT AS host_customer_non_energy_impacts_low_income_dollar_per_unit,
     change_in_host_customer_risk_dollar_per_unit::FLOAT AS change_in_host_customer_risk_dollar_per_unit,
@@ -116,7 +116,7 @@ SELECT
           'incremental_costs_annual_dollar_per_unit_year',
           'host_customer_transaction_costs_dollar_per_unit',
           'host_customer_interconnection_costs_dollar_per_unit',
-          'host_customer_tax_incentives_upfront_dollar_per_unit'
+          'host_customer_tax_incentive_upfront_dollar_per_unit'
           --'annual_o_m_cost_per_unit_dollar_per_year'
         ], 
         [
@@ -128,7 +128,7 @@ SELECT
           incremental_costs_annual_dollar_per_unit_year,
           host_customer_transaction_costs_dollar_per_unit,
           host_customer_interconnection_costs_dollar_per_unit,
-          host_customer_tax_incentives_upfront_dollar_per_unit
+          host_customer_tax_incentive_upfront_dollar_per_unit
           --annual_o_m_cost_per_unit_dollar_per_year
           ]
         )::MAP<VARCHAR, FLOAT> AS costs_by_type,

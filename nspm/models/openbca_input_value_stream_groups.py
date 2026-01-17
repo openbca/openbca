@@ -68,8 +68,8 @@ config_measure_cost_fields_map_dict = {
         'host_customer_interconnection_costs_dollar_per_unit'
     ],
     'Host Customer Tax Incentives': [
-            'host_customer_tax_incentives_upfront_dollar_per_unit',
-            'program_federal_incentives_dollar_per_year'
+            'host_customer_tax_incentive_upfront_dollar_per_unit',
+            'program_federal_incentive_dollar_per_year'
         ]
 }
 
@@ -80,7 +80,7 @@ repeating_annual_costs = [
     'incremental_costs_annual_dollar_per_unit_year',
     'program_incentive_utility_dollar_per_year',
     'program_performance_incentive_utility_dollar_per_year',
-    'program_federal_incentives_dollar_per_year'
+    'program_federal_incentive_dollar_per_year'
     ]
 
 def load_value_stream_groups_from_excel(
