@@ -83,7 +83,7 @@ FROM
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
 	svs.commodity = vsg.commodity 
 WHERE 
-	svs.value_stream = 'Energy Generation (Electric)'
+	svs.value_stream = 'Energy Generation (E)'
 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
 	AND UPPER(vsg.commodity) = 'ELECTRIC'
 	AND include_in_test 
@@ -197,7 +197,7 @@ FROM
 	standard_value_streams svs
 	, openbca.core_layer0_base.value_stream_groups vsg  
 WHERE 
-	svs.value_stream IN ('Energy Generation (Electric)', 'Fuel Supply and O&M (NG)', 'Propane Supply', 'Oil Supply', 'Diesel Supply')
+	svs.value_stream IN ('Energy Generation (E)', 'Fuel Supply and O&M (NG)', 'Propane Supply', 'Oil Supply', 'Diesel Supply')
 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
 	AND UPPER(vsg.commodity) NOT IN ('ELECTRIC', 'NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL')
 	AND include_in_test 

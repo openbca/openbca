@@ -9,6 +9,9 @@ DOCKER_RUN_ARGS=-e DB=${DB} -v $(shell pwd)/reference:/app/reference -v $(shell 
 install:
 	uv sync
 
+test-streamlit:
+	uv run streamlit run streamlit_test/app.py
+
 test-core:
 	uv run sqlmesh -p core test
 
@@ -34,11 +37,6 @@ docker-test-app: docker-build
 docker-run-app: docker-build
 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
 
-run-nspm:
-	uv run sqlmesh -p nspm -p core plan --auto-apply
-	#@echo "Evaluating and writing output in output/final_value_calculations.csv..."
-	#@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.final_value_calculations_ts) TO 'output/final_value_calculations.csv' (HEADER, DELIMITER ',');\"); con.close()"
-
 run-ca-electric-acc:
 	@echo "Starting ACC Electric Model data scraping..."
 	@echo ""
@@ -57,6 +55,8 @@ run-ca-gas-acc:
 	@time DB=ca_acc/output/ca_gas_acc.db uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM ca_gas_acc.gas.acc_gas_model_ts) TO 'ca_acc/output/full_ca_avoided_costs_acc_gas.csv' (HEADER, DELIMITER ',');\"); con.close()"
 	@echo "CSV file saved to: ca_acc/output/full_ca_avoided_costs_acc_gas.csv"
 
+run-nspm:
+	uv run sqlmesh -p nspm -p core plan --auto-apply
 
 run-nspm-group-outputs:
 	@time uv run sqlmesh -p nspm -p core plan --auto-apply

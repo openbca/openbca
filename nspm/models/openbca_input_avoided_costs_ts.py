@@ -152,5 +152,7 @@ def load_avoided_costs_from_excel(
     
     # Adjust hour_of_year from 1 - 8760 to 0 - 8759
     long_df['hour_of_year'] = long_df['hour_of_year'] - 1
+
+    print(long_df.query('avoided_cost == "Oil Supply"').head())
     
     return long_df
