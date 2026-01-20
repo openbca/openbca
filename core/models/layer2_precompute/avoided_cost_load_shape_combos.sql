@@ -221,7 +221,7 @@ UNION ALL
 
 (
     SELECT  
-    distinct
+    DISTINCT
     true::BOOLEAN AS coincident_peak_capacity_calc
     , ac.avoided_cost
     , ac.avoided_cost_subset 

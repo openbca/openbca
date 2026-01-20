@@ -140,17 +140,26 @@ db_exists_now = db_path.exists()
 if db_exists_now:
     con = duckdb.connect(str(db_path), read_only=True)
 
-    jst_results_filter = st.multiselect(
-        label = "Select results to display", 
-        options = ["jst_ratio", "total_costs", "total_benefits", "net_benefits"], 
-        default=["jst_ratio"], 
-        )
+    # jst_results_filter = st.multiselect(
+    #     label = "Select results to display", 
+    #     options = ["jst_ratio", "total_costs", "total_benefits", "net_benefits"], 
+    #     default=["jst_ratio"], 
+    #     )
 
-    jst_query = f"SELECT {', '.join(jst_results_filter)} FROM openbca.core_layer3_finalization.jst_ratio"
+    jst_query = "SELECT * FROM openbca.core_layer3_finalization.jst_ratio"
 
     jst_results_df = con.execute(jst_query).df()
-    
-    st.dataframe(jst_results_df, use_container_width=True, hide_index=True)
+
+    jst_ratio = jst_results_df['jst_ratio'].values[0]
+    total_costs = jst_results_df['total_costs'].values[0]
+    total_benefits = jst_results_df['total_benefits'].values[0]
+    net_benefits = jst_results_df['net_benefits'].values[0]
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric(label="Total Benefits", value=f"${total_benefits:,.0f}")
+    col2.metric(label="Total Costs", value=f"${total_costs:,.0f}")
+    col3.metric(label="Net Benefits", value=f"${net_benefits:,.0f}")
+    col4.metric(label="JST Ratio", value=f"{jst_ratio:.2f}")
 
     measure_filters_query = f"""
     SELECT  
@@ -163,74 +172,78 @@ if db_exists_now:
     , label_4
     , label_5
     FROM 
-    openbca.core_layer0_base.measures m
+    openbca.core_layer0_base.measures
     """
 
     measure_filters_df = con.execute(measure_filters_query).df()
-    aggregation_options = []
+    
+    filter_options = []
     for col in measure_filters_df.columns:
         if len(measure_filters_df[col].unique()) > 1:
-            aggregation_options.append(col)
-
-#st.radio(label, options, index=0, format_func=special_internal_function, key=None, help=None, on_change=None, args=None, kwargs=None, *, disabled=False, horizontal=False, captions=None, label_visibility="visible", width="content")
-#st.checkbox(label, value=False, key=None, help=None, on_change=None, args=None, kwargs=None, *, disabled=False, label_visibility="visible", width="content")
-
-    id_sql = ''
-    include_id_grouping_filter = False
-    if 'id' in aggregation_options:
-        include_id_grouping_filter = st.checkbox(
-            label = "Include ID grouping",
-            value = False,
-            help = "Breakout results by id",
+            filter_options.append(col)
+    
+    filters_dict = {}
+    for i, option in enumerate(filter_options): 
+        options = measure_filters_df[option].unique().tolist()
+        filters_dict[option] = st.multiselect(
+            label = f"Limit {option} to:",
+            options = ['All'] + options,
+            default = 'All',
+            key = f"filter_{option}",
         )
-        
-        if include_id_grouping_filter:
-            id_sql = 'fvc.id' 
 
-        aggregation_options.remove('id')
+        if "All" in filters_dict[option]:
+            filters_dict[option] = options
+
+#selected_option_2 = st.multiselect("Select one or more options:",['A', 'B', 'C', 'All'])
+
+# if "All" in selected_option_2:
+#     selected_option_2 = ['A', 'B', 'C']
+    
+    where_sql = f"WHERE 1=1"
+    for option, values in filters_dict.items():
+        where_snippet = ', '.join(["'{}'".format(value) for value in values])
+        where_sql += f" AND m.{option} IN ({where_snippet})"
+    
+    aggregation_options = ["commodity", "value_stream"]
+    #commodity_index = aggregation_options.index("commodity")
     
     aggregation_filter = st.radio(
-        label = "Select aggregation to display", 
-        options = aggregation_options + ["commodity", "value_stream"], 
+        label = "Breakout results by:", 
+        options = aggregation_options, 
         horizontal = True,
-        #default=["commodity"], 
+        index = 0, 
         )
-
-    aggregation_sql = aggregation_filter
-    if id_sql != '': 
-        aggregation_sql = aggregation_sql + ', ' + id_sql
         
     aggregation_query = f"""
     SELECT 
-    {aggregation_sql} 
+    {aggregation_filter} 
     , sum(final_dollar_value) as final_dollar_value
     FROM 
     openbca.core_layer3_finalization.final_value_calculations_ts fvc 
     JOIN openbca.core_layer0_base.measures m ON 
     fvc.id = m.id
+    {where_sql} 
     GROUP BY 
-    {aggregation_sql} 
+    {aggregation_filter} 
     """
 
-    aggregation_results_df = con.execute(aggregation_query).df().query("final_dollar_value != 0")
+    st.write(aggregation_query)
 
-    figsize = (10, 5)
-    if include_id_grouping_filter:
-        num_ids = len(aggregation_results_df['id'].unique())
-        figsize = (10, 3 * num_ids)
-        
-    con.close()
+    aggregation_results_df = con.execute(aggregation_query).df().query("final_dollar_value != 0")
+    aggregation_results_total_df = pd.DataFrame([['total', aggregation_results_df['final_dollar_value'].sum()]], columns=[aggregation_filter, 'final_dollar_value'])
+    aggregation_results_df = pd.concat([aggregation_results_df, aggregation_results_total_df])
     
-    #st.dataframe(aggregation_results_df, use_container_width=True, hide_index=True)
+    st.dataframe(aggregation_results_df, use_container_width=True, hide_index=True)
 
     fig = waterfall_multitier_fig(
         df = aggregation_results_df,
         col = 'final_dollar_value',
         category = aggregation_filter,
-        tiers = 'id' if include_id_grouping_filter else None,
+        tiers = None,
         sorting_list = None,
         sort_directions = None,
-        figsize = figsize,
+        figsize = (11, 5),
         include_line = False,
         include_value_labels = True,
         value_labels_decimals = 0,
@@ -243,3 +256,5 @@ if db_exists_now:
 
 else:
     st.info("OpenBCA outputs not found. Run the OpenBCA model to generate outputs.")
+
+con.close()

@@ -134,8 +134,8 @@ def load_value_stream_groups_from_excel(
         elif calc_type == 'Single Value - First Year':
             return '$_adder'
 
-        elif commodity == 'Non-System' and avoided_cost in non_system_commodities:
-            return avoided_cost
+        # elif commodity == 'Non-System' and avoided_cost in non_system_commodities:
+        #     return avoided_cost
 
         else:
             if commodity == 'Electric':
@@ -147,6 +147,9 @@ def load_value_stream_groups_from_excel(
                 return 'annual'
 
     value_stream_groups_df['value_stream_group'] = value_stream_groups_df.apply(lambda x: assign_value_stream_group(x['calc_type'], x['commodity'], x['avoided_cost']), axis=1)
+    value_stream_groups_df['commodity'] = value_stream_groups_df.apply(lambda x: x['avoided_cost'] if x['avoided_cost'] in non_system_commodities else x['commodity'], axis=1)
+
+    #print(value_stream_groups_df.tail(30))
 
     value_stream_groups_costs_dfs = []
     for field in config_cost_name_commodity_map_dict.keys():

@@ -112,11 +112,6 @@ def waterfall_multitier_fig(
         df_stacked = df.query(f"tiers == '{tier}'")
         df_stacked["tier_number"] = i
         df_stacked["lead_cumsum"] = df_stacked["cumsum"].shift(1).fillna(0)
-        # df_stacked["base"] = df_stacked.apply(
-        #     lambda row: row["lead_cumsum"] if row[col] > 0 else row["cumsum"], axis=1
-        # )
-        # if i == 0:
-        #     display(df_stacked)
 
         stacked_dfs.append(df_stacked)
         totals_dfs.append(df_totals.query(f"tiers == '{tier}'"))
@@ -166,7 +161,7 @@ def waterfall_multitier_fig(
             ymax = axs[i].get_ylim()[1]
             y_range = ymax - ymin
             axs[i].set_ylim(
-                min(0, ymin - 0.04 * y_range), max(0, ymax + 0.04 * y_range)
+                min(0, ymin - 0.06 * y_range), max(0, ymax + 0.06 * y_range)
             )
 
         ymin = axs[i].get_ylim()[0]
@@ -179,7 +174,7 @@ def waterfall_multitier_fig(
                 zip(stacked_df["cumsum"], stacked_df["lead_cumsum"], stacked_df[col])
             ):
                 axs[i].annotate(
-                    f"{int(val) if value_labels_decimals == 0 else round(val, value_labels_decimals)}",
+                    f"${int(val) if value_labels_decimals == 0 else round(val, value_labels_decimals):,}",
                     (
                         k,
                         (
@@ -195,7 +190,7 @@ def waterfall_multitier_fig(
         if len(totals_dfs[i]) > 0:
             val = totals_dfs[i][[col]].values[0][0]
             axs[i].annotate(
-                f"{int(val) if value_labels_decimals == 0 else round(val, value_labels_decimals)}",
+                f"${int(val) if value_labels_decimals == 0 else round(val, value_labels_decimals):,}",
                 (
                     len(stacked_df),
                     (

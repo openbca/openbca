@@ -11,7 +11,7 @@ WITH costs_by_id_commodity AS (
         , m.ntg
         , vsg.commodity
         , k.avoided_cost
-        , costs_by_type[k.avoided_cost] as cost_value
+        , unit_quantity * costs_by_type[k.avoided_cost] AS cost_value
         , vsg.calc_type
     FROM 
         openbca.core_layer0_base.measures m 
