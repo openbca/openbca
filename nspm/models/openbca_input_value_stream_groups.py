@@ -54,8 +54,8 @@ config_measure_cost_fields_map_dict = {
     'Utility Financial Incentives': [
             'utility_incentive_upfront_dollar_per_unit',
             'utility_incentive_annual_dollar_per_unit_year',
-            'program_incentive_utility_dollar_per_year',
-            'program_performance_incentive_utility_dollar_per_year'
+            'program_incentive_utility_to_customer_dollar_per_year',
+            'program_performance_incentive_govt_to_utility_dollar_per_year'
         ],
     'Host Customer Incremental Cost': [
             'incremental_costs_upfront_dollar_per_unit',
@@ -78,8 +78,8 @@ repeating_annual_costs = [
     'program_admin_costs_dollar_per_year', 
     'utility_incentive_annual_dollar_per_unit_year',
     'incremental_costs_annual_dollar_per_unit_year',
-    'program_incentive_utility_dollar_per_year',
-    'program_performance_incentive_utility_dollar_per_year',
+    'program_incentive_utility_to_customer_dollar_per_year',
+    'program_performance_incentive_govt_to_utility_dollar_per_year',
     'program_federal_incentive_dollar_per_year'
     ]
 

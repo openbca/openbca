@@ -29,6 +29,7 @@ SELECT
     , CASE 
     WHEN factor = '0' THEN 0
     WHEN factor = '1' THEN 1
+    WHEN factor = '-1' THEN -1
     WHEN factor = 'ntg' THEN ntg 
     WHEN factor = '1-ntg' THEN 1 - ntg 
     END AS cost_treatment_factor 

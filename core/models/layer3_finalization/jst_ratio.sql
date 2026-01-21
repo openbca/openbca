@@ -5,12 +5,11 @@ MODEL(
 
 WITH program_costs_benefits AS (
 	SELECT 
-		-(SUM(program_admin_costs_dollar_per_year) + SUM(program_incentive_utility_dollar_per_year)) AS dollar_costs
-		, SUM(program_performance_incentive_utility_dollar_per_year) + SUM(program_federal_incentive_dollar_per_year) AS dollar_benefits
+		-(SUM(ifnull(program_admin_costs_dollar_per_year, 0)) + SUM(ifnull(program_incentive_utility_to_customer_dollar_per_year, 0))) AS dollar_costs
+		, SUM(ifnull(program_performance_incentive_govt_to_utility_dollar_per_year, 0)) + SUM(ifnull(program_federal_incentive_dollar_per_year, 0)) AS dollar_benefits
 	FROM 
 		openbca.core_layer0_base.program_value_streams 
 )
-
 
 , measure_costs_benefits AS (
 	SELECT 
@@ -29,10 +28,10 @@ WITH program_costs_benefits AS (
 )
 
 SELECT 
-p.dollar_costs + m.dollar_costs AS total_costs
-, p.dollar_benefits + m.dollar_benefits AS total_benefits
-, p.dollar_benefits + m.dollar_benefits + p.dollar_costs + m.dollar_costs AS net_benefits
-, (p.dollar_benefits + m.dollar_benefits) / -(p.dollar_costs + m.dollar_costs) AS jst_ratio
+	p.dollar_costs + m.dollar_costs AS total_costs
+	, p.dollar_benefits + m.dollar_benefits AS total_benefits
+	, p.dollar_benefits + m.dollar_benefits + p.dollar_costs + m.dollar_costs AS net_benefits
+	, (p.dollar_benefits + m.dollar_benefits) / -(p.dollar_costs + m.dollar_costs) AS jst_ratio
 FROM   
 program_costs_benefits p 
 , measure_costs_benefits m 

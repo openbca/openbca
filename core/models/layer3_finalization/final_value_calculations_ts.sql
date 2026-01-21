@@ -207,3 +207,31 @@ GROUP BY
 	, vsg.avoided_cost 
 	, svs.year 
 	, vsg.pct_adder 
+
+-- UNION ALL 
+
+-- SELECT 
+-- 	program_name AS id 
+-- 	, vsg.commodity 
+-- 	, vsg.avoided_cost AS value_stream 
+-- 	, svs.year 
+-- 	, NULL AS quarter
+-- 	, NULL AS month  
+-- 	, NULL AS day_of_year 
+-- 	, NULL AS hour_of_year 
+-- 	, NULL AS hour_of_day
+-- 	, SUM(svs.final_dollar_value) * vsg.pct_adder AS final_dollar_value -- Check if null values in sum
+-- FROM 
+-- 	standard_value_streams svs
+-- 	, openbca.core_layer0_base.value_stream_groups vsg  
+-- WHERE 
+-- 	svs.value_stream IN ()
+-- 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
+-- 	AND UPPER(vsg.commodity) NOT IN ('ELECTRIC', 'NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL')
+-- 	AND include_in_test 
+-- GROUP BY 
+-- 	svs.id 
+-- 	, vsg.commodity 
+-- 	, vsg.avoided_cost 
+-- 	, svs.year 
+-- 	, vsg.pct_adder 

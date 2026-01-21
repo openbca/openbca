@@ -9,6 +9,20 @@ import pandas as pd
 import numpy as np
 from figures import waterfall_multitier_fig
 
+col1, col2, col3 = st.columns(3)
+
+LOGOS_DIR = Path(__file__).resolve().parent / "logos"
+with col1:
+    logo_col, _spacer_col = st.columns([2, 1])
+    with logo_col:
+        st.image(str(LOGOS_DIR / "NASEO.jpg"), use_container_width=True)
+with col2:
+    logo_col, _spacer_col = st.columns([1, 1])
+    with logo_col:
+        st.image(str(LOGOS_DIR / "ICF.jpg"), use_container_width=True)
+with col3:
+    st.image(str(LOGOS_DIR / "RECURVE.jpg"), use_container_width=True)
+
 st.title("Welcome to the OpenBCA")
 st.write("This interface is designed to help you run the OpenBCA model and visualize results.")
 

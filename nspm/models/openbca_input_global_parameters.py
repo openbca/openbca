@@ -7,6 +7,8 @@ import os
     name='openbca_input.global_parameters',
     kind='FULL',
     columns={
+        'real_or_nominal_inputs': 'string',
+        'inflation_rate': 'float',
         'discount_rate': 'float',
         'discount_cadence': 'int',
         'electric_line_loss': 'float',
@@ -23,6 +25,8 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file
 DATA_DIR = os.path.join(BASE_DIR, '..', 'input_templates')  # adjust if needed
 
+real_nominal_row = 9
+inflation_rate_row = 7
 discount_rate_row = 9
 discount_cadence_row = 10
 line_losses_rows = [12, 13]
@@ -36,6 +40,28 @@ def compile_global_parameters_from_excel(
     '''
     file_path = os.path.join(DATA_DIR, input_file)
     xls = pd.ExcelFile(file_path)
+
+    real_nominal_df = pd.read_excel(
+        xls, 
+        sheet_name='Common Data', 
+        header=0, 
+        skiprows=lambda x: x != real_nominal_row, 
+        usecols='B,C').T.reset_index()
+
+    real_nominal_df.columns = ['real_or_nominal_inputs']
+    real_nominal_df.drop([0], inplace=True)
+    real_nominal_df['real_or_nominal_inputs'] = real_nominal_df['real_or_nominal_inputs'].apply(lambda x: 'nominal' if 'nominal' in x.lower() else 'real')
+
+
+    inflation_rate_df = pd.read_excel(
+        xls, 
+        sheet_name='Common Data', 
+        header=0, 
+        skiprows=lambda x: x != inflation_rate_row, 
+        usecols='B,D').T.reset_index()
+
+    inflation_rate_df.columns = ['inflation_rate']
+    inflation_rate_df.drop([0], inplace=True)
     
     discount_rate_df = pd.read_excel(
         xls, 
@@ -79,6 +105,13 @@ def compile_global_parameters_from_excel(
     cost_treatment_df.columns = ['cost_treatment']
     cost_treatment_df.drop([0], inplace=True)
 
-    global_parameters_df = pd.concat([discount_rate_df.reset_index(drop=True), discount_cadence_df.reset_index(drop=True), line_losses_df.reset_index(drop=True), cost_treatment_df.reset_index(drop=True)], axis = 1)
+    global_parameters_df = pd.concat([
+        real_nominal_df.reset_index(drop=True),
+        inflation_rate_df.reset_index(drop=True),
+        discount_rate_df.reset_index(drop=True), 
+        discount_cadence_df.reset_index(drop=True), 
+        line_losses_df.reset_index(drop=True), 
+        cost_treatment_df.reset_index(drop=True)
+        ], axis = 1)
 
     return global_parameters_df
