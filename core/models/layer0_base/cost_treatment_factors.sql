@@ -28,7 +28,7 @@ FROM (
         ('MEASURE COST', 'RIM', '0'),
 
         ('TAX INCENTIVE', 'UCT', '0'),
-        ('TAX INCENTIVE', 'TRC', '0'),
+        ('TAX INCENTIVE', 'TRC', '-1'),
         ('TAX INCENTIVE', 'CA TRC', '1-ntg'),
         ('TAX INCENTIVE', 'PCT', '-1'),
         ('TAX INCENTIVE', 'RIM', '0'),

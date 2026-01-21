@@ -15,6 +15,11 @@ replace_elements = {
     "Btm": "BTM",
     "Sfo": "SFO",
     "Lax": "LAX",
+    " Dollar Per Unit Year": '',
+    " Dollar Per Unit": '',
+    "Rps": "RPS",
+    "Nei":"NEI",
+    "Ng":"NG"
 }
 
 
@@ -161,7 +166,7 @@ def waterfall_multitier_fig(
             ymax = axs[i].get_ylim()[1]
             y_range = ymax - ymin
             axs[i].set_ylim(
-                min(0, ymin - 0.06 * y_range), max(0, ymax + 0.06 * y_range)
+                min(0, ymin - 0.06 * y_range), max(0, ymax + 0.08 * y_range)
             )
 
         ymin = axs[i].get_ylim()[0]
@@ -174,7 +179,7 @@ def waterfall_multitier_fig(
                 zip(stacked_df["cumsum"], stacked_df["lead_cumsum"], stacked_df[col])
             ):
                 axs[i].annotate(
-                    f"${int(val) if value_labels_decimals == 0 else round(val, value_labels_decimals):,}",
+                    f"{val:,.{value_labels_decimals}f}",
                     (
                         k,
                         (
@@ -190,7 +195,7 @@ def waterfall_multitier_fig(
         if len(totals_dfs[i]) > 0:
             val = totals_dfs[i][[col]].values[0][0]
             axs[i].annotate(
-                f"${int(val) if value_labels_decimals == 0 else round(val, value_labels_decimals):,}",
+                f"{val:,.{value_labels_decimals}f}", 
                 (
                     len(stacked_df),
                     (

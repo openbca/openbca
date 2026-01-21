@@ -6,9 +6,11 @@ from pathlib import Path
 from datetime import datetime
 import duckdb
 import pandas as pd
+import numpy as np
 from figures import waterfall_multitier_fig
 
-st.title("OpenBCA Input File Uploader and Application Launcher")
+st.title("Welcome to the OpenBCA")
+st.write("This interface is designed to help you run the OpenBCA model and visualize results.")
 
 # Resolve paths relative to this file, not the current working directory.
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -19,6 +21,7 @@ INPUT_TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
 DEFAULT_DB = REPO_ROOT / "output" / "openbca.db"
 DEFAULT_DB.parent.mkdir(parents=True, exist_ok=True)
 
+st.subheader("Upload Input Files")
 uploaded_files = st.file_uploader(
     "Upload Program Input and Configuration files:", accept_multiple_files=True, type=["xlsm", "xlsx"]
 )
@@ -68,9 +71,9 @@ db_exists = db_path.exists()
 db_handling = st.radio(
     "If the database file already exists, what should we do?",
     [
-        "Overwrite existing OpenBCA output database",
-        "Backup existing OpenBCA output database, then run OpenBCA",
-        "Keep existing OpenBCA output database",
+        "Overwrite existing output database",
+        "Backup existing output database, then run OpenBCA",
+        "Keep existing output database",
     ],
     index=2 if db_exists else 0,
 )
@@ -85,7 +88,7 @@ if db_handling.startswith("Backup"):
         help="Example: output/openbca.20260119-153000.bak.db",
     )
 
-run_clicked = st.button("Run OpenBCA model", type="primary")
+run_clicked = st.button("Run OpenBCA", type="primary")
 if run_clicked:
     if db_exists and db_handling.startswith("Keep"):
         st.warning("Stopped. Existing DB retained; model was not run.")
@@ -134,24 +137,20 @@ if run_clicked:
             #     st.text_area("stderr", result.stderr, height=240)
 
 st.divider()
-st.subheader("Explore BCA Results")
+st.subheader("OpenBCA Results Explorer")
 
 db_exists_now = db_path.exists()
 if db_exists_now:
     con = duckdb.connect(str(db_path), read_only=True)
 
-    # jst_results_filter = st.multiselect(
-    #     label = "Select results to display", 
-    #     options = ["jst_ratio", "total_costs", "total_benefits", "net_benefits"], 
-    #     default=["jst_ratio"], 
-    #     )
+    st.sidebar.title("Filter Results")
 
     jst_query = "SELECT * FROM openbca.core_layer3_finalization.jst_ratio"
 
     jst_results_df = con.execute(jst_query).df()
 
     jst_ratio = jst_results_df['jst_ratio'].values[0]
-    total_costs = jst_results_df['total_costs'].values[0]
+    total_costs = -jst_results_df['total_costs'].values[0]
     total_benefits = jst_results_df['total_benefits'].values[0]
     net_benefits = jst_results_df['net_benefits'].values[0]
 
@@ -185,28 +184,21 @@ if db_exists_now:
     filters_dict = {}
     for i, option in enumerate(filter_options): 
         options = measure_filters_df[option].unique().tolist()
-        filters_dict[option] = st.multiselect(
-            label = f"Limit {option} to:",
-            options = ['All'] + options,
-            default = 'All',
+        filters_dict[option] = st.sidebar.multiselect(
+            label = f"Limit {' '.join(option.split('_')).title()} to:".replace(" Id ", " ID "),
+            options = options,
             key = f"filter_{option}",
         )
 
-        if "All" in filters_dict[option]:
+        if len(filters_dict[option]) == 0:
             filters_dict[option] = options
-
-#selected_option_2 = st.multiselect("Select one or more options:",['A', 'B', 'C', 'All'])
-
-# if "All" in selected_option_2:
-#     selected_option_2 = ['A', 'B', 'C']
     
     where_sql = f"WHERE 1=1"
     for option, values in filters_dict.items():
         where_snippet = ', '.join(["'{}'".format(value) for value in values])
         where_sql += f" AND m.{option} IN ({where_snippet})"
     
-    aggregation_options = ["commodity", "value_stream"]
-    #commodity_index = aggregation_options.index("commodity")
+    aggregation_options = ["Commodity", "Value Stream"]
     
     aggregation_filter = st.radio(
         label = "Breakout results by:", 
@@ -214,10 +206,12 @@ if db_exists_now:
         horizontal = True,
         index = 0, 
         )
+
+    aggregation_column = aggregation_filter.lower().replace(" ", "_")
         
     aggregation_query = f"""
     SELECT 
-    {aggregation_filter} 
+    {aggregation_column} 
     , sum(final_dollar_value) as final_dollar_value
     FROM 
     openbca.core_layer3_finalization.final_value_calculations_ts fvc 
@@ -225,31 +219,50 @@ if db_exists_now:
     fvc.id = m.id
     {where_sql} 
     GROUP BY 
-    {aggregation_filter} 
+    {aggregation_column} 
     """
 
-    st.write(aggregation_query)
+    #st.write(aggregation_query)
 
     aggregation_results_df = con.execute(aggregation_query).df().query("final_dollar_value != 0")
-    aggregation_results_total_df = pd.DataFrame([['total', aggregation_results_df['final_dollar_value'].sum()]], columns=[aggregation_filter, 'final_dollar_value'])
+    aggregation_results_total_df = pd.DataFrame([['total', aggregation_results_df['final_dollar_value'].sum()]], columns=[aggregation_column, 'final_dollar_value'])
     aggregation_results_df = pd.concat([aggregation_results_df, aggregation_results_total_df])
+    aggregation_results_df['total'] = aggregation_results_df[aggregation_column].apply(lambda x: True if x == 'total' else False)
+
+    max_val_len = len(str(int(max(abs(aggregation_results_df['final_dollar_value'].max()), abs(aggregation_results_df['final_dollar_value'].min())))))
+    dollar_magnitude = np.floor(max_val_len / 3)
+    dollar_magnitude_dict = {0:'', 1:'K', 2:'M', 3:'B', 4:'T'}
+    num_bars = len(aggregation_results_df)
+
+    def determine_label_sig_figs(num_bars: int) -> int:
+        if num_bars <= 10:
+            return 3
+        elif num_bars <= 15:
+            return 2
+        elif num_bars <= 20:
+            return 1
+        else:
+            return 0
     
-    st.dataframe(aggregation_results_df, use_container_width=True, hide_index=True)
+    num_bars_sig_figs = determine_label_sig_figs(num_bars)
+    
+    aggregation_results_df['final_dollar_value_label'] = aggregation_results_df['final_dollar_value'].apply(lambda x: x/10**(dollar_magnitude * 3) if dollar_magnitude > 0 else x)
+    #st.dataframe(aggregation_results_df, use_container_width=True, hide_index=True)
 
     fig = waterfall_multitier_fig(
         df = aggregation_results_df,
-        col = 'final_dollar_value',
-        category = aggregation_filter,
+        col = 'final_dollar_value_label',
+        category = aggregation_column,
         tiers = None,
-        sorting_list = None,
-        sort_directions = None,
+        sorting_list = ['total', 'final_dollar_value'],
+        sort_directions = [True, False],
         figsize = (11, 5),
         include_line = False,
         include_value_labels = True,
-        value_labels_decimals = 0,
+        value_labels_decimals = num_bars_sig_figs,
         title = "Benefit and Cost Breakdown",
         annotations = [None],
-        ylabel = 'Dollars ($)',
+        ylabel = f'Dollars (${dollar_magnitude_dict[dollar_magnitude]})',
         ylims = None,
     )
     st.pyplot(fig, clear_figure=True)
