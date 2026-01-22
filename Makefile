@@ -11,6 +11,8 @@ install:
 
 test-streamlit:
 	uv run streamlit run streamlit_test/app.py
+	@echo "Evaluating and writing output in output/results_summary_by_id.csv..."
+	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id) TO 'output/results_summary_by_id.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
 test-core:
 	uv run sqlmesh -p core test
@@ -57,6 +59,8 @@ run-ca-gas-acc:
 
 run-nspm:
 	uv run sqlmesh -p nspm -p core plan --auto-apply
+	@echo "Evaluating and writing output in output/results_summary_by_id.csv..."
+	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id) TO 'output/results_summary_by_id.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
 run-nspm-group-outputs:
 	@time uv run sqlmesh -p nspm -p core plan --auto-apply
