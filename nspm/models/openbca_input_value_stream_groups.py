@@ -42,7 +42,8 @@ config_cost_name_commodity_map_dict = {
     'Host Customer Incremental Cost': 'MEASURE COST',
     'Host Customer Transaction Cost': 'MEASURE COST',
     'Host Customer Interconn Cost': 'MEASURE COST',
-    'Host Customer Tax Incentives': 'TAX INCENTIVE'
+    'Host Customer Tax Incentives': 'TAX INCENTIVE',
+    'Program Level Benefits': 'NON-SYSTEM',
 }
 
 config_measure_cost_fields_map_dict = {
@@ -55,7 +56,7 @@ config_measure_cost_fields_map_dict = {
             'utility_incentive_upfront_dollar_per_unit',
             'utility_incentive_annual_dollar_per_unit_year',
             'program_incentive_utility_to_customer_dollar_per_year',
-            'program_performance_incentive_govt_to_utility_dollar_per_year'
+            #'program_performance_incentive_govt_to_utility_dollar_per_year'
         ],
     'Host Customer Incremental Cost': [
             'incremental_costs_upfront_dollar_per_unit',
@@ -69,9 +70,17 @@ config_measure_cost_fields_map_dict = {
     ],
     'Host Customer Tax Incentives': [
             'host_customer_tax_incentive_upfront_dollar_per_unit',
-            'program_federal_incentive_dollar_per_year'
-        ]
+            #'program_federal_incentive_dollar_per_year'
+        ],
+    'Program Level Benefits': [
+        'program_performance_incentive_govt_to_utility_dollar_per_year',
+        'program_federal_incentive_dollar_per_year'
+    ]
 }
+
+# Utility Performance Incentive
+#program_performance_incentive_govt_to_utility_dollar_per_year
+#program_federal_incentive_dollar_per_year
 
 repeating_annual_costs = [
     'administration_costs_annual_dollar_per_unit_year',
@@ -108,14 +117,12 @@ def load_value_stream_groups_from_excel(
     column_headers = ['avoided_cost', 'commodity', 'include_in_test', 'calc_type', 'pct_adder']
     value_stream_groups_df.columns = column_headers
 
-    print(value_stream_groups_df.dtypes)
-
     for col in column_headers:
         value_stream_groups_df[col] = value_stream_groups_df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
             
     value_stream_groups_df['include_in_test'] = value_stream_groups_df['include_in_test'].apply(lambda x: True if x == 'Yes' else False)
 
-    def assign_value_stream_group(calc_type, commodity, avoided_cost):
+    def assign_value_stream_group(calc_type, commodity):
         
         if calc_type == None:
             return None
@@ -134,9 +141,6 @@ def load_value_stream_groups_from_excel(
         elif calc_type == 'Single Value - First Year':
             return '$_adder'
 
-        # elif commodity == 'Non-System' and avoided_cost in non_system_commodities:
-        #     return avoided_cost
-
         else:
             if commodity == 'Electric':
                 return 'electric'
@@ -146,15 +150,16 @@ def load_value_stream_groups_from_excel(
             else:
                 return 'annual'
 
-    value_stream_groups_df['value_stream_group'] = value_stream_groups_df.apply(lambda x: assign_value_stream_group(x['calc_type'], x['commodity'], x['avoided_cost']), axis=1)
+    value_stream_groups_df['value_stream_group'] = value_stream_groups_df.apply(lambda x: assign_value_stream_group(x['calc_type'], x['commodity']), axis=1)
     value_stream_groups_df['commodity'] = value_stream_groups_df.apply(lambda x: x['avoided_cost'] if x['avoided_cost'] in non_system_commodities else x['commodity'], axis=1)
-
-    #print(value_stream_groups_df.tail(30))
 
     value_stream_groups_costs_dfs = []
     for field in config_cost_name_commodity_map_dict.keys():
-        
-        if field in value_stream_groups_df['avoided_cost'].unique():
+
+        if field == 'Program Level Benefits':
+            include_in_test = True
+
+        elif field in value_stream_groups_df['avoided_cost'].unique():
             include_in_test = value_stream_groups_df.query(f"avoided_cost == '{field}'")['include_in_test'].values[0]
             value_stream_groups_df = value_stream_groups_df.query(f"avoided_cost != '{field}'")
         

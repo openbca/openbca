@@ -16,6 +16,7 @@ SELECT
 	, ac_ls.hour_of_day
     , factors.energy_savings_factors_applied * ac_ls.avoided_cost_x_load_shape AS final_dollar_value
 	, factors.discount_factor
+    , factors.inflation_factor
 FROM 
     core_layer2_precompute.savings_factors factors
 JOIN core_layer1_mappings.commodity_load_shape_by_id cls ON 
@@ -33,7 +34,7 @@ JOIN core_layer2_precompute.avoided_cost_load_shape_combos ac_ls ON
 )
 
 SELECT 
-    * EXCEPT(discount_factor)
+    * EXCEPT(discount_factor, inflation_factor)
 FROM 
     standard_value_streams 
 WHERE
@@ -51,7 +52,7 @@ SELECT
     , svs.day_of_year 
     , svs.hour_of_year
 	, svs.hour_of_day
-	, -c.cost_value * discount_factor * cost_treatment_factor AS final_dollar_value
+	, -c.cost_value * inflation_factor * cost_treatment_factor AS final_dollar_value --leaving out discount factor as costs are accrued on an ongoing basis.
 FROM 
 	standard_value_streams svs 
 JOIN core_layer1_mappings.cost_components_by_id c ON  

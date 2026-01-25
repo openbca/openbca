@@ -100,14 +100,13 @@ FROM
             'program_admin_costs_dollar_per_year',
             'utility_incentive_upfront_dollar_per_unit',
             'utility_incentive_annual_dollar_per_unit_year',
-            'program_incentive_utility_dollar_per_year',
-            --'program_performance_incentive_utility_dollar_per_year',
+            'program_incentive_utility_to_customer_dollar_per_year',
             'incremental_costs_upfront_dollar_per_unit',
             'incremental_costs_annual_dollar_per_unit_year',
-            -- 'annual_o_m_cost_per_unit_dollar_per_year',
             'host_customer_transaction_costs_dollar_per_unit',
             'host_customer_interconnection_costs_dollar_per_unit',
             'host_customer_tax_incentive_upfront_dollar_per_unit',
+            'program_performance_incentive_govt_to_utility_dollar_per_year',
             'program_federal_incentive_dollar_per_year'
         ]
         ) AS k(avoided_cost)

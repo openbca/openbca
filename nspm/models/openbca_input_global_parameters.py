@@ -7,8 +7,9 @@ import os
     name='openbca_input.global_parameters',
     kind='FULL',
     columns={
-        'real_or_nominal_inputs': 'string',
+        #'real_or_nominal_inputs': 'string',
         'inflation_rate': 'float',
+        'dollar_year': 'int',
         'discount_rate': 'float',
         'discount_cadence': 'int',
         'electric_line_loss': 'float',
@@ -27,6 +28,7 @@ DATA_DIR = os.path.join(BASE_DIR, '..', 'input_templates')  # adjust if needed
 
 real_nominal_row = 9
 inflation_rate_row = 7
+dollar_year_row = 4
 discount_rate_row = 9
 discount_cadence_row = 10
 line_losses_rows = [12, 13]
@@ -48,10 +50,9 @@ def compile_global_parameters_from_excel(
         skiprows=lambda x: x != real_nominal_row, 
         usecols='B,C').T.reset_index()
 
-    real_nominal_df.columns = ['real_or_nominal_inputs']
+    real_nominal_df.columns = ['real_inputs']
     real_nominal_df.drop([0], inplace=True)
-    real_nominal_df['real_or_nominal_inputs'] = real_nominal_df['real_or_nominal_inputs'].apply(lambda x: 'nominal' if 'nominal' in x.lower() else 'real')
-
+    real_nominal_df['real_inputs'] = real_nominal_df['real_inputs'].apply(lambda x: False if 'nominal' in x.lower() else True)
 
     inflation_rate_df = pd.read_excel(
         xls, 
@@ -62,7 +63,17 @@ def compile_global_parameters_from_excel(
 
     inflation_rate_df.columns = ['inflation_rate']
     inflation_rate_df.drop([0], inplace=True)
-    
+
+    dollar_year_df = pd.read_excel(
+        xls, 
+        sheet_name='Common Data', 
+        header=0, 
+        skiprows=lambda x: x != dollar_year_row, 
+        usecols='B,D').T.reset_index()
+
+    dollar_year_df.columns = ['dollar_year']
+    dollar_year_df.drop([0], inplace=True)
+
     discount_rate_df = pd.read_excel(
         xls, 
         sheet_name='Common Data', 
@@ -108,10 +119,14 @@ def compile_global_parameters_from_excel(
     global_parameters_df = pd.concat([
         real_nominal_df.reset_index(drop=True),
         inflation_rate_df.reset_index(drop=True),
+        dollar_year_df.reset_index(drop=True),
         discount_rate_df.reset_index(drop=True), 
         discount_cadence_df.reset_index(drop=True), 
         line_losses_df.reset_index(drop=True), 
         cost_treatment_df.reset_index(drop=True)
         ], axis = 1)
 
+    global_parameters_df['inflation_rate'] = global_parameters_df['real_inputs'].apply(lambda x: 0.0 if x else global_parameters_df['inflation_rate'])
+    global_parameters_df.drop(columns=['real_inputs'], inplace=True)
+    
     return global_parameters_df

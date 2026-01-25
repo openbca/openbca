@@ -83,6 +83,10 @@ SELECT
     , quarter
     , energy_savings_by_commodity[k.commodity] AS energy_savings
     , discount_factor
+    , 1.0 / POW(
+        1.0 + gp.inflation_rate,
+        (year - gp.dollar_year) 
+    ) AS inflation_factor
     , ntg  
     , unit_quantity
     , CASE 
@@ -91,12 +95,12 @@ SELECT
     ELSE 1.0 
     END AS line_loss_factor
     , CASE 
-    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor / (1-electric_line_loss)  
-    WHEN UPPER(k.commodity) = 'NATURAL GAS' THEN energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor / (1-natural_gas_line_loss)
-    ELSE energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor 
+    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor  / ((1-electric_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))  
+    WHEN UPPER(k.commodity) = 'NATURAL GAS' THEN energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor / ((1-natural_gas_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))
+    ELSE energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor / (POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))
     END AS energy_savings_factors_applied
     , CASE 
-    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN coincident_peak_savings_kw * unit_quantity * ntg * discount_factor / (1-electric_line_loss) 
+    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN coincident_peak_savings_kw * unit_quantity * ntg * discount_factor / ((1-electric_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year))) 
     ELSE NULL 
     END AS coincident_peak_savings_factors_applied
 FROM 
@@ -108,6 +112,7 @@ CROSS JOIN UNNEST(map_keys(m.energy_savings_by_commodity)) AS k(commodity)
 WHERE 
     energy_savings IS NOT NULL 
 
+
 UNION ALL
 
 SELECT 
@@ -117,6 +122,10 @@ SELECT
     , quarter
     , NULL AS energy_savings
     , discount_factor
+    , 1.0 / POW(
+        1.0 + gp.inflation_rate,
+        (year - gp.dollar_year) 
+    ) AS inflation_factor
     , ntg  
     , unit_quantity
     , NULL AS line_loss_factor
@@ -127,3 +136,29 @@ FROM
 JOIN core_layer0_base.measures m ON 
     m.id = d.id
 CROSS JOIN UNNEST(cost_commodities) AS k(commodity)
+, core_layer0_base.global_parameters gp
+
+-- UNION ALL
+
+-- SELECT 
+--     program_name AS id
+--     , k.commodity
+--     , program_year AS year 
+--     , 1 AS quarter
+--     , NULL AS energy_savings
+--     , discount_factor
+--     , 1.0 / POW(
+--         1.0 + gp.inflation_rate,
+--         (year - gp.dollar_year) 
+--     ) AS inflation_factor
+--     , ntg  
+--     , unit_quantity
+--     , NULL AS line_loss_factor
+--     , NULL AS energy_savings_factors_applied
+--     , NULL AS coincident_peak_savings_factors_applied
+-- FROM 
+--     measure_discount_rate_factor_ts d
+-- JOIN core_layer0_base.measures m ON 
+--     m.id = d.id
+-- CROSS JOIN UNNEST(cost_commodities) AS k(commodity)
+-- , core_layer0_base.global_parameters gp

@@ -5,7 +5,7 @@ import os
 from parsing_helper_functions import clean_header
 
 ID_COLUMNS = ['program_name', 'year']
-
+ 
 @model(
     name='openbca_input.program_value_streams', 
     kind='FULL',
@@ -13,11 +13,8 @@ ID_COLUMNS = ['program_name', 'year']
     columns={
         'program_name': 'string',
         'program_year': 'int',
-        'program_admin_costs_dollar_per_year': 'float',
-        'program_incentive_utility_to_customer_dollar_per_year': 'float',
-        'program_performance_incentive_govt_to_utility_dollar_per_year': 'float',
-        'program_federal_incentive_dollar_per_year': 'float'
-
+        'avoided_cost': 'string',
+        'avoided_cost_value': 'float',
     },
 )
 
@@ -47,11 +44,25 @@ def load_program_value_streams_from_excel(
 
     program_value_streams_df.columns = [clean_header(c) for c in program_value_streams_df.columns]
 
-    return program_value_streams_df[[
+    program_value_streams_df = program_value_streams_df[[
         'program_name', 
         'program_year',
         'program_admin_costs_dollar_per_year',
         'program_incentive_utility_to_customer_dollar_per_year',
         'program_performance_incentive_govt_to_utility_dollar_per_year',
         'program_federal_incentive_dollar_per_year'
-        ]]
+        ]].melt(
+        id_vars=['program_name', 'program_year'],
+        value_vars=[        
+            'program_admin_costs_dollar_per_year',
+            'program_incentive_utility_to_customer_dollar_per_year',
+            'program_performance_incentive_govt_to_utility_dollar_per_year',
+            'program_federal_incentive_dollar_per_year'
+            ],
+        var_name="avoided_cost",
+        value_name="avoided_cost_value"
+    ).dropna(axis=0, subset=['avoided_cost_value'])
+
+    print(program_value_streams_df.head())
+
+    return program_value_streams_df
