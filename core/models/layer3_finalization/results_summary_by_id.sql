@@ -7,6 +7,7 @@ WITH lifecycle_savings_calc AS (
 	SELECT 
 		m.id
 		, m.measure_id
+		, m.measure_name
 		, m.project_id
 		, m.program_name
 		, m.ntg 
@@ -32,6 +33,7 @@ WITH lifecycle_savings_calc AS (
 		SELECT 
 			id
 			, measure_id
+			, measure_name
 			, project_id
 			, program_name
 			, ntg 
@@ -108,7 +110,9 @@ WITH lifecycle_savings_calc AS (
 , total_values AS (
 	SELECT 
 		id
-		, SUM(final_dollar_value) AS total_dollar_value
+		, SUM(CASE WHEN commodity IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN final_dollar_value END) AS total_costs
+		, SUM(CASE WHEN commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN final_dollar_value END) AS total_benefits
+		, SUM(final_dollar_value) AS total_net_benefits
 	FROM  
 		core_layer3_finalization.final_value_calculations_ts
 	GROUP BY
@@ -116,15 +120,23 @@ WITH lifecycle_savings_calc AS (
 )
 
 SELECT 
-	lc.*
+	CASE 
+	WHEN tv.id = m.id THEN 'Measure' ELSE 'Program' END AS type
+	, tv.id
+	, lc.* EXCEPT(id)
 	, tv.* EXCEPT(id)
 	, cv.* EXCEPT(id)
 	, vs.* EXCEPT(id)
 FROM
-	lifecycle_savings lc 
-JOIN total_values tv ON
-	lc.id = tv.id
-JOIN commodity_values cv ON
-	lc.id = cv.id
-JOIN value_stream_values vs ON  
-	lc.id = vs.id
+	total_values tv 
+FULL OUTER JOIN commodity_values cv ON
+	tv.id = cv.id
+FULL OUTER JOIN value_stream_values vs ON  
+	tv.id = vs.id
+FULL OUTER JOIN lifecycle_savings lc ON
+	tv.id = lc.id
+FULL OUTER JOIN core_layer0_base.measures m ON
+	tv.id = m.id
+ORDER BY  
+	type
+	, id

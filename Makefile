@@ -1,5 +1,7 @@
 DB?=output/openbca.db
+DBV?=output/openbca_input_validation.db
 export DB
+export DBV
 
 docker-build:
 	docker build -t openbca -f Dockerfile .
@@ -10,7 +12,8 @@ install:
 	uv sync
 
 test-streamlit:
-	uv run streamlit run streamlit_test/app.py
+	uv run streamlit run streamlit_test/Upload_Data_and_Run_Model.py
+#	uv run streamlit run streamlit_test/app.py
 
 test-core:
 	uv run sqlmesh -p core test
@@ -55,17 +58,22 @@ run-ca-gas-acc:
 	@time DB=ca_acc/output/ca_gas_acc.db uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM ca_gas_acc.gas.acc_gas_model_ts) TO 'ca_acc/output/full_ca_avoided_costs_acc_gas.csv' (HEADER, DELIMITER ',');\"); con.close()"
 	@echo "CSV file saved to: ca_acc/output/full_ca_avoided_costs_acc_gas.csv"
 
+run-input-transform-validations:
+	@DB=$(DBV) uv run sqlmesh -p nspm -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
+	@echo "Running parsing scripts and validating input data..."
+	@time DB=$(DBV) uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DBV']); con.close()"
+
 run-nspm:
 	uv run sqlmesh -p nspm -p core plan --auto-apply
 	@echo "Evaluating and writing output in output/results_summary_by_id.csv..."
 	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id) TO 'output/results_summary_by_id.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
-run-nspm-group-outputs:
-	@time uv run sqlmesh -p nspm -p core plan --auto-apply
-	@echo "Evaluating and writing output in output/results_summary_by_id.csv..."
-	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id) TO 'output/results_summary_by_id.csv' (HEADER, DELIMITER ',');\"); con.close()"
-	@echo "Evaluating and writing output in output/custom_aggregation_results_summary.csv..."
-	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT $(GB), sum(final_dollar_value) AS final_dollar_value FROM openbca.core_layer3_finalization.final_value_calculations_ts GROUP BY $(GB)) TO 'output/custom_aggregation_results_summary.csv' (HEADER, DELIMITER ',');\"); con.close()"
+# run-nspm-group-outputs:
+# 	@time uv run sqlmesh -p nspm -p core plan --auto-apply
+# 	@echo "Evaluating and writing output in output/results_summary_by_id.csv..."
+# 	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id) TO 'output/results_summary_by_id.csv' (HEADER, DELIMITER ',');\"); con.close()"
+# 	@echo "Evaluating and writing output in output/custom_aggregation_results_summary.csv..."
+# 	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT $(GB), sum(final_dollar_value) AS final_dollar_value FROM openbca.core_layer3_finalization.final_value_calculations_ts GROUP BY $(GB)) TO 'output/custom_aggregation_results_summary.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
 test-parsing:
 	@echo "\nTesting parsing of Excel input templates."

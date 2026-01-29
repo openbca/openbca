@@ -3,7 +3,7 @@ MODEL(
     kind FULL,
 );
 
-WITH standard_value_streams AS (
+WITH standard_value_stream_hourly AS (
 SELECT 
     factors.id
     , factors.commodity 
@@ -14,9 +14,10 @@ SELECT
     , ac_ls.day_of_year 
     , ac_ls.hour_of_year
 	, ac_ls.hour_of_day
+	, factors.annual_net_energy_savings * ac_ls.load_shape_value AS net_energy_savings
     , factors.energy_savings_factors_applied * ac_ls.avoided_cost_x_load_shape AS final_dollar_value
-	, factors.discount_factor
-    , factors.inflation_factor
+	--, factors.discount_factor
+    --, factors.inflation_factor
 FROM 
     core_layer2_precompute.savings_factors factors
 JOIN core_layer1_mappings.commodity_load_shape_by_id cls ON 
@@ -33,8 +34,32 @@ JOIN core_layer2_precompute.avoided_cost_load_shape_combos ac_ls ON
     AND acs.avoided_cost_subset = ac_ls.avoided_cost_subset 
 )
 
+, standard_value_streams AS (  
+	SELECT 
+		id
+		, commodity
+		, value_stream
+		, year
+		, quarter
+		, month
+		, hour_of_day
+		, SUM(net_energy_savings) AS net_energy_savings
+		, SUM(final_dollar_value) AS final_dollar_value
+	FROM 
+		standard_value_stream_hourly
+	GROUP BY 
+		id
+		, commodity
+		, value_stream
+		, year
+		, quarter
+		, month
+		, hour_of_day
+)
+
+-- "Standard" value streams (not program-level, cost components, or adders)
 SELECT 
-    * EXCEPT(discount_factor, inflation_factor)
+    * 
 FROM 
     standard_value_streams 
 WHERE
@@ -42,6 +67,7 @@ WHERE
 
 UNION ALL  
 
+-- Measure-level cost components
 SELECT 
 	svs.id  
 	, svs.commodity
@@ -49,10 +75,11 @@ SELECT
 	, svs.year
 	, svs.quarter
 	, svs.month
-    , svs.day_of_year 
-    , svs.hour_of_year
+    --, svs.day_of_year 
+    --, svs.hour_of_year
 	, svs.hour_of_day
-	, -c.cost_value * inflation_factor * cost_treatment_factor AS final_dollar_value --leaving out discount factor as costs are accrued on an ongoing basis.
+	, NULL AS net_energy_savings
+	, -c.cost_value * cost_treatment_factor / (POW(1.0 + gp.inflation_rate, (year - gp.dollar_year))) AS final_dollar_value --leaving out discount factor as costs are accrued on an ongoing basis.
 FROM 
 	standard_value_streams svs 
 JOIN core_layer1_mappings.cost_components_by_id c ON  
@@ -68,6 +95,7 @@ WHERE
 
 UNION ALL
 
+-- Electric adders
 SELECT 
 	svs.id 
 	, vsg.commodity 
@@ -75,9 +103,10 @@ SELECT
 	, svs.year 
 	, svs.quarter
 	, svs.month  
-	, svs.day_of_year 
-	, svs.hour_of_year 
+	--, svs.day_of_year 
+	--, svs.hour_of_year 
 	, svs.hour_of_day
+	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
@@ -91,6 +120,7 @@ WHERE
 
 UNION ALL
 
+-- Natural Gas adders
 SELECT 
 	svs.id 
 	, vsg.commodity 
@@ -98,8 +128,9 @@ SELECT
 	, svs.year 
 	, svs.quarter
 	, svs.month  
-	, svs.day_of_year 
-	, svs.hour_of_year 
+	--, svs.day_of_year 
+	--, svs.hour_of_year 
+	, svs.net_energy_savings
 	, svs.hour_of_day
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
@@ -114,6 +145,7 @@ WHERE
 
 UNION ALL
 
+-- Propane adders
 SELECT 
 	svs.id 
 	, vsg.commodity 
@@ -121,9 +153,10 @@ SELECT
 	, svs.year 
 	, svs.quarter
 	, svs.month  
-	, svs.day_of_year 
-	, svs.hour_of_year
+	--, svs.day_of_year 
+	--, svs.hour_of_year
 	, svs.hour_of_day 
+	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
@@ -137,6 +170,7 @@ WHERE
 
 UNION ALL 
 
+-- Oil adders
 SELECT 
 	svs.id 
 	, vsg.commodity 
@@ -144,9 +178,10 @@ SELECT
 	, svs.year 
 	, svs.quarter
 	, svs.month  
-	, svs.day_of_year 
-	, svs.hour_of_year
+	--, svs.day_of_year 
+	--, svs.hour_of_year
 	, svs.hour_of_day 
+	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
@@ -160,6 +195,7 @@ WHERE
 
 UNION ALL 
 
+-- Diesel adders
 SELECT 
 	svs.id 
 	, vsg.commodity 
@@ -167,9 +203,10 @@ SELECT
 	, svs.year 
 	, svs.quarter
 	, svs.month  
-	, svs.day_of_year 
-	, svs.hour_of_year 
+	--, svs.day_of_year 
+	--, svs.hour_of_year 
 	, svs.hour_of_day
+	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs
@@ -183,6 +220,7 @@ WHERE
 
 UNION ALL 
 
+-- All fuels adders 
 SELECT 
 	svs.id 
 	, vsg.commodity 
@@ -190,9 +228,10 @@ SELECT
 	, svs.year 
 	, NULL AS quarter
 	, NULL AS month  
-	, NULL AS day_of_year 
-	, NULL AS hour_of_year 
+	--, NULL AS day_of_year 
+	--, NULL AS hour_of_year 
 	, NULL AS hour_of_day
+	, NULL AS net_energy_savings -- Convert kWh to MMBtu and create sum of all fuels metric?
 	, SUM(svs.final_dollar_value) * vsg.pct_adder AS final_dollar_value -- Check if null values in sum
 FROM 
 	standard_value_streams svs
@@ -209,30 +248,49 @@ GROUP BY
 	, svs.year 
 	, vsg.pct_adder 
 
--- UNION ALL 
+UNION ALL 
 
--- SELECT 
--- 	program_name AS id 
--- 	, vsg.commodity 
--- 	, vsg.avoided_cost AS value_stream 
--- 	, svs.year 
--- 	, NULL AS quarter
--- 	, NULL AS month  
--- 	, NULL AS day_of_year 
--- 	, NULL AS hour_of_year 
--- 	, NULL AS hour_of_day
--- 	, SUM(svs.final_dollar_value) * vsg.pct_adder AS final_dollar_value -- Check if null values in sum
--- FROM 
--- 	standard_value_streams svs
--- 	, openbca.core_layer0_base.value_stream_groups vsg  
--- WHERE 
--- 	svs.value_stream IN ()
--- 	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
--- 	AND UPPER(vsg.commodity) NOT IN ('ELECTRIC', 'NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL')
--- 	AND include_in_test 
--- GROUP BY 
--- 	svs.id 
--- 	, vsg.commodity 
--- 	, vsg.avoided_cost 
--- 	, svs.year 
--- 	, vsg.pct_adder 
+-- Program-level benefits 
+SELECT 
+	p.program_name AS id 
+	, vsg.commodity 
+	, p.avoided_cost AS value_stream 
+	, p.program_year AS year  
+	, NULL AS quarter
+	, NULL AS month  
+	-- , NULL AS day_of_year 
+	-- , NULL AS hour_of_year 
+	, NULL AS hour_of_day
+	, NULL AS net_energy_savings
+	, avoided_cost_value / (POW(1.0 + gp.inflation_rate, (p.program_year - gp.dollar_year))) AS final_dollar_value 
+FROM core_layer0_base.program_value_streams p
+JOIN core_layer0_base.value_stream_groups vsg ON 
+ 	p.avoided_cost = vsg.avoided_cost
+	, openbca.core_layer0_base.global_parameters gp
+WHERE 
+	vsg.commodity NOT IN ['ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE']
+
+UNION ALL
+
+-- Program-level costs 
+SELECT 
+	c.id 
+	, c.commodity 
+	, c.avoided_cost AS value_stream 
+	, c.start_year AS year  
+	, NULL AS quarter
+	, NULL AS month  
+	-- , NULL AS day_of_year 
+	-- , NULL AS hour_of_year 
+	, NULL AS hour_of_day
+	, NULL AS net_energy_savings
+	, -c.cost_value * cost_treatment_factor / (POW(1.0 + gp.inflation_rate, (c.start_year - gp.dollar_year))) AS final_dollar_value 
+FROM 
+	core_layer1_mappings.cost_components_by_id c  
+JOIN core_layer0_base.program_value_streams p ON 
+	c.id = p.program_name
+	AND c.avoided_cost = p.avoided_cost 
+	AND c.start_year = p.program_year 
+	, openbca.core_layer0_base.global_parameters gp
+WHERE 
+	c.cost_treatment = gp.cost_treatment

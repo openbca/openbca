@@ -4,7 +4,6 @@ MODEL(
 );
 
 SELECT
-    --real_or_nominal_inputs::VARCHAR AS real_or_nominal_inputs,
     inflation_rate::FLOAT AS inflation_rate,
     dollar_year::INT AS dollar_year,
     discount_rate::FLOAT AS discount_rate,

@@ -10,7 +10,7 @@ WITH discount_rates AS (
         , start_year  
         , start_quarter 
         , estimated_useful_life
-        , COALESCE(m.discount_rate, gp.discount_rate) AS discount_rate, 
+        , m.discount_rate 
         , discount_cadence
     FROM
         core_layer0_base.measures m, core_layer0_base.global_parameters gp
@@ -81,7 +81,7 @@ SELECT
     , k.commodity AS commodity
     , year 
     , quarter
-    , energy_savings_by_commodity[k.commodity] AS energy_savings
+    --, energy_savings_by_commodity[k.commodity] AS energy_savings
     , discount_factor
     , 1.0 / POW(
         1.0 + gp.inflation_rate,
@@ -89,6 +89,7 @@ SELECT
     ) AS inflation_factor
     , ntg  
     , unit_quantity
+    , energy_savings_by_commodity[k.commodity] * unit_quantity * ntg AS annual_net_energy_savings
     , CASE 
     WHEN UPPER(k.commodity) = 'ELECTRIC' THEN 1/(1-electric_line_loss)  
     WHEN UPPER(k.commodity) = 'NATURAL GAS' THEN 1/(1-natural_gas_line_loss)
@@ -110,8 +111,7 @@ JOIN core_layer0_base.measures m ON
 CROSS JOIN UNNEST(map_keys(m.energy_savings_by_commodity)) AS k(commodity)
 , core_layer0_base.global_parameters gp
 WHERE 
-    energy_savings IS NOT NULL 
-
+    annual_net_energy_savings IS NOT NULL 
 
 UNION ALL
 
@@ -120,7 +120,7 @@ SELECT
     , k.commodity
     , year 
     , quarter
-    , NULL AS energy_savings
+    --, NULL AS energy_savings
     , discount_factor
     , 1.0 / POW(
         1.0 + gp.inflation_rate,
@@ -128,6 +128,7 @@ SELECT
     ) AS inflation_factor
     , ntg  
     , unit_quantity
+    , NULL AS annual_net_energy_savings
     , NULL AS line_loss_factor
     , NULL AS energy_savings_factors_applied
     , NULL AS coincident_peak_savings_factors_applied
@@ -137,28 +138,3 @@ JOIN core_layer0_base.measures m ON
     m.id = d.id
 CROSS JOIN UNNEST(cost_commodities) AS k(commodity)
 , core_layer0_base.global_parameters gp
-
--- UNION ALL
-
--- SELECT 
---     program_name AS id
---     , k.commodity
---     , program_year AS year 
---     , 1 AS quarter
---     , NULL AS energy_savings
---     , discount_factor
---     , 1.0 / POW(
---         1.0 + gp.inflation_rate,
---         (year - gp.dollar_year) 
---     ) AS inflation_factor
---     , ntg  
---     , unit_quantity
---     , NULL AS line_loss_factor
---     , NULL AS energy_savings_factors_applied
---     , NULL AS coincident_peak_savings_factors_applied
--- FROM 
---     measure_discount_rate_factor_ts d
--- JOIN core_layer0_base.measures m ON 
---     m.id = d.id
--- CROSS JOIN UNNEST(cost_commodities) AS k(commodity)
--- , core_layer0_base.global_parameters gp

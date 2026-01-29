@@ -21,6 +21,22 @@ WITH costs_by_id_commodity AS (
     WHERE 
         vsg.include_in_test 
         AND cost_value IS NOT NULL -- Include?
+
+UNION ALL 
+
+SELECT 
+	p.program_name AS id 
+	, p.program_year AS start_year  
+	, 1.0 AS ntg
+    , vsg.commodity
+    , p.avoided_cost AS avoided_cost
+    , p.avoided_cost_value AS cost_value
+    , vsg.calc_type
+	 
+FROM 
+	core_layer0_base.program_value_streams p
+	JOIN core_layer0_base.value_stream_groups vsg ON 
+	p.avoided_cost = vsg.avoided_cost
 )
 
 SELECT

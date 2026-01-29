@@ -13,7 +13,7 @@ SELECT
     CASE WHEN avoided_cost_subset IS NULL THEN 'System-wide' ELSE avoided_cost_subset END::VARCHAR AS avoided_cost_subset,
     start_year::INT AS start_year,
     start_quarter::INT AS start_quarter,
-    coalesce(m.discount_rate, gp.discount_rate)::FLOAT AS discount_rate, 
+    discount_rate::FLOAT AS discount_rate, 
     measure_name::VARCHAR AS measure_name,
     measure_unit::VARCHAR AS measure_unit,
     unit_quantity::FLOAT AS unit_quantity,
@@ -69,12 +69,13 @@ SELECT
           'PROPANE', 
           'DIESEL', 
           'OIL',
-          'HOST CUSTOMER RISK',
-          'HOST CUSTOMER RELIABILITY', 
-          'HOST CUSTOMER RESILIENCE',
-          'HOST CUSTOMER NEIs',
-          'HOST CUSTOMER NEIs - LI',
-          'SOCIETAL RESILIENCE',
+          'HOST CUSTOMER',
+          -- 'HOST CUSTOMER RISK',
+          -- 'HOST CUSTOMER RELIABILITY', 
+          -- 'HOST CUSTOMER RESILIENCE',
+          -- 'HOST CUSTOMER NEIs',
+          -- 'HOST CUSTOMER NEIs - LI',
+          'SOCIETAL',
           UPPER(custom_1_value_stream_commodity), 
           UPPER(custom_2_value_stream_commodity), 
           UPPER(custom_3_value_stream_commodity), 
@@ -87,12 +88,14 @@ SELECT
           annual_propane_savings_mmbtu, 
           annual_diesel_savings_mmbtu, 
           annual_oil_savings_mmbtu, 
-          change_in_host_customer_risk_dollar_per_unit,
-          change_in_host_customer_reliability_dollar_per_unit,
-          change_in_host_customer_resilience_dollar_per_unit,
-          host_customer_non_energy_impacts_dollar_per_unit,
-          host_customer_non_energy_impacts_low_income_dollar_per_unit,
-          change_in_societal_resilience_dollar_per_unit,
+          1.0,
+          1.0,
+          -- change_in_host_customer_risk_dollar_per_unit,
+          -- change_in_host_customer_reliability_dollar_per_unit,
+          -- change_in_host_customer_resilience_dollar_per_unit,
+          -- host_customer_non_energy_impacts_dollar_per_unit,
+          -- host_customer_non_energy_impacts_low_income_dollar_per_unit,
+          -- change_in_societal_resilience_dollar_per_unit,
           custom_1_annual_savings, 
           custom_2_annual_savings, 
           custom_3_annual_savings, 
@@ -117,6 +120,7 @@ SELECT
           'host_customer_transaction_costs_dollar_per_unit',
           'host_customer_interconnection_costs_dollar_per_unit',
           'host_customer_tax_incentive_upfront_dollar_per_unit'
+          --'annual_o_m_cost_per_unit_dollar_per_year'
         ], 
         [
           administration_costs_upfront_dollar_per_unit, 
@@ -128,6 +132,7 @@ SELECT
           host_customer_transaction_costs_dollar_per_unit,
           host_customer_interconnection_costs_dollar_per_unit,
           host_customer_tax_incentive_upfront_dollar_per_unit
+          --annual_o_m_cost_per_unit_dollar_per_year
           ]
         )::MAP<VARCHAR, FLOAT> AS costs_by_type,
     MAP(
@@ -141,4 +146,4 @@ SELECT
         ]
       )::MAP<VARCHAR, VARCHAR> AS load_shape_mapping_by_commodity,
 FROM 
-  openbca_input.measures m, openbca_input.global_parameters gp
+  openbca_input.measures
