@@ -332,6 +332,8 @@ def waterfall_multitier_fig(
             ],
         )
 
+        axs[i].grid(axis='y', alpha=0.5)
+
         if len(totals_dfs[i]) > 0:
             axs[i].bar(
                 totals_dfs[i][category], totals_dfs[i][col], color="green", alpha=0.65
@@ -606,7 +608,7 @@ def bar_fig(
     uncertainty_col: str = None,
     figsize: tuple = (10, 6),
     y2_col: str = None,
-    min_y2_counts: int = 0,
+    min_y2_counts: Optional[int] = None,  # None = no filter (show negative y2); int = keep only rows with y2 >= value
     pin_yaxis_zeros: bool = False,  # Whether to force the y1 and y2 axes to share 0
     single_bar_color="dimgray",
     horizontal: bool = False,  # Whether to plot a horizontal bar chart
@@ -656,8 +658,9 @@ def bar_fig(
         return_ax = True
 
     if y2_col != None:
-        df_1 = df_1[df_1[y2_col] >= min_y2_counts]
-        ax1 = ax.twinx()  ###
+        if min_y2_counts is not None:
+            df_1 = df_1[df_1[y2_col] >= min_y2_counts]
+        ax1 = ax.twinx()  
 
     groups = df_1[groupings].unique()
     num_bars = len(groups)
@@ -720,7 +723,7 @@ def bar_fig(
 
         ax1.set_ylabel(
             "Count Meters" if y2label is None else y2label,
-            size=15,
+            size=16,
             labelpad=20,
             rotation=-90,
         )
@@ -768,8 +771,8 @@ def bar_fig(
         sylab = ax.set_ylabel
         sxlab = ax.set_xlabel
 
-    sylab(y_label, size=15, labelpad=5)
-    sxlab(" ".join(category.split("_")).title() if xlabel == None else xlabel, size=15)
+    sylab(y_label, size=16, labelpad=5)
+    sxlab(" ".join(category.split("_")).title() if xlabel == None else xlabel, size=16)
 
     ax.tick_params(left=True, bottom=True, length=4, width=1, labelsize=15)
     ax.tick_params(which="minor", bottom=True, left=True, length=2)
@@ -779,8 +782,12 @@ def bar_fig(
         for cat in list(df_1[category].unique())
     ]
 
+    if len(unique_xtick_labels) > 20:
+        unique_xtick_labels = [label if index % 2 == 0 else '' for index, label in enumerate(unique_xtick_labels)]
+
+
     if horizontal:
-        plt.yticks(fontsize=12)
+        #plt.yticks(fontsize=15)
         ax.xaxis.set_minor_locator(AutoMinorLocator())
         ax.set_yticks(np.arange(len(unique_xtick_labels)))
         ax.set_yticklabels(unique_xtick_labels, fontsize=15)
@@ -789,10 +796,10 @@ def bar_fig(
         rotate = -45 if max([len(k) for k in unique_xtick_labels]) > 5 else 0
         ax.set_xticks(np.arange(len(unique_xtick_labels)))
         ax.set_xticklabels(
-            [int(label) if label.isdigit() else label for label in unique_xtick_labels],
+            unique_xtick_labels,
             rotation=rotate,
             ha="left" if rotate == -45 else "center",
-            fontsize=13,
+            fontsize=15,
         )
 
     if legend and (groupings != "dummy"):
@@ -805,7 +812,7 @@ def bar_fig(
             prop={"size": 15},
         )
 
-    ax.grid(False)
+    ax.grid(axis='x' if horizontal else 'y', alpha=0.5)
     if horizontal:
         ax.axvline(0)
     else:
@@ -813,5 +820,171 @@ def bar_fig(
 
     if return_ax:
         return ax
+
+    return fig
+
+
+def scatter_fig(
+    df: pd.DataFrame,
+    xy_cols_dict: dict,
+    marker_size: int = 10,
+    include_line: bool = False,
+    vlines: list = [None],
+    marker: str = markers_open[0],
+    marker_color: str = colors[3],
+    color_by_col: str = None,
+    label_points: bool = False,
+    labels: list = None,
+    label_size: int = 10,
+    figsize: tuple = (8, 7),
+    title: str = None,
+    xlims: list = None,
+    xlabel: str = None,
+    ylims: list = None,
+    ylabel: str = None,
+    legend: bool = False,
+    legend_labels: list = [],
+    legend_loc: str = "upper left",
+    ax=None,
+    ):
+    """
+    Create a scatter plot with optional labels and uncertainty.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame containing data.
+        xy_cols_dict (dict): Dictionary specifying columns for x and y axes.
+        marker (str): Matplotlib marker to use for plotting points
+            (default open circle).
+        marker_size (int): Size of markers in the scatter plot
+            (default 10 points).
+        marker_color (str): Color of the markers in the scatter plot
+            (default black)
+        color_by_col (str): Name of a column containing a categorical variable
+            to be used to color the data points. If this keyword is passed, then
+            the marker_color keyword can be a dict that maps category names to colors.
+            If marker_color is not a dict, it will be ignored in this context.
+        label_points (bool): Whether to label data points.
+        labels (list): List of labels for each data point if label_points is True.
+        label_size (int): Font size of labels.
+        figsize (tuple): Figure size (width, height) in inches.
+        title (str): Title of the plot.
+        xlims (list): List containing the x-axis limits.
+        xlabel (str): Label for the x-axis.
+        ylims (list): List containing the y-axis limits.
+        ylabel (str): Label for the y-axis.
+        legend (bool): Whether to plot a legend.
+        ax (plt.Axes): Can pass in a Matplotlib Axes object to put the plot on.
+
+    Returns:
+        None
+    """
+    vlines = [v for v in vlines if v != None]
+    if ax is None:
+        fig = plt.figure(figsize=figsize, dpi=120)
+        ax = fig.gca()
+
+    # legend_labels_ovewrite = legend_labels
+
+    # Generate column list and legend labels
+    col_list, leg_labels = generate_legend_labels(df=df, cols_dict=xy_cols_dict)
+
+    x = list(df[list(xy_cols_dict.keys())[0]])
+    y = list(df[list(xy_cols_dict.keys())[1]])
+
+    xmin, xmax = min(x), max(x)
+    ymin, ymax = min(y), max(y)
+
+    # Scatter plot
+    if color_by_col is not None:
+        grouped = df.groupby(color_by_col)
+        for i, (n, g) in enumerate(grouped):
+            xg = list(g[list(xy_cols_dict.keys())[0]])
+            yg = list(g[list(xy_cols_dict.keys())[1]])
+            if type(marker_color) == type({}):
+                colg = marker_color[g[color_by_col].iloc[0]]
+            else:
+                colg = get_colors()[i]
+
+            ax.scatter(
+                xg,
+                yg,
+                marker=markers_open[i % len(markers_open)],
+                s=marker_size,
+                color=colg,
+                label=None if len(legend_labels) == 0 else legend_labels[i],
+            )
+
+            if include_line:
+                ax.plot(xg, yg, color=colg)
+            if len(vlines) > 0:
+                ax.axvline(vlines[i], linestyle="--", color=colg)
+
+    else:
+        ax.scatter(
+            x,
+            y,
+            marker=marker,
+            s=marker_size,
+            color=marker_color,
+        )
+
+        if include_line:
+            ax.plot(x, y, color=marker_color)
+
+    # Horizontal dashed line at y=0
+    ax.axhline(0, linestyle="--", color="dimgray")
+
+    # Set axis limits set_axis_lims(ylims, ymin, ymax, multiplier)
+    try:
+        ax.set_xlim(set_axis_lims(xlims, xmin, xmax))
+        ax.set_ylim(set_axis_lims(ylims, ymin, ymax))
+    except:
+        pass
+
+    # Set Axis Labels
+    ax.set_xlabel(
+        (
+            xlabel
+            if xlabel is not None
+            else f"{'Avg. ' if 'avg' in col_list[0] else ''}{get_unit_from_column_name(col_list[0])}"
+        ),
+        size=14,
+    )
+    ax.set_ylabel(
+        (
+            ylabel
+            if ylabel is not None
+            else f"{'Avg. ' if 'avg' in col_list[1] else ''}{get_unit_from_column_name(col_list[1])}"
+        ),
+        size=14,
+    )
+
+    # Ticks and Grid
+    ax.tick_params(axis="both", labelsize=13)
+    ax.tick_params(left=True, bottom=True, length=5, width=1)
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    ax.grid(True, alpha=0.5)
+
+    # Set Titles, Legends, Annotations
+    ax.set_title(
+        "" if title is None else title,
+        fontsize=15,
+        loc="left",
+    )
+
+    y_range = ax.get_ylim()[1] - ax.get_ylim()[0]
+    # Annotate data points with labels
+    if label_points:
+        for i, label in enumerate(labels):
+            ax.annotate(label, (x[i], y[i]+0.033*y_range), fontsize=label_size, ha="center")
+
+    if legend:
+        ax.legend(
+            loc="lower left" if legend_loc == None else legend_loc,
+            fontsize=12,
+            frameon=True,
+            labelspacing=0.78,
+        )
 
     return fig

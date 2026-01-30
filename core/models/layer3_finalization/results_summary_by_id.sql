@@ -5,20 +5,20 @@ MODEL(
 
 WITH lifecycle_savings_calc AS (
 	SELECT 
-		m.id
-		, m.measure_id
-		, m.measure_name
-		, m.project_id
-		, m.program_name
+		m.id::VARCHAR AS id
+		, m.measure_id::VARCHAR AS measure_id
+		, m.measure_name::VARCHAR AS measure_name
+		, m.project_id::VARCHAR AS project_id
+		, m.program_name::VARCHAR AS program_name
 		, m.ntg 
 		, m.estimated_useful_life
 		, m.unit_quantity 
-		, cls.commodity
-		, label_1
-		, label_2
-		, label_3
-		, label_4
-		, label_5
+		, cls.commodity::VARCHAR AS commodity
+		, label_1::VARCHAR AS label_1
+		, label_2::VARCHAR AS label_2
+		, label_3::VARCHAR AS label_3
+		, label_4::VARCHAR AS label_4
+		, label_5::VARCHAR AS label_5
 		, cls.total_net_annual_energy_savings * m.estimated_useful_life AS total_net_lifecycle_energy_savings
 	FROM
 		core_layer1_mappings.commodity_load_shape_by_id cls 
@@ -123,7 +123,8 @@ SELECT
 	CASE 
 	WHEN tv.id = m.id THEN 'Measure' ELSE 'Program' END AS type
 	, tv.id
-	, lc.* EXCEPT(id)
+	, COALESCE(lc.program_name, tv.id) AS program_name
+	, lc.* EXCEPT(id, program_name)
 	, tv.* EXCEPT(id)
 	, cv.* EXCEPT(id)
 	, vs.* EXCEPT(id)
