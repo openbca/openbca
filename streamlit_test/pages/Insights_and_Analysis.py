@@ -100,6 +100,13 @@ if db_exists_now:
                             filters_dict[category] = options  
 
             filter_submitted = st.form_submit_button("Filter Results")
+    
+    filter_warning = 'Active filters: '
+    for i, (category, values) in enumerate(filters_dict.items()):
+        if len(values) < len(filters_options_dict[category]):
+            filter_warning += f"{category.title().replace('_', ' ').replace( 'Id', ' ID')}, " 
+    if filter_warning != 'Active filters: ':
+        st.warning(filter_warning.rstrip(', '))
 
     where_sql = f"WHERE 1=1"
     for category, values in filters_dict.items():
