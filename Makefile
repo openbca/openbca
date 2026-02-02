@@ -3,42 +3,41 @@ DBV?=output/openbca_input_validation.db
 export DB
 export DBV
 
-docker-build:
-	docker build -t openbca -f Dockerfile .
+# docker-build:
+# 	docker build -t openbca -f Dockerfile .
 
-DOCKER_RUN_ARGS=-e DB=${DB} -v $(shell pwd)/reference:/app/reference -v $(shell pwd)/core:/app/core -v $(shell pwd)/demo:/app/demo -v $(shell pwd)/nspm:/app/nspm -v $(shell pwd)/output:/app/output -v $(shell pwd)/app:/app/app -v $(shell pwd)/logs:/app/logs openbca
+# DOCKER_RUN_ARGS=-e DB=${DB} -v $(shell pwd)/reference:/app/reference -v $(shell pwd)/core:/app/core -v $(shell pwd)/demo:/app/demo -v $(shell pwd)/nspm:/app/nspm -v $(shell pwd)/output:/app/output -v $(shell pwd)/app:/app/app -v $(shell pwd)/logs:/app/logs openbca
 
 install:
 	uv sync
 
 test-streamlit:
 	uv run streamlit run streamlit_test/Upload_Data_and_Run_Model.py
-#	uv run streamlit run streamlit_test/app.py
 
-test-core:
-	uv run sqlmesh -p core test
+# test-core:
+# 	uv run sqlmesh -p core test
 
-run-reference:
-	uv run sqlmesh -p reference plan --auto-apply
+# run-reference:
+# 	uv run sqlmesh -p reference plan --auto-apply
 
-test-reference:
-	PYTHONPATH=. pytest reference/tests
-	uv run sqlmesh -p reference test
+# test-reference:
+# 	PYTHONPATH=. pytest reference/tests
+# 	uv run sqlmesh -p reference test
 
-prepare-app:
-	uv run sqlmesh -p reference -p app -p core plan --auto-apply
+# prepare-app:
+# 	uv run sqlmesh -p reference -p app -p core plan --auto-apply
 
-run-app: prepare-app
-	uv run streamlit run app/src/main.py
+# run-app: prepare-app
+# 	uv run streamlit run app/src/main.py
 
-test-app: prepare-app
-	PYTHONPATH=app/src python3 app/tests/test_app.py
+# test-app: prepare-app
+# 	PYTHONPATH=app/src python3 app/tests/test_app.py
 
-docker-test-app: docker-build
-	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make test-app"
+# docker-test-app: docker-build
+# 	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make test-app"
 
-docker-run-app: docker-build
-	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
+# docker-run-app: docker-build
+# 	docker run -it -p 8501:8501 ${DOCKER_RUN_ARGS} bash -c "make run-app"
 
 run-ca-electric-acc:
 	@echo "Starting ACC Electric Model data scraping..."
@@ -79,36 +78,26 @@ test-parsing:
 	@echo "\nTesting parsing of Excel input templates."
 	cd nspm && PYTHONPATH=.. uv run python test_parsing.py
 
-docker-run-nspm: docker-build
-	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make run-nspm"
+# docker-run-nspm: docker-build
+# 	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make run-nspm"
 
-test-nspm:
-	PYTHONPATH=. pytest nspm/tests
+# test-nspm:
+# 	PYTHONPATH=. pytest nspm/tests
 
-test: test-reference test-core test-demo test-app
+# test: test-reference test-core test-demo test-app
 
-docker-test: docker-build
-	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make test"
+# docker-test: docker-build
+# 	docker run --rm ${DOCKER_RUN_ARGS} bash -c "make test"
 
 clean:
 	@rm -rf logs && rm -rf output/*
 	@find . -type d -name ".cache" -exec rm -rf {} +
 
-docker-shell: docker-build
-	docker run -it --rm ${DOCKER_RUN_ARGS} bash
+# docker-shell: docker-build
+# 	docker run -it --rm ${DOCKER_RUN_ARGS} bash
 
 generate-flow-diagram:
 	uv run sqlmesh -p . dag output/dag.html
 
 sqlmesh-ui-core:
 	uv run sqlmesh -p core ui
-
-# Example: How to pass arguments to a Makefile target
-# Usage: make example-arg NAME=world
-example-arg:
-	@echo "Hello, $(NAME)!"
-# Example with default value
-# Usage: make example-default
-# Usage: make example-default NAME=Alice
-example-default:
-	@echo "Hello, $(or $(NAME),default user)!"

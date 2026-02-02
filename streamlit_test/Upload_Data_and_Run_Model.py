@@ -32,14 +32,14 @@ with col4:
 with col5:
     st.image(str(LOGOS_DIR / "RECURVE.jpg"), width='stretch')
 
+st.markdown("## Welcome to the OpenBCA")
+st.markdown("###### The OpenBCA software executes Jurisdiction Specific Tests developed under National Standard Practice Manual guidance.")
+
 # Resolve paths relative to this file, not the current working directory.
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INPUT_TEMPLATES_DIR = REPO_ROOT / "nspm" / "input_templates"
 OUTPUT_DIR = REPO_ROOT / "output"
-
-# Ensure input and output directories exist, make them if not.
 INPUT_TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Match Makefile defaults (DB?=output/openbca.db, DBV?=output/openbca_input_validation.db) if not set.
 DEFAULT_OUTPUT_DB = REPO_ROOT / "output" / "openbca.db"

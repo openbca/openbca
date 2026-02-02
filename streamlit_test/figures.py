@@ -62,7 +62,7 @@ colors = get_colors()
 markers_open = get_markers()[0]
 markers_closed = get_markers()[1]
 linestyles = ["-", "--", ":", "-."]
-
+    
 # Fix common capitalization errors
 replace_elements = {
     "kwh": "kWh",
@@ -76,6 +76,7 @@ replace_elements = {
     "Lax": "LAX",
     " Dollar Per Unit Year": '',
     " Dollar Per Unit": '',
+    " Dollar Per Year": '',
     "Rps": "RPS",
     "Nei":"NEI",
     "Ng":"NG"
@@ -322,6 +323,7 @@ def waterfall_multitier_fig(
         axs = [axs]
 
     for i, stacked_df in enumerate(stacked_dfs):
+        axs[i].grid(axis='y', alpha=0.5)
 
         axs[i].bar(
             stacked_df[category],
@@ -330,13 +332,16 @@ def waterfall_multitier_fig(
             color=[
                 "cornflowerblue" if x >= 0 else "lightcoral" for x in stacked_df[col]
             ],
+            zorder=3
         )
-
-        axs[i].grid(axis='y', alpha=0.5)
 
         if len(totals_dfs[i]) > 0:
             axs[i].bar(
-                totals_dfs[i][category], totals_dfs[i][col], color="green", alpha=0.65
+                totals_dfs[i][category],
+                totals_dfs[i][col],
+                color="green", 
+                alpha=0.65, 
+                zorder=3
             )
 
         if include_line:
@@ -345,6 +350,7 @@ def waterfall_multitier_fig(
                     [j - 1, j],
                     [stacked_df["cumsum"][j - 1], stacked_df["cumsum"][j]],
                     color="black",
+                    zorder=1000
                 )
 
         if ylims != None:
@@ -407,6 +413,7 @@ def waterfall_multitier_fig(
 
         axs[i].tick_params(axis="y", labelsize=15)
         axs[i].yaxis.set_minor_locator(AutoMinorLocator())
+
         if len(annotations) > 0:
             if annotations[i] != None:
                 axs[i].annotate(
@@ -689,6 +696,7 @@ def bar_fig(
                 height=bar_width,
                 color=colors[i] if len(groups) > 1 else single_bar_color,
                 label=label,
+                zorder=1000
             )
         else:
             ax.bar(
@@ -697,6 +705,7 @@ def bar_fig(
                 width=bar_width,
                 color=colors[i] if len(groups) > 1 else single_bar_color,
                 label=label,
+                zorder=1000
             )
 
         if uncertainty_col != None:
@@ -735,8 +744,8 @@ def bar_fig(
             if c > 0:
                 ax1.set_ylim(c * (1 - (a - b) / a), c)
             else:
-                ax.set_ylim(min(b, c), a)
-                ax1.set_ylim(min(b, c), a)
+                c = min(df_1[(df_1[groupings] == groups[0])][y2_col]) * 1.05
+                ax1.set_ylim(c, a)
 
         if legend:
             ax1.legend(
@@ -785,6 +794,9 @@ def bar_fig(
     if len(unique_xtick_labels) > 20:
         unique_xtick_labels = [label if index % 2 == 0 else '' for index, label in enumerate(unique_xtick_labels)]
 
+    total_label_len = 0
+    for label in unique_xtick_labels:
+        total_label_len += len(label)
 
     if horizontal:
         #plt.yticks(fontsize=15)
@@ -793,7 +805,7 @@ def bar_fig(
         ax.set_yticklabels(unique_xtick_labels, fontsize=15)
     else:
         ax.yaxis.set_minor_locator(AutoMinorLocator())
-        rotate = -45 if max([len(k) for k in unique_xtick_labels]) > 5 else 0
+        rotate = -45 if (max([len(k) for k in unique_xtick_labels]) > 5 or total_label_len > 30) else 0
         ax.set_xticks(np.arange(len(unique_xtick_labels)))
         ax.set_xticklabels(
             unique_xtick_labels,
@@ -982,7 +994,7 @@ def scatter_fig(
     if legend:
         ax.legend(
             loc="lower left" if legend_loc == None else legend_loc,
-            fontsize=12,
+            fontsize=11,
             frameon=True,
             labelspacing=0.78,
         )
