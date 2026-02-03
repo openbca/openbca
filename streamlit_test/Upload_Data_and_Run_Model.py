@@ -140,25 +140,25 @@ with col2:
                         else:
                             st.error(f"Validations failed (exit code {result.returncode}).")
 
-                con = duckdb.connect(str(validation_db_path))
+                with duckdb.connect(str(validation_db_path)) as con:
 
-                ## Required Parameters Validations
-                required_parameters_query = "SELECT * FROM core_validations.required_parameters_v"    
-                required_parameters_df = con.execute(required_parameters_query).df()
-                global_parameters_query = "SELECT * FROM core_validations.global_parameters_v"    
-                global_parameters_df = con.execute(global_parameters_query).df()
-                unique_ids_query = "SELECT * FROM core_validations.unique_ids_v"    
-                unique_ids_df = con.execute(unique_ids_query).df()
-                load_shapes_query = "SELECT * FROM core_validations.load_shape_v"    
-                load_shapes_df = con.execute(load_shapes_query).df()
-                avoided_cost_load_shape_granularity_query = "SELECT * FROM core_validations.avoided_cost_load_shape_granularity_v"    
-                avoided_cost_load_shape_granularity_df = con.execute(avoided_cost_load_shape_granularity_query).df()
+                    ## Required Parameters Validations
+                    required_parameters_query = "SELECT * FROM core_validations.required_parameters_v"    
+                    required_parameters_df = con.execute(required_parameters_query).df()
+                    global_parameters_query = "SELECT * FROM core_validations.global_parameters_v"    
+                    global_parameters_df = con.execute(global_parameters_query).df()
+                    unique_ids_query = "SELECT * FROM core_validations.unique_ids_v"    
+                    unique_ids_df = con.execute(unique_ids_query).df()
+                    load_shapes_query = "SELECT * FROM core_validations.load_shape_v"    
+                    load_shapes_df = con.execute(load_shapes_query).df()
+                    avoided_cost_load_shape_granularity_query = "SELECT * FROM core_validations.avoided_cost_load_shape_granularity_v"    
+                    avoided_cost_load_shape_granularity_df = con.execute(avoided_cost_load_shape_granularity_query).df()
 
-                validate_required_parameters(required_parameters_df, "Program Inputs", "Row-level parameters")
-                validate_required_parameters(global_parameters_df, "Configuration", "Global parameters")
-                validate_unique_ids(unique_ids_df, program_input_file_name, "Unique IDs")
-                validate_load_shapes(load_shapes_df, program_input_file_name, "Load Shape")
-                validate_avoided_cost_load_shape_granularity(avoided_cost_load_shape_granularity_df, program_input_file_name, "Agreement between avoided cost and load shape granularity")
+                    validate_required_parameters(required_parameters_df, "Program Inputs", "Row-level parameters")
+                    validate_required_parameters(global_parameters_df, "Configuration", "Global parameters")
+                    validate_unique_ids(unique_ids_df, program_input_file_name, "Unique IDs")
+                    validate_load_shapes(load_shapes_df, program_input_file_name, "Load Shape")
+                    validate_avoided_cost_load_shape_granularity(avoided_cost_load_shape_granularity_df, program_input_file_name, "Agreement between avoided cost and load shape granularity")
 
 st.divider()
 st.subheader("Run OpenBCA Model")
@@ -183,21 +183,21 @@ if db_exists:
     # Show download button if database exists and model has been run
     with col2:
         try:
-            con = duckdb.connect(str(db_path), read_only=True)
-            # Query the data and convert to CSV string
-            summary_results_df = con.execute(
-                "SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id"
-            ).df()
-            summary_results_csv = summary_results_df.to_csv(index=False)
-            
-            download_summary_results = st.button("Download Summary Results", type="secondary")
-            if download_summary_results:
-                # Save file to OUTPUT_DIR
-                output_file_path = OUTPUT_DIR / "results_summary_by_id.csv"
-                with open(output_file_path, 'w', encoding='utf-8') as f:
-                    f.write(summary_results_csv)
-                st.success(f"Summary results saved to {output_file_path}")
-            con.close()
+            with duckdb.connect(str(db_path), read_only=True) as con:
+                # Query the data and convert to CSV string
+                summary_results_df = con.execute(
+                    "SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id"
+                ).df()
+                summary_results_csv = summary_results_df.to_csv(index=False)
+                
+                download_summary_results = st.button("Download Summary Results", type="secondary")
+                if download_summary_results:
+                    # Save file to OUTPUT_DIR
+                    output_file_path = OUTPUT_DIR / "results_summary_by_id.csv"
+                    with open(output_file_path, 'w', encoding='utf-8') as f:
+                        f.write(summary_results_csv)
+                    st.success(f"Summary results saved to {output_file_path}")
+
         except Exception as e:
             # If there's an error (e.g., table doesn't exist yet), just skip showing the button
             pass
