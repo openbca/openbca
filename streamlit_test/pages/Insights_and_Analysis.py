@@ -190,7 +190,7 @@ else:
         with col2:
             catalog_by_filter = ''
             if num_filters > 0:
-                catalog_by_filter = st.radio("Catalog scatter plot results by:", options=[' '.join(filter.split('_')).title() for filter in filters if filter != 'id'], index=0, horizontal=True).lower().replace(" ", "_")
+                catalog_by_filter = st.radio("Catalog scatter plot results by:", options=[' '.join(filter.split('_')).title().replace(" Id", " ID") for filter in filters if filter != 'id'], index=0, horizontal=True).lower().replace(" ", "_")
                 catalog_by_filter_sql = f", {catalog_by_filter.lower().replace(" ", "_")}"
 
             benefit_cost_scatter_df = con.execute(generate_benefit_cost_scatter_query(where_sql, catalog_by_filter_sql)).df()
@@ -272,7 +272,6 @@ else:
             st.markdown("##### Explore Results by Commodity and Value Stream")
 
             benefits_commodity_options_df = con.execute(generate_benefits_commodity_options_query(where_sql)).df()
-
             benefits_commodity_options = [commodity.title().replace("Nei", "NEI") for commodity in benefits_commodity_options_df['commodity'].tolist()]
 
             commodity_filter = st.radio(
@@ -317,16 +316,31 @@ else:
                 subcol2.write(f"")
                 subcol2.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help="Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here.")
             
-            temporal_aggregation_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit)).df()
+            temporal_aggregation_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=False)).df()
             temporal_aggregation_results_df, temporal_aggregation_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings' if unit != '' else None)
-
+            temporal_aggregation_value_stream_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=True)).df()
+            temporal_aggregation_value_stream_results_df, temporal_aggregation_value_stream_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_value_stream_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings' if unit != '' else None)
+            
+            value_streams = sorted(temporal_aggregation_value_stream_results_df['value_stream'].unique().tolist())
+            
+            if 'show_value_streams_filter' not in st.session_state:
+                st.session_state.show_value_streams_filter = None
+            
+            if len(value_streams) > 1:
+                st.session_state.show_value_streams_filter = st.multiselect(
+                    label = f"Select Value Streams to Show:",
+                    options = value_streams,
+                    key = "value_streams_filter",
+                    default = None
+                )
+            
             temporal_aggregation_bar_fig = bar_fig(
                 df = temporal_aggregation_results_df,
                 col = 'final_dollar_value',
                 category = temporal_aggregation_filter,
+                value_stream_df = temporal_aggregation_value_stream_results_df.query(f"value_stream in {st.session_state.show_value_streams_filter}") if len(value_streams) > 1 else None,
                 figsize= (10, 6),
                 y2_col = None if unit == '' else 'net_lifecycle_energy_savings',
-                min_y2_counts = None,  # allow negative net_lifecycle_energy_savings on y2
                 pin_yaxis_zeros = True,
                 single_bar_color="cornflowerblue",
                 space_fraction = 0.65,
@@ -336,7 +350,6 @@ else:
                 y2label = f'Savings ({temporal_aggregation_results_unit_labels[1][2] if len(temporal_aggregation_results_unit_labels[1]) > 2 else ''}{unit})',
                 legend = True,
                 legend_loc = None,
-                label_map = None
             )
 
             st.pyplot(temporal_aggregation_bar_fig, clear_figure=True)
@@ -350,24 +363,24 @@ else:
                     'final_dollar_value': st.column_config.NumberColumn(
                         label = "Benefits ($)",
                         format="dollar",
-                        #decimals = 0,
                         )
                     }
                 )
 
         # Costs
         with col2:
-            st.markdown("#### Costs Analysis")
-            st.markdown("##### Explore Results by Commodity and Value Stream")
+            st.markdown("#### Costs")
+            st.markdown("##### See Results by Commodity and Value Stream")
 
             costs_commoidty_results_df = con.execute(generate_costs_commodity_query(where_sql)).df()
             costs_commoidty_results_df, costs_commoidty_results_df_unit_labels = determine_dollar_magnitude(costs_commoidty_results_df, x_col='final_dollar_value', y_col=None)
-
+            costs_commoidty_results_df['commodity'] = costs_commoidty_results_df['commodity'].apply(lambda x: replace_multiple_string_elements(' '.join(x.split('_')).title()))
+            
             costs_bar_fig = bar_fig(
                 df = costs_commoidty_results_df,
                 col = 'final_dollar_value',
                 category = 'commodity',
-                figsize= (10, 6),
+                figsize= (9, 5),
                 pin_yaxis_zeros = True,
                 single_bar_color="darkred",
                 horizontal = True,
@@ -378,7 +391,6 @@ else:
                 y2label = None,
                 legend = True,
                 legend_loc = None,
-                label_map = {'ADMIN': 'Administration', 'UTILITY INCENTIVE': 'Utility Incentive', 'MEASURE COST': 'Measure Cost', 'TAX INCENTIVE': 'Tax Incentive'}
             )
 
             st.pyplot(costs_bar_fig, clear_figure=True)

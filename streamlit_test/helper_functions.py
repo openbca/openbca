@@ -44,7 +44,6 @@ def determine_dollar_magnitude(df:pd.DataFrame, x_col: str = None, y_col: str = 
                 unit_labels.append(f"(${base_unit_label})")
             else:
                 unit_labels.append('')
-    print("rescale = ", rescale)
 
     if return_scale_exponent:
         scale_exponent = dollar_magnitude_dict_reverse[base_unit_label] * 3 if rescale else 0

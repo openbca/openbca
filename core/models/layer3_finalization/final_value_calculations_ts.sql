@@ -130,8 +130,8 @@ SELECT
 	, svs.month  
 	--, svs.day_of_year 
 	--, svs.hour_of_year 
-	, svs.net_energy_savings
 	, svs.hour_of_day
+	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
 FROM 
 	standard_value_streams svs

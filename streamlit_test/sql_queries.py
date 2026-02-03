@@ -97,21 +97,22 @@ def generate_populated_temporal_cols_query(where_sql, commodity_filter, col):
     return populated_temporal_cols_query
 
 
-def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit):
+def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream: bool = False):
     temporal_aggregation_benefits_sql = f"""
     WITH benefits AS (
         SELECT 
         {temporal_aggregation_filter}
+        {', value_stream' if group_by_value_stream else ''}
         , sum(final_dollar_value) AS final_dollar_value
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fvc 
-        JOIN openbca.core_layer0_base.measures m ON 
+        FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
         AND commodity = '{commodity_filter}'
-        AND NOT (commodity = 'NATURAL GAS' AND hour_of_day IS NOT NULL)
         GROUP BY 
         {temporal_aggregation_filter}
+        {', value_stream' if group_by_value_stream else ''}
     )
     """
 
@@ -127,7 +128,6 @@ def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, te
         {where_sql} 
         AND commodity = '{commodity_filter}'
         AND value_stream IN ('Energy Generation (E)', 'Fuel Supply and O&M (NG)', 'Propane Supply', 'Oil Supply', 'Diesel Supply')
-        AND NOT (commodity = 'NATURAL GAS' AND hour_of_day IS NOT NULL)
         GROUP BY 
         {temporal_aggregation_filter}
             
@@ -181,7 +181,7 @@ def generate_value_stream_benefits_query(where_sql, commodity_filter):
         , sum(final_dollar_value) AS final_dollar_value
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fvc 
-        JOIN openbca.core_layer0_base.measures m ON 
+        FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
         AND commodity = '{commodity_filter}'
@@ -239,3 +239,4 @@ def generate_summary_results_query():
         openbca.core_layer3_finalization.results_summary_by_id
     """
     return summary_results_query
+
