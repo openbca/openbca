@@ -1,7 +1,8 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
-import numpy as np
+from matplotlib.patches import ConnectionPatch, Patch
 from math import floor, log10
 from typing import Optional
 
@@ -14,9 +15,9 @@ def get_colors():
         list: A list of matplotlib color specifiers
     """
     return [
+        "royalblue",
         "green",
         "firebrick",
-        "royalblue",
         "dimgray",
         "olive",
         "#DB3E3B",
@@ -57,6 +58,10 @@ def get_markers():
     ]
 
 
+def get_hatches():
+    return ['//', '\\\\', '||', '--', '++', 'xx', 'oo', 'OO', '..', '**']
+
+
 # Get colors, markers, and linestyles to use throughout
 colors = get_colors()
 markers_open = get_markers()[0]
@@ -80,7 +85,7 @@ replace_elements = {
     "Rps": "RPS",
     "Nei":"NEI",
     "Ng":"NG"
-}
+    }
 
 
 def get_unit_from_column_name(col: str):
@@ -150,7 +155,7 @@ def set_y_axis_params(
     num_y_ticks: int = 5,
     ylims: list = None,
     multiplier: float = 0.08,
-):
+    ):
     """Generate nice y ticks, y minor ticks and y tick labels
 
     Function will always place a major tick and label at 0 unless
@@ -205,7 +210,7 @@ def set_axis_lims(
     max_val: float,
     multiplier: float = 0.06,
     force_zero_lim: bool = True,
-):
+    ):
     if lims is not None:
         axis_min = min(lims)
         axis_max = max(lims)
@@ -250,6 +255,34 @@ def create_label_from_column_name(col: str, replace_elements: dict = replace_ele
     return final_label
 
 
+def generate_legend_labels(df: pd.DataFrame, cols_dict: dict):
+    """Add high and low uncertainty columns to a dataframe for easy plotting
+
+    Args:
+        df (pd.DataFrame): A dataframe for which we are plotting a set of
+            columns with uncertainty for each tabulated in a separate column
+        cols_dict (dict): A cols_dict dictionary (see the figures notebook
+            for details).
+
+
+    Returns:
+        _type_: _description_
+    """
+
+    col_list = list(cols_dict.keys())
+    legend_labels = []
+
+    for ls_col in cols_dict:
+
+        legend_labels.append(
+            create_label_from_column_name(ls_col)
+            if cols_dict[ls_col]["label"] is None
+            else cols_dict[ls_col]["label"]
+        )
+
+    return col_list, legend_labels
+
+
 def waterfall_multitier_fig(
     df: pd.DataFrame,
     col: str,
@@ -265,7 +298,7 @@ def waterfall_multitier_fig(
     annotations: list = [None],
     ylabel: str = None,
     ylims: list = None,
-):
+    ):
 
     annotations = [a for a in annotations if a != None]
 
@@ -444,34 +477,6 @@ def waterfall_multitier_fig(
     return fig
 
 
-def generate_legend_labels(df: pd.DataFrame, cols_dict: dict):
-    """Add high and low uncertainty columns to a dataframe for easy plotting
-
-    Args:
-        df (pd.DataFrame): A dataframe for which we are plotting a set of
-            columns with uncertainty for each tabulated in a separate column
-        cols_dict (dict): A cols_dict dictionary (see the figures notebook
-            for details).
-
-
-    Returns:
-        _type_: _description_
-    """
-
-    col_list = list(cols_dict.keys())
-    legend_labels = []
-
-    for ls_col in cols_dict:
-
-        legend_labels.append(
-            create_label_from_column_name(ls_col)
-            if cols_dict[ls_col]["label"] is None
-            else cols_dict[ls_col]["label"]
-        )
-
-    return col_list, legend_labels
-
-
 def hour_of_day_ls_fig(
     df: pd.DataFrame,
     cols_dict: dict,
@@ -607,7 +612,7 @@ def hour_of_day_ls_fig(
     return fig
 
 
-def bar_fig(
+def numeric_bar_fig(
     df: pd.DataFrame,
     col: str,
     category: str,
@@ -646,7 +651,7 @@ def bar_fig(
             height=df[col],
             width=space_fraction,
             color=colors[i] if single_bar_color is None else single_bar_color,
-            #label=label,
+            alpha=1 if value_stream_df is None else 0.75,
             zorder=1000
         )
 
@@ -743,8 +748,6 @@ def bar_fig(
     ax.tick_params(which="minor", bottom=True, left=True, length=2)
 
     unique_xtick_labels = list(df[category].unique())
-
-    print("1: ", unique_xtick_labels)
 
     if len(unique_xtick_labels) > 20:
         unique_xtick_labels = unique_xtick_labels[::2]
@@ -953,255 +956,328 @@ def scatter_fig(
     return fig
 
 
+def categorical_bar_fig(
+    df: pd.DataFrame,
+    col: str,
+    category: str,
+    groupings: str = None,
+    figsize: tuple = (10, 6),
+    y2_col: str = None,
+    min_y2_counts: Optional[int] = None,  # None = no filter (show negative y2); int = keep only rows with y2 >= value
+    pin_yaxis_zeros: bool = False,  # Whether to force the y1 and y2 axes to share 0
+    single_bar_color="dimgray",
+    horizontal: bool = False,  # Whether to plot a horizontal bar chart
+    space_fraction: float = 0.65,
+    sort_by: list = None,
+    sort_ascending: bool = True,
+    title: str = None,
+    xlabel: str = None,
+    ylabel: str = None,
+    y2label: str = None,
+    legend: bool = True,
+    legend_loc: "str" = None,
+    ):
 
+    if sort_by is None:
+        sort_by = [category]
+        if groupings != None:
+            sort_by += [groupings]
 
-# def bar_fig(
-#     df: pd.DataFrame,
-#     col: str,
-#     category: str,
-#     value_stream_df: pd.DataFrame = None,
-#     #value_stream: str = None,
-#     groupings: str = None,
-#     uncertainty_col: str = None,
-#     figsize: tuple = (10, 6),
-#     y2_col: str = None,
-#     min_y2_counts: Optional[int] = None,  # None = no filter (show negative y2); int = keep only rows with y2 >= value
-#     pin_yaxis_zeros: bool = False,  # Whether to force the y1 and y2 axes to share 0
-#     single_bar_color="dimgray",
-#     horizontal: bool = False,  # Whether to plot a horizontal bar chart
-#     space_fraction: float = 0.65,
-#     sort_by: list = None,
-#     sort_ascending: bool = True,
-#     title: str = None,
-#     xlabel: str = None,
-#     ylabel: str = None,
-#     y2label: str = None,
-#     ax: Optional[list] = None,
-#     legend: bool = True,
-#     legend_loc: "str" = None,
-#     label_map: dict = None,  # Maps group names to legend labels
-#     ):
+    try:
+        df[category] = pd.to_numeric(df[category], downcast='integer')
+    except:
+        pass
 
-#     if sort_by is None:
-#         sort_by = [
-#             category,
-#         ]
-#         if groupings != None:
-#             sort_by += [groupings]
+    if groupings != None:
+        try:
+            df[groupings] = pd.to_numeric(df[groupings])
+        except:
+            pass
+    else:
+        groupings = "dummy"
+        df[groupings] = "dummy"
+        groups = ["dummy"]
 
-#     df_1 = df.copy()
+    fig = plt.figure(figsize=figsize, dpi=200)
+    ax = fig.gca()
 
-#     try:
-#         df_1[category] = pd.to_numeric(df_1[category], downcast='integer')
-#     except:
-#         pass
+    if y2_col != None:
+        if min_y2_counts is not None:
+            df = df[df[y2_col] >= min_y2_counts]
+        ax1 = ax.twinx()  
 
-#     if groupings != None:
-#         try:
-#             df_1[groupings] = pd.to_numeric(df_1[groupings])
-#         except:
-#             pass
-#     else:
-#         groupings = "dummy"
-#         df_1[groupings] = "dummy"
-#         groups = ["dummy"]
+    groups = df[groupings].unique()
+    num_bars = len(groups)
+    bar_width = space_fraction / num_bars
 
-#     if value_stream_df is not None:
-#         value_stream_df.sort_values(by=['value_stream', category], inplace=True, ascending=sort_ascending)
-#         value_stream_df["dummy"] = "dummy"
+    df.sort_values(by=sort_by, inplace=True, ascending=sort_ascending)
+    for i, group in enumerate(sorted(list(groups), reverse=True)):
         
-#     if ax is None:
-#         # Plot a standalone figure if no axes object was passed
-#         fig = plt.figure(figsize=figsize, dpi=200)
-#         ax = fig.gca()
-#         return_ax = False
-#     else:
-#         return_ax = True
+        x1 = pd.Series(
+            [j for j in range(len(df[category][(df[groupings] == group)]))]
+        )
+        
+        y = df[col][(df[groupings] == group)]
+        
+        shift = bar_width * (-0.5 - i + num_bars / 2)
 
-#     if y2_col != None:
-#         if min_y2_counts is not None:
-#             df_1 = df_1[df_1[y2_col] >= min_y2_counts]
-#         ax1 = ax.twinx()  
+        # Create legend labels or use the provided mapping
+        label = " ".join(str(group).split("_")).title()
 
-#     groups = df_1[groupings].unique()
-#     num_bars = len(groups)
-#     bar_width = space_fraction / num_bars
+        if horizontal:
+            ax.barh(
+                x1 + shift,
+                y,
+                height=bar_width,
+                color=colors[i] if len(groups) > 1 else single_bar_color,
+                label=label,
+                zorder=1000
+            )
+        else:
+            ax.bar(
+                x1 + shift,
+                y,
+                width=bar_width,
+                color=colors[i] if len(groups) > 1 else single_bar_color,
+                label=label,
+                zorder=1000
+            )
 
-#     df_1.sort_values(by=sort_by, inplace=True, ascending=sort_ascending)
-#     for i, group in enumerate(sorted(list(groups), reverse=True)):
-#         x1 = pd.Series(
-#             [j for j in range(len(df_1[category][(df_1[groupings] == group)]))]
-#         )
-#         y = df_1[col][(df_1[groupings] == group)]
-#         shift = bar_width * (-0.5 - i + num_bars / 2)
+    if y2_col != None:
+        ax1.scatter(
+            x1,
+            df[(df[groupings] == groups[0])][y2_col],
+            s=75,
+            color="firebrick",
+            label="Count Meters" if y2label is None else y2label,
+        )
 
-#         # Create legend labels or use the provided mapping
-#         label = " ".join(str(group).split("_")).title()
-#         if label_map is not None:
-#             try:
-#                 label = label_map[group]
-#             except KeyError:
-#                 pass
+        ax1.set_ylabel(
+            "Count Meters" if y2label is None else y2label,
+            size=16,
+            labelpad=20,
+            rotation=-90,
+        )
 
-#         if horizontal:
-#             ax.barh(
-#                 x1 + shift,
-#                 y,
-#                 height=bar_width,
-#                 color=colors[i] if len(groups) > 1 else single_bar_color,
-#                 label=label,
-#                 zorder=1000
-#             )
-#         else:
-#             ax.bar(
-#                 x1 + shift,
-#                 y,
-#                 width=bar_width,
-#                 color=colors[i] if len(groups) > 1 else single_bar_color,
-#                 label=label,
-#                 zorder=1000
-#             )
-            
-#         # if uncertainty_col != None:
-#         #     error = df_1[uncertainty_col][(df_1[groupings] == group)]
-#         #     ax.errorbar(
-#         #         y if horizontal else x1 + shift,
-#         #         x1 + shift if horizontal else y,
-#         #         yerr=None if horizontal else error,
-#         #         xerr=error if horizontal else None,
-#         #         ecolor="darkorange",
-#         #         capsize=5,
-#         #         capthick=1,
-#         #         linestyle="none",
-#         #     )
+        if pin_yaxis_zeros:
+            a = ax.get_ylim()[1]
+            b = ax.get_ylim()[0]
+            c = max(df[(df[groupings] == groups[0])][y2_col]) * 1.05
+            if c > 0:
+                ax1.set_ylim(c * (1 - (a - b) / a), c)
+            else:
+                c = min(df[(df[groupings] == groups[0])][y2_col]) * 1.05
+                ax1.set_ylim(c, a)
+
+        if legend:
+            ax1.legend(
+                ["Count Meters" if y2label is None else y2label],
+                frameon=False,
+                bbox_to_anchor=(1.0, 1.1),
+                prop={"size": 15},
+            )
+
+        ax1.grid(False)
+        ax1.tick_params(left=False, right=True, length=4, width=1, labelsize=15)
+
+    ax.set_title(
+        "Load Impact" if title is None else title,
+        fontsize=19,
+        loc="left",
+    )
+
+    if ylabel is not None:
+        y_label = ylabel
+    elif "pct" in col:
+        y_label = "Fraction Savings"
+    elif "savings" in col:
+        y_label = "Avg. Hourly Savings (kWh)"
+    else:
+        y_label = " ".join(col.split("_")).title()
+
+    if horizontal:
+        sylab = ax.set_xlabel
+        sxlab = ax.set_ylabel
+    else:
+        sylab = ax.set_ylabel
+        sxlab = ax.set_xlabel
+
+    sylab(y_label, size=16, labelpad=5)
+    sxlab(" ".join(category.split("_")).title() if xlabel == None else xlabel, size=16)
+
+    ax.tick_params(left=True, bottom=True, length=4, width=1, labelsize=15)
+    ax.tick_params(which="minor", bottom=True, left=True, length=2)
+
+    unique_xtick_labels = [
+        replace_multiple_string_elements(" ".join(str(cat).title().split("_")))
+        for cat in list(df[category].unique())
+    ]
+
+    if len(unique_xtick_labels) > 20:
+        unique_xtick_labels = [label if index % 2 == 0 else '' for index, label in enumerate(unique_xtick_labels)]
+
+    total_label_len = 0
+    for label in unique_xtick_labels:
+        total_label_len += len(label)
+
+    if horizontal:
+        ax.xaxis.set_minor_locator(AutoMinorLocator())
+        ax.set_yticks(np.arange(len(unique_xtick_labels)))
+        ax.set_yticklabels(unique_xtick_labels, fontsize=15)
+    else:
+        ax.yaxis.set_minor_locator(AutoMinorLocator())
+        rotate = -45 if (max([len(k) for k in unique_xtick_labels]) > 5 or total_label_len > 30) else 0
+        ax.set_xticks(np.arange(len(unique_xtick_labels)))
+        ax.set_xticklabels(
+            unique_xtick_labels,
+            rotation=rotate,
+            ha="left" if rotate == -45 else "center",
+            fontsize=15,
+        )
+
+    if legend and (groupings != "dummy"):
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(
+            handles[::-1],
+            labels[::-1],
+            frameon=False,
+            loc="upper left" if legend_loc == None else legend_loc,
+            prop={"size": 15},
+        )
+
+    ax.grid(axis='x' if horizontal else 'y', alpha=0.5)
+    if horizontal:
+        ax.axvline(0)
+    else:
+        ax.axhline(0)
+
+    return fig
+
+
+def pie_chart(
+    df: pd.DataFrame,
+    col: str,
+    label_col: str,
+    max_slices: int = 10,
+    min_slice_fraction: float = 0.02,
+    figsize: tuple = (9, 5),
+    title: str = "Proportional Values",
+    ):
     
-#         if value_stream_df is not None:
-#             for i, value_stream in enumerate(value_stream_df['value_stream'].unique()):
-#                 x1_vs= pd.Series(
-#                     [j for j in range(len(value_stream_df[category][(value_stream_df[groupings] == group)]))]
-#                 )
-#                 y_vs = value_stream_df[col][(value_stream_df[groupings] == group)]
-#                 ax.plot(
-#                     #df_value_stream.query(f"value_stream == '{value_stream}'")[category] + shift,
-#                     value_stream_df.query(f"value_stream == '{value_stream}'")[category],
-#                     value_stream_df.query(f"value_stream == '{value_stream}'")[col],
-#                     linewidth=3,
-#                     color=colors[i],
-#                     linestyle = linestyles[i%len(linestyles)],
-#                     label=value_stream,
-#                     zorder=1000
-#                 )
 
-#     if y2_col != None:
-#         ax1.scatter(
-#             x1,
-#             df_1[(df_1[groupings] == groups[0])][y2_col],
-#             s=75,
-#             color="firebrick",
-#             label="Count Meters" if y2label is None else y2label,
-#         )
+    conditional = '>' if len(df.query(f"{col} > 0")) > 0 else '<'
 
-#         ax1.set_ylabel(
-#             "Count Meters" if y2label is None else y2label,
-#             size=16,
-#             labelpad=20,
-#             rotation=-90,
-#         )
+    df_pos_pie = df[[label_col, col]].query(f"{col} {conditional} 0").sort_values(by=col, ascending=False).reset_index(drop=True)
+    df_pos_pie['plot'] = df_pos_pie[col] / df_pos_pie[col].sum()
+    df_pos_pie = df_pos_pie.reset_index().rename(columns={'index': 'slice_number'})
+    df_pos_pie['slice_number'] = df_pos_pie['slice_number'] + 1
+    df_pos_bar = df_pos_pie.query(f"plot < {min_slice_fraction} or slice_number > {max_slices}")
 
-#         if pin_yaxis_zeros:
-#             a = ax.get_ylim()[1]
-#             b = ax.get_ylim()[0]
-#             c = max(df_1[(df_1[groupings] == groups[0])][y2_col]) * 1.05
-#             if c > 0:
-#                 ax1.set_ylim(c * (1 - (a - b) / a), c)
-#             else:
-#                 c = min(df_1[(df_1[groupings] == groups[0])][y2_col]) * 1.05
-#                 ax1.set_ylim(c, a)
+    if len(df_pos_bar) > 1: 
+        df_pos_pie.query(f"plot >= {min_slice_fraction} and slice_number <= {max_slices}", inplace=True)
+        df_pos_other = df_pos_bar[[col, 'plot']].sum().to_frame().T
+        df_pos_other['slice_number'] = 0
+        df_pos_other[label_col] = 'Other'
+        
+        df_pos_pie = pd.concat([df_pos_other[['slice_number', label_col, col,'plot']], df_pos_pie])
 
-#         if legend:
-#             ax1.legend(
-#                 ["Count Meters" if y2label is None else y2label],
-#                 frameon=False,
-#                 bbox_to_anchor=(1.0, 1.1),
-#                 prop={"size": 15},
-#             )
+        bar_vals = df_pos_bar['plot']
+        bar_legend_labels = df_pos_bar[label_col]
+        bar_value_labels = [f"${v:,.2f}" for v in list(df_pos_bar[col])]
 
-#         ax1.grid(False)
-#         ax1.tick_params(left=False, right=True, length=4, width=1, labelsize=15)
+    pie_vals = list(df_pos_pie['plot'])
+    pie_legend_labels = list(df_pos_pie[label_col])
+    pie_value_labels = [f"${v:,.1f}" for v in list(df_pos_pie[col])] if len(pie_vals) >= 4 else [f"${v:,.2f}" for v in list(df_pos_pie[col])]
 
-#     ax.set_title(
-#         "Load Impact" if title is None else title,
-#         fontsize=19,
-#         loc="left",
-#     )
+    if len(df_pos_bar) > 1:
+    # make figure and assign axis objects
+        fig, (ax1, ax2) = plt.subplots(1, 2, width_ratios=[1, 0.4], figsize=figsize, dpi=200)
+        fig.subplots_adjust(wspace=0)
+        # pie chart parameters (no labels in pie to avoid compressing it)
+        explode = [0.1]+[0]*(len(pie_vals)-1)
+        ax1.set_title(title, fontsize=17, loc="left")
+    else:
+        fig = plt.figure(figsize=figsize, dpi=200)
+        ax1 = fig.gca()
+        explode = [0]*len(pie_vals)
+        ax1.set_title(title, fontsize=14, loc="left")
 
-#     if ylabel is not None:
-#         y_label = ylabel
-#     elif "pct" in col:
-#         y_label = "Fraction Savings"
-#     elif "savings" in col:
-#         y_label = "Avg. Hourly Savings (kWh)"
-#     else:
-#         y_label = " ".join(col.split("_")).title()
+    
 
-#     if horizontal:
-#         sylab = ax.set_xlabel
-#         sxlab = ax.set_ylabel
-#     else:
-#         sylab = ax.set_ylabel
-#         sxlab = ax.set_xlabel
+    # rotate so that first wedge is split by the x-axis
+    angle = -180 * pie_vals[0]
+    # Greens palette: sample from matplotlib colormap (same idea as seaborn "Greens")
+    pie_colors = plt.cm.cividis(np.linspace(0.15, 0.95, len(pie_vals)))
+    
+    wedges, label_texts = ax1.pie(
+        pie_vals, labels=pie_value_labels, startangle=angle,
+        explode=explode, pctdistance=1.18, colors=pie_colors
+    )
 
-#     sylab(y_label, size=16, labelpad=5)
-#     sxlab(" ".join(category.split("_")).title() if xlabel == None else xlabel, size=16)
+    for t in label_texts:
+        t.set_fontsize(15)
+    # color-coded legend at bottom of pie chart
+    legend_handles = [
+        Patch(facecolor=w.get_facecolor(), edgecolor=w.get_edgecolor(), label=l)
+        for w, l in zip(wedges, pie_legend_labels)
+    ]
 
-#     ax.tick_params(left=True, bottom=True, length=4, width=1, labelsize=15)
-#     ax.tick_params(which="minor", bottom=True, left=True, length=2)
+    ax1.legend(
+        handles=legend_handles[1:]+[legend_handles[0]],
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.02),
+        ncol=1,
+        frameon=False,
+        fontsize=12,
+    )
 
-#     unique_xtick_labels = [
-#         replace_multiple_string_elements(" ".join(str(cat).title().split("_")))
-#         for cat in list(df_1[category].unique())
-#     ]
+    if len(df_pos_bar) > 1:
+        # bar chart parameters
+        bottom = 1
+        width = 0.5
+        bar_colors = plt.cm.Blues(np.linspace(0.5, 0.95, len(bar_vals)))
+        # Reversed order for stacking (top bar = last row); label index is len(bar_vals)-1-j
+        bar_value_labels_rev = list(reversed(bar_value_labels))
+        # Adding from the top matches the legend.
+        for j, (height, legend_label) in enumerate(reversed([*zip(bar_vals, bar_legend_labels)])):
+            bottom -= height
+            bc = ax2.bar(0, height, width, bottom=bottom, color=bar_colors[j], label=legend_label,
+                        alpha=0.1 + 0.25 * j)
+            # Only label bars with non-zero height (zero-height bars can make get_bbox() return None)
+            if height > 0:
+                ax2.bar_label(bc, labels=[bar_value_labels_rev[j]], label_type='center', fontsize=12)
 
-#     if len(unique_xtick_labels) > 20:
-#         unique_xtick_labels = [label if index % 2 == 0 else '' for index, label in enumerate(unique_xtick_labels)]
+        #ax2.set_title('Other Value Streams', fontsize=13)
+        ax2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.02), ncol=1, frameon=False, fontsize=12)
+        ax2.axis('off')
+        ax2.set_xlim(- 2.5 * width, 2.5 * width)
 
-#     total_label_len = 0
-#     for label in unique_xtick_labels:
-#         total_label_len += len(label)
+        # use ConnectionPatch to draw lines between the two plots
+        theta1, theta2 = wedges[0].theta1, wedges[0].theta2
+        center, r = wedges[0].center, wedges[0].r
+        bar_height = sum(bar_vals)
+        # Bar stack is drawn from bottom=1 downward, so it occupies y from 1 - bar_height to 1
+        bar_top_y = 1.0
+        bar_bottom_y = 1.0 - bar_height
 
-#     if horizontal:
-#         #plt.yticks(fontsize=15)
-#         ax.xaxis.set_minor_locator(AutoMinorLocator())
-#         ax.set_yticks(np.arange(len(unique_xtick_labels)))
-#         ax.set_yticklabels(unique_xtick_labels, fontsize=15)
-#     else:
-#         ax.yaxis.set_minor_locator(AutoMinorLocator())
-#         rotate = -45 if (max([len(k) for k in unique_xtick_labels]) > 5 or total_label_len > 30) else 0
-#         ax.set_xticks(np.arange(len(unique_xtick_labels)))
-#         ax.set_xticklabels(
-#             unique_xtick_labels,
-#             rotation=rotate,
-#             ha="left" if rotate == -45 else "center",
-#             fontsize=15,
-#         )
+        # draw top connecting line
+        x = r * np.cos(np.pi / 180 * theta2) + center[0]
+        y = r * np.sin(np.pi / 180 * theta2) + center[1]
+        con = ConnectionPatch(xyA=(-width / 2, bar_top_y), coordsA=ax2.transData,
+                            xyB=(x, y), coordsB=ax1.transData)
+        con.set_color('dimgray')
+        con.set_linewidth(1)
+        con.set_linestyle('dotted')
+        ax2.add_artist(con)
 
-#     if legend and (groupings != "dummy"):
-#         handles, labels = ax.get_legend_handles_labels()
-#         ax.legend(
-#             handles[::-1],
-#             labels[::-1],
-#             frameon=False,
-#             loc="upper left" if legend_loc == None else legend_loc,
-#             prop={"size": 15},
-#         )
+        # draw bottom connecting line
+        x = r * np.cos(np.pi / 180 * theta1) + center[0]
+        y = r * np.sin(np.pi / 180 * theta1) + center[1]
+        con = ConnectionPatch(xyA=(-width / 2, bar_bottom_y), coordsA=ax2.transData,
+                            xyB=(x, y), coordsB=ax1.transData)
+        con.set_color('dimgray')
+        con.set_linewidth(1)
+        con.set_linestyle('dotted')
+        ax2.add_artist(con)
 
-#     ax.grid(axis='x' if horizontal else 'y', alpha=0.5)
-#     if horizontal:
-#         ax.axvline(0)
-#     else:
-#         ax.axhline(0)
-
-#     if return_ax:
-#         return ax
-
-#     return fig
+    return fig#, df_neg 

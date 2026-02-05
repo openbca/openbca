@@ -6,6 +6,8 @@ def generate_measure_filters_query():
         , program_name 
         , measure_name
         , measure_id
+        , avoided_cost_subset
+        , cast(start_year as string) as start_year
         , label_1
         , label_2
         , label_3
@@ -53,11 +55,11 @@ def generate_waterfall_query(where_sql, waterfall_column):
     return waterfall_query
 
 
-def generate_benefit_cost_scatter_query(where_sql, catalog_by_filter_sql):
+def generate_benefit_cost_scatter_query(where_sql, catalog_by_filter):
     benefit_cost_scatter_query = f"""
         SELECT 
         id
-        {catalog_by_filter_sql}
+        , {catalog_by_filter}
         , ifnull(total_benefits, 0) as total_benefits
         , -ifnull(total_costs, 0) as total_costs
         FROM 
@@ -177,7 +179,7 @@ def generate_null_aggregation_benefits_query(where_sql, commodity_filter, tempor
 def generate_value_stream_benefits_query(where_sql, commodity_filter):
     value_stream_benefits_query = f"""
         SELECT 
-        value_stream as '{commodity_filter.title()} Value Stream'
+        value_stream 
         , sum(final_dollar_value) AS final_dollar_value
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fvc 
@@ -191,6 +193,34 @@ def generate_value_stream_benefits_query(where_sql, commodity_filter):
         value_stream
     """
     return value_stream_benefits_query
+
+
+def generate_multiple_options_probe_query(where_sql, column_names:list[str]):
+    
+    subqueries = []
+    for column_name in column_names:
+            
+        column_filter_coalesce = column_name
+        if column_name == 'program_name':
+            column_filter_coalesce = "coalesce(m.program_name, fvc.id)"
+    
+        subqueries.append(
+            f"""
+            SELECT 
+            '{column_name}' AS field 
+            , count(distinct {column_filter_coalesce}) AS distinct_values
+            FROM 
+            openbca.core_layer3_finalization.final_value_calculations_ts fvc 
+            FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
+            fvc.id = m.id
+            {where_sql} 
+            HAVING SUM(final_dollar_value) IS NOT NULL
+            """
+        )
+
+    multiple_options_probe_query = ' UNION ALL '.join(subqueries)
+    
+    return multiple_options_probe_query
 
 
 def generate_costs_commodity_query(where_sql):
@@ -229,6 +259,34 @@ def generate_costs_value_stream_query(where_sql):
         value_stream
     """
     return costs_value_stream_query
+
+
+def generate_categorical_summary_query(where_sql, category_filter, grouping_filter = None):
+    
+    category_filter_coalesce = category_filter
+    if category_filter == 'program_name':
+        category_filter_coalesce = "coalesce(m.program_name, fvc.id)"
+    
+    grouping_filter_coalesce = grouping_filter
+    if grouping_filter == 'program_name':
+        grouping_filter_coalesce = "coalesce(m.program_name, fvc.id)"
+
+    categorical_summary_query = f"""
+        SELECT 
+        {category_filter_coalesce} AS {category_filter}
+        {f", {grouping_filter_coalesce} AS {grouping_filter}" if grouping_filter is not None else ''}
+        , sum(final_dollar_value) AS final_dollar_value
+        FROM 
+        openbca.core_layer3_finalization.final_value_calculations_ts fvc 
+        FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
+        fvc.id = m.id
+        {where_sql} 
+        GROUP BY 
+        {category_filter_coalesce}
+        {f", {grouping_filter_coalesce}" if grouping_filter is not None else ''}
+        HAVING SUM(final_dollar_value) IS NOT NULL
+    """
+    return categorical_summary_query
 
 
 def generate_summary_results_query():
