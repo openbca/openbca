@@ -94,16 +94,16 @@ else:
             # If there are more than 5 filters, create multiple rows of filters.
             max_filters_per_row = 5
             num_filter_rows = int(np.ceil(num_filters / max_filters_per_row))
-    
-                with st.form("Apply Selectios", border=True):
+
+            with st.form("Apply Selectios", border=True):
                 st.markdown("##### Comprehensive Filters", help="Make desired selections and apply them via the 'Apply Selection' button.")
-            st.markdown("###### These selections will be applied to all analyses below.")
+                st.markdown("###### These selections will be applied to all analyses below.")
                 filters_dict = {}
                 filters_options_dict = {}
                 for j in range(num_filter_rows):
-                start_idx = j * max_filters_per_row
-                num_cols_this_row = min(max_filters_per_row, num_filters - start_idx)
-                cols = st.columns(min(max(num_cols_this_row, 3), 5))
+                    start_idx = j * max_filters_per_row
+                    num_cols_this_row = min(max_filters_per_row, num_filters - start_idx)
+                    cols = st.columns(min(max(num_cols_this_row, 3), 5))
                     for i in range(num_cols_this_row):
                         with cols[i]:
                             category = filters[start_idx + i]
@@ -201,10 +201,10 @@ else:
                 catalog_by_filter = ''
                 if num_filters > 0:
                     catalog_by_filter = st.radio(
-                    "Catalog scatter plot results by:", 
-                    options = [space_and_title(filter) for filter in filters if filter != 'id'], 
-                    index = 0, 
-                    horizontal = True,
+                        "Catalog scatter plot results by:", 
+                        options = [space_and_title(filter) for filter in filters if filter != 'id'], 
+                        index = 0, 
+                        horizontal = True,
                     )
 
                 benefit_cost_scatter_df = con.execute(generate_benefit_cost_scatter_query(where_sql, reconstruct_column_name(catalog_by_filter))).df()
@@ -248,29 +248,29 @@ else:
                 max_marker_size = 300 
                 marker_size = max(min_marker_size, min(max_marker_size, min_marker_size + 10*(max_marker_size - min_marker_size) / len(plot_benefit_cost_scatter_df)))
 
-                benefit_cost_scatter_fig = scatter_fig(
-                    df = plot_benefit_cost_scatter_df,
-                    xy_cols_dict = {
-                        'total_costs':{'uncertainty_col':None, 'label': 'Costs ($)'},
-                        'total_benefits':{'uncertainty_col':None, 'label': 'Benefits ($)'}
-                        },
-                    marker_size = marker_size,
-                    color_by_col = reconstruct_column_name(catalog_by_filter),
-                    label_points = False,
-                    labels = plot_benefit_cost_scatter_df['id'].tolist(),
-                    label_size = 10,
-                    figsize = (8, 6),
-                    title = "Benefits and Costs by ID",
-                    xlims = [plot_x_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_x_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                    xlabel = f'Costs {plot_benefit_cost_scatter_unit_labels[0]}',
-                    ylims = [plot_y_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_y_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                    ylabel = f'Benefits {plot_benefit_cost_scatter_unit_labels[1]}',
-                    legend = True,
-                    legend_labels = sorted(list(plot_benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
-                    legend_loc = "upper left",
-                )
+            benefit_cost_scatter_fig = scatter_fig(
+                df = plot_benefit_cost_scatter_df,
+                xy_cols_dict = {
+                    'total_costs':{'uncertainty_col':None, 'label': 'Costs ($)'},
+                    'total_benefits':{'uncertainty_col':None, 'label': 'Benefits ($)'}
+                    },
+                marker_size = marker_size,
+                color_by_col = reconstruct_column_name(catalog_by_filter),
+                label_points = False,
+                labels = plot_benefit_cost_scatter_df['id'].tolist(),
+                label_size = 10,
+                figsize = (8, 6),
+                title = "Benefits and Costs by ID",
+                xlims = [plot_x_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_x_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
+                xlabel = f'Costs {plot_benefit_cost_scatter_unit_labels[0]}',
+                ylims = [plot_y_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_y_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
+                ylabel = f'Benefits {plot_benefit_cost_scatter_unit_labels[1]}',
+                legend = True,
+                legend_labels = sorted(list(plot_benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
+                legend_loc = "upper left",
+            )
 
-                st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
+            st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
 
             st.divider()
             # Benefits and Costs Analysis
@@ -295,8 +295,8 @@ else:
                 unit = 'MMBtu'
             else:
                 unit = ''
-        
-    
+            
+
             temporal_cols = ['hour_of_day', 'month', 'year']
 
             populated_temporal_cols = []
@@ -304,7 +304,7 @@ else:
                 if len(
                     con.execute(generate_populated_temporal_cols_query(where_sql, commodity_filter, col)).df()
                 ) > 0:
-                    populated_temporal_cols.append(col)        
+                    populated_temporal_cols.append(col)
 
             temporal_aggregation_filter = 'year'
             if len(populated_temporal_cols) > 1:
@@ -367,7 +367,7 @@ else:
                 )
 
                 st.pyplot(temporal_aggregation_bar_fig, clear_figure=True)
-            
+        
             with col2:
                 pos_value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, commodity_filter)).df().query("final_dollar_value > 0")
                 neg_value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, commodity_filter)).df().query("final_dollar_value < 0")
@@ -568,5 +568,4 @@ else:
         st.markdown("### Summary Results Table:")
         st.dataframe(summary_results_df, width='stretch', hide_index=True)
         st.write(f"Using Database: `{db_value}`")
-
-        con.close()
+        
