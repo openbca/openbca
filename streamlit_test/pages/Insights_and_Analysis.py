@@ -95,7 +95,7 @@ else:
             max_filters_per_row = 5
             num_filter_rows = int(np.ceil(num_filters / max_filters_per_row))
 
-            with st.form("Apply Selectios", border=True):
+            with st.form("Apply Selections", border=True):
                 st.markdown("##### Comprehensive Filters", help="Make desired selections and apply them via the 'Apply Selection' button.")
                 st.markdown("###### These selections will be applied to all analyses below.")
                 filters_dict = {}
@@ -248,29 +248,29 @@ else:
                 max_marker_size = 300 
                 marker_size = max(min_marker_size, min(max_marker_size, min_marker_size + 10*(max_marker_size - min_marker_size) / len(plot_benefit_cost_scatter_df)))
 
-            benefit_cost_scatter_fig = scatter_fig(
-                df = plot_benefit_cost_scatter_df,
-                xy_cols_dict = {
-                    'total_costs':{'uncertainty_col':None, 'label': 'Costs ($)'},
-                    'total_benefits':{'uncertainty_col':None, 'label': 'Benefits ($)'}
-                    },
-                marker_size = marker_size,
-                color_by_col = reconstruct_column_name(catalog_by_filter),
-                label_points = False,
-                labels = plot_benefit_cost_scatter_df['id'].tolist(),
-                label_size = 10,
-                figsize = (8, 6),
-                title = "Benefits and Costs by ID",
-                xlims = [plot_x_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_x_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                xlabel = f'Costs {plot_benefit_cost_scatter_unit_labels[0]}',
-                ylims = [plot_y_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_y_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                ylabel = f'Benefits {plot_benefit_cost_scatter_unit_labels[1]}',
-                legend = True,
-                legend_labels = sorted(list(plot_benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
-                legend_loc = "upper left",
-            )
+                benefit_cost_scatter_fig = scatter_fig(
+                    df = plot_benefit_cost_scatter_df,
+                    xy_cols_dict = {
+                        'total_costs':{'uncertainty_col':None, 'label': 'Costs ($)'},
+                        'total_benefits':{'uncertainty_col':None, 'label': 'Benefits ($)'}
+                        },
+                    marker_size = marker_size,
+                    color_by_col = reconstruct_column_name(catalog_by_filter),
+                    label_points = False,
+                    labels = plot_benefit_cost_scatter_df['id'].tolist(),
+                    label_size = 10,
+                    figsize = (8, 6),
+                    title = "Benefits and Costs by ID",
+                    xlims = [plot_x_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_x_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
+                    xlabel = f'Costs {plot_benefit_cost_scatter_unit_labels[0]}',
+                    ylims = [plot_y_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_y_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
+                    ylabel = f'Benefits {plot_benefit_cost_scatter_unit_labels[1]}',
+                    legend = True,
+                    legend_labels = sorted(list(plot_benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
+                    legend_loc = "upper left",
+                )
 
-            st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
+                st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
 
             st.divider()
             # Benefits and Costs Analysis
