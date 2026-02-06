@@ -194,8 +194,7 @@ if db_exists:
                 if download_summary_results:
                     # Save file to OUTPUT_DIR
                     output_file_path = OUTPUT_DIR / "results_summary_by_id.csv"
-                    # with open(output_file_path, 'w', encoding='utf-8') as f:
-                    #     f.write(summary_results_csv)
+                    # DD: Write directly to the output file path, avoids windows carriage return issues when writing from a string buffer
                     summary_results_df.to_csv(output_file_path, index=False)
                     st.success(f"Summary results saved to {output_file_path}")
 
