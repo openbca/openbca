@@ -58,9 +58,16 @@ run-ca-gas-acc:
 	@echo "CSV file saved to: ca_acc/output/full_ca_avoided_costs_acc_gas.csv"
 
 run-input-transform-validations:
-	@DB=$(DBV) uv run sqlmesh -p nspm -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
 	@echo "Running parsing scripts and validating input data..."
-	@time DB=$(DBV) uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DBV']); con.close()"
+# Note: we use a separate DuckDB instance and gateway for validation of initial parsing and ingestion steps
+	@uv run sqlmesh --gateway validations_duckdb -p nspm -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
+	@uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DBV']); con.close();"
+
+test-environment-var-windows:
+	@echo DB is %DB%
+	@echo DBV is %DBV%
+	DB=$(DB)
+	DBV=$(DBV)
 
 run-nspm:
 	uv run sqlmesh -p nspm -p core plan --auto-apply
