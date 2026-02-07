@@ -63,11 +63,11 @@ run-input-transform-validations:
 	@uv run sqlmesh --gateway validations_duckdb -p nspm -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
 	@uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DBV']); con.close();"
 
-test-environment-var-windows:
-	@echo DB is %DB%
-	@echo DBV is %DBV%
-	DB=$(DB)
-	DBV=$(DBV)
+# test-environment-var-windows:
+# 	@echo DB is %DB%
+# 	@echo DBV is %DBV%
+# 	DB=$(DB)
+# 	DBV=$(DBV)
 
 run-nspm:
 	uv run sqlmesh -p nspm -p core plan --auto-apply
