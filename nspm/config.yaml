@@ -1,8 +1,15 @@
 gateways:
+  # Output results gateway
   local_duckdb:
     connection:
       type: duckdb
       database: {{ env_var('DB') }}
+  
+  # Separate gateway for input transform validation only
+  validations_duckdb:
+    connection:
+      type: duckdb
+      database: {{ env_var('DBV') }}
 
 default_gateway: local_duckdb
 
