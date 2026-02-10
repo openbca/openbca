@@ -10,5 +10,9 @@ output/*
 excel_input_parsing/input_templates/*
 !.keepme
 
+# Ignore PyInstaller files
+dist/
+build/
+
 __pycache__
 .DS_Store

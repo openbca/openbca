@@ -2,6 +2,7 @@
 """
 Centralized configuration for OpenBCA.
 Handles path resolution for various directories used in the project.
+Works in both development mode and when packaged with PyInstaller.
 """
 import sys
 from pathlib import Path
@@ -11,7 +12,16 @@ from pathlib import Path
 # Ensures serializability by sqlmesh
 
 def get_repo_root() -> Path:
-    return Path(__file__).resolve().parent.parent
+    """
+    Get the repository root directory.
+    Works correctly in both development mode and when packaged with PyInstaller.
+    """
+    if getattr(sys, 'frozen', False):
+        # Running in PyInstaller bundle
+        return Path(sys._MEIPASS)
+    else:
+        # Running in development
+        return Path(__file__).resolve().parent.parent
 
 
 def get_core_project_dir() -> Path:
@@ -41,3 +51,7 @@ def get_logs_dir() -> Path:
     logs_dir.mkdir(parents=True, exist_ok=True)
     return logs_dir
 
+
+def get_logos_dir() -> Path:
+    """Get the directory containing Streamlit app logos."""
+    return get_streamlit_app_dir() / 'logos'

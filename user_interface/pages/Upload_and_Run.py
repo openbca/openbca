@@ -68,7 +68,7 @@ with quit_col:
         os.kill(os.getpid(), signal.SIGTERM)
 st.markdown("###### The OpenBCA software executes Jurisdiction Specific Tests developed under National Standard Practice Manual guidance.")
 
-# Resolve paths relative to this file, not the current working directory.
+# Resolve paths using config module - works in both dev and PyInstaller modes
 REPO_ROOT = get_repo_root()
 INPUT_TEMPLATES_DIR = get_input_templates_dir()
 OUTPUT_DIR = get_output_dir()
