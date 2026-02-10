@@ -1,5 +1,5 @@
 
-def generate_measure_filters_query():
+def generate_measure_filters_query(where_sql = ""):
     measure_filters_query = f"""
         SELECT  
         id
@@ -14,7 +14,8 @@ def generate_measure_filters_query():
         , label_4
         , label_5
         FROM 
-        openbca.core_layer0_base.measures
+        openbca.core_layer0_base.measures m
+        {where_sql}
     """
     return measure_filters_query
 

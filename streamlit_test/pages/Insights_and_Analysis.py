@@ -95,11 +95,26 @@ else:
             max_filters_per_row = 5
             num_filter_rows = int(np.ceil(num_filters / max_filters_per_row))
 
-            with st.form("Apply Selections", border=True):
+            def where_sql_for_others(exclude_category: str) -> str:
+                """Build WHERE clause from all filter selections except exclude_category (so options for that dimension reflect other filters)."""
+                sql = "WHERE 1=1"
+                for other in filters:
+                    if other == exclude_category:
+                        continue
+                    others_selection = st.session_state.get(f"filter_{other}") or []
+                    if others_selection:
+                        snippet = ", ".join(["'{}'".format(v) for v in others_selection])
+                        sql += f" AND m.{other} IN ({snippet})"
+                return sql
+
+            where_sql = "WHERE 1=1"
+            filters_dict = {}
+            filters_options_dict = {}
+            with st.container(border=True):
+                
                 st.markdown("##### Comprehensive Filters", help="Make desired selections and apply them via the 'Apply Selection' button.")
                 st.markdown("###### These selections will be applied to all analyses below.")
-                filters_dict = {}
-                filters_options_dict = {}
+                
                 for j in range(num_filter_rows):
                     start_idx = j * max_filters_per_row
                     num_cols_this_row = min(max_filters_per_row, num_filters - start_idx)
@@ -107,34 +122,32 @@ else:
                     for i in range(num_cols_this_row):
                         with cols[i]:
                             category = filters[start_idx + i]
-                            options = sorted(measure_filters_df[category].unique().tolist())
+                            # Options for this category = values that exist given ALL OTHER filters' current selections
+                            options = sorted(
+                                con.execute(
+                                    generate_measure_filters_query(where_sql_for_others(category))
+                                ).df()[category].unique().tolist()
+                            )
                             filters_options_dict[category] = options
+                            # Default = current selection restricted to currently available options
+                            current_selection = st.session_state.get(f"filter_{category}") or []
+                            default = [v for v in current_selection if v in options] if current_selection else []
                             filters_dict[category] = st.multiselect(
-                                label=f"Limit {space_and_title(category)} to:".replace(" Id ", " ID "),
+                                label=f"Limit {space_and_title(category)} to:",
                                 options=options,
+                                default=default,
                                 key=f"filter_{category}",
                             )
                             if len(filters_dict[category]) == 0:
                                 filters_dict[category] = options
+                            if len(filters_dict[category]) < len(filters_options_dict[category]):
+                                where_snippet = ", ".join(["'{}'".format(value) for value in filters_dict[category]])
+                                where_sql += f" AND m.{category} IN ({where_snippet})"
 
-                filter_submitted = st.form_submit_button("Apply Selection", type="primary")
-        
-        filter_warning = 'Active filters: '
-        for i, (category, values) in enumerate(filters_dict.items()):
-            if len(values) < len(filters_options_dict[category]):
-                filter_warning += f"{category.title().replace('_', ' ').replace( 'Id', ' ID')}, " 
-        if filter_warning != 'Active filters: ':
-            st.warning(filter_warning.rstrip(', '))
-
-        where_sql = f"WHERE 1=1"
-        for category, values in filters_dict.items():
-            if len(values) < len(filters_options_dict[category]):
-                where_snippet = ', '.join(["'{}'".format(value) for value in values])
-                where_sql += f" AND m.{category} IN ({where_snippet})"
 
         jst_results_df = con.execute(generate_jst_query(where_sql)).df()
         if len(jst_results_df) == 0:
-            st.info("No results correspond to the selected filters. Please check your selections.")
+            st.error("No results correspond to the selected filters. Please check your selections.")
         else:
             jst_ratio = jst_results_df['jst_ratio'].values[0]
             total_costs = -jst_results_df['total_costs'].values[0]
@@ -149,17 +162,32 @@ else:
             col4.metric(label="JST Ratio", value=f"{jst_ratio:.2f}", border=False)
 
             st.divider()
+            
             ###Analyis  
             col1, col2 = st.columns(spec=[0.55, 0.45], gap="medium", border=False)
             
-            # Waterfall Plot
             with col1: 
-                st.markdown("#### Portfolio Analysis")
+
+                subcol1, subcol2 = st.columns(spec=[0.35, 0.65], gap="medium", border=False)
+                with subcol1:
+                    st.write(f"")
+                    st.markdown("#### Portfolio Analysis")
+                
+                # Waterfall Plot
+                with subcol2:    
+                    waterfall_scatter_fig_or_table = st.segmented_control(
+                        label = "**Display**", 
+                        options = ['Figures', 'Tables'], 
+                        default='Figures',
+                        key = "waterfall_scatter_fig_or_table"
+                        )   
+  
 
                 waterfall_options = ["Impact Category", "Value Stream"]
                 
+                #with subcol2:
                 waterfall_filter = st.radio(
-                    label = "See waterfall results by:", 
+                    label = "**Waterfall Steps**", 
                     options = waterfall_options, 
                     horizontal = True,
                     index = 0, 
@@ -177,31 +205,51 @@ else:
                 num_bars = len(waterfall_results_df)
                 num_bars_sig_figs = determine_label_sig_figs(num_bars)
 
-                waterfall_fig = waterfall_multitier_fig(
-                    df = waterfall_results_df,
-                    col = 'final_dollar_value',
-                    category = waterfall_column,
-                    tiers = None,
-                    sorting_list = ['total', 'final_dollar_value'],
-                    sort_directions = [True, False],
-                    figsize = (11, 6),
-                    include_line = False,
-                    include_value_labels = True,
-                    value_labels_decimals = num_bars_sig_figs,
-                    title = "Benefit and Cost Breakdown",
-                    annotations = [None],
-                    ylabel = f'Dollars {waterfall_unit_labels[1]}',
-                    ylims = None,
-                )
+                if waterfall_scatter_fig_or_table == 'Figures':
+                    waterfall_fig = waterfall_multitier_fig(
+                        df = waterfall_results_df,
+                        col = 'final_dollar_value',
+                        category = waterfall_column,
+                        tiers = None,
+                        sorting_list = ['total', 'final_dollar_value'],
+                        sort_directions = [True, False],
+                        figsize = (11, 6),
+                        include_line = False,
+                        include_value_labels = True,
+                        value_labels_decimals = num_bars_sig_figs,
+                        title = "Benefit and Cost Breakdown",
+                        annotations = [None],
+                        ylabel = f'Dollars {waterfall_unit_labels[1]}',
+                        ylims = None,
+                    )
 
-                st.pyplot(waterfall_fig, clear_figure=True)
+                    st.pyplot(waterfall_fig, clear_figure=True)
+
+                else:
+                    waterfall_results_df.sort_values(by=['total', 'final_dollar_value'], ascending=[True, False], inplace=True)
+                    waterfall_results_df[waterfall_column] = waterfall_results_df[waterfall_column].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+                
+                    st.dataframe(
+                        waterfall_results_df[[waterfall_column, 'final_dollar_value_original']], 
+                        width='stretch', 
+                        hide_index=True,
+                        column_config={
+                            waterfall_column: st.column_config.TextColumn(
+                                label=space_and_title(waterfall_column),
+                            ),
+                            'final_dollar_value_original': st.column_config.NumberColumn(
+                                label="Dollars ($)",
+                                format="dollar",
+                            )
+                        }
+                        )
 
             # Benefit and Cost Scatter Plot
             with col2:
                 catalog_by_filter = ''
                 if num_filters > 0:
                     catalog_by_filter = st.radio(
-                        "Catalog scatter plot results by:", 
+                        "**Create Categories From**", 
                         options = [space_and_title(filter) for filter in filters if filter != 'id'], 
                         index = 0, 
                         horizontal = True,
@@ -210,78 +258,113 @@ else:
                 benefit_cost_scatter_df = con.execute(generate_benefit_cost_scatter_query(where_sql, reconstruct_column_name(catalog_by_filter))).df()
                 if num_filters > 0:
                     benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].fillna("None", inplace=True)
-                            
-                min_scatter_val = benefit_cost_scatter_df[['total_costs', 'total_benefits']].min().min()
-                max_scatter_val = benefit_cost_scatter_df[['total_costs', 'total_benefits']].max().max()
-                scatter_range = max_scatter_val - min_scatter_val
-                initial_padding = 0.05
-                axis_min = min_scatter_val - initial_padding * scatter_range
-                axis_max = max_scatter_val + initial_padding * scatter_range
 
-                x_min_scatter_val = benefit_cost_scatter_df['total_costs'].min()
-                x_max_scatter_val = benefit_cost_scatter_df['total_costs'].max()
-                y_min_scatter_val = benefit_cost_scatter_df['total_benefits'].min()
-                y_max_scatter_val = benefit_cost_scatter_df['total_benefits'].max()
+                if waterfall_scatter_fig_or_table == 'Figures':            
+                    min_scatter_val = benefit_cost_scatter_df[['total_costs', 'total_benefits']].min().min()
+                    max_scatter_val = benefit_cost_scatter_df[['total_costs', 'total_benefits']].max().max()
+                    scatter_range = max_scatter_val - min_scatter_val
+                    initial_padding = 0.05
+                    axis_min = min_scatter_val - initial_padding * scatter_range
+                    axis_max = max_scatter_val + initial_padding * scatter_range
 
-                zoom_padding = 0.005
-                x_min = x_min_scatter_val + scatter_range * zoom_padding
-                x_max = x_max_scatter_val - scatter_range * zoom_padding
-                y_min = y_min_scatter_val + scatter_range * zoom_padding
-                y_max = y_max_scatter_val - scatter_range * zoom_padding
+                    x_min_scatter_val = benefit_cost_scatter_df['total_costs'].min()
+                    x_max_scatter_val = benefit_cost_scatter_df['total_costs'].max()
+                    y_min_scatter_val = benefit_cost_scatter_df['total_benefits'].min()
+                    y_max_scatter_val = benefit_cost_scatter_df['total_benefits'].max()
 
-                zoom = st.slider("Zoom:", min_value=0.0, max_value=0.999, value=0.0, step=0.001)
-                
-                plot_x_axis_min = min(axis_min*(1 - zoom), x_max)
-                plot_x_axis_max = max(axis_max*(1 - zoom), x_min)
-                plot_y_axis_min = min(axis_min*(1 - zoom), y_max)
-                plot_y_axis_max = max(axis_max*(1 - zoom), y_min)
+                    zoom_padding = 0.005
+                    x_min = x_min_scatter_val + scatter_range * zoom_padding
+                    x_max = x_max_scatter_val - scatter_range * zoom_padding
+                    y_min = y_min_scatter_val + scatter_range * zoom_padding
+                    y_max = y_max_scatter_val - scatter_range * zoom_padding
 
-                plot_benefit_cost_scatter_df, plot_benefit_cost_scatter_unit_labels, plot_benefit_cost_scatter_scale_exponent = determine_dollar_magnitude(
-                    benefit_cost_scatter_df.query(
-                        f"{plot_x_axis_min} <= total_costs <= {plot_x_axis_max} and {plot_y_axis_min} <= total_benefits <= {plot_y_axis_max}"), 
-                        x_col='total_costs', 
-                        y_col='total_benefits',
-                        return_scale_exponent=True
-                        )
+                    zoom = st.slider("Zoom:", min_value=0.0, max_value=0.999, value=0.0, step=0.001)
+                    
+                    plot_x_axis_min = min(axis_min*(1 - zoom), x_max)
+                    plot_x_axis_max = max(axis_max*(1 - zoom), x_min)
+                    plot_y_axis_min = min(axis_min*(1 - zoom), y_max)
+                    plot_y_axis_max = max(axis_max*(1 - zoom), y_min)
 
-                min_marker_size = 100
-                max_marker_size = 300 
-                marker_size = max(min_marker_size, min(max_marker_size, min_marker_size + 10*(max_marker_size - min_marker_size) / len(plot_benefit_cost_scatter_df)))
+                    plot_benefit_cost_scatter_df, plot_benefit_cost_scatter_unit_labels, plot_benefit_cost_scatter_scale_exponent = determine_dollar_magnitude(
+                        benefit_cost_scatter_df.query(
+                            f"{plot_x_axis_min} <= total_costs <= {plot_x_axis_max} and {plot_y_axis_min} <= total_benefits <= {plot_y_axis_max}"), 
+                            x_col='total_costs', 
+                            y_col='total_benefits',
+                            return_scale_exponent=True
+                            )
 
-                benefit_cost_scatter_fig = scatter_fig(
-                    df = plot_benefit_cost_scatter_df,
-                    xy_cols_dict = {
-                        'total_costs':{'uncertainty_col':None, 'label': 'Costs ($)'},
-                        'total_benefits':{'uncertainty_col':None, 'label': 'Benefits ($)'}
-                        },
-                    marker_size = marker_size,
-                    color_by_col = reconstruct_column_name(catalog_by_filter),
-                    label_points = False,
-                    labels = plot_benefit_cost_scatter_df['id'].tolist(),
-                    label_size = 10,
-                    figsize = (8, 6),
-                    title = "Benefits and Costs by ID",
-                    xlims = [plot_x_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_x_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                    xlabel = f'Costs {plot_benefit_cost_scatter_unit_labels[0]}',
-                    ylims = [plot_y_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_y_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                    ylabel = f'Benefits {plot_benefit_cost_scatter_unit_labels[1]}',
-                    legend = True,
-                    legend_labels = sorted(list(plot_benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
-                    legend_loc = "upper left",
-                )
+                    min_marker_size = 100
+                    max_marker_size = 300 
+                    marker_size = max(min_marker_size, min(max_marker_size, min_marker_size + 10*(max_marker_size - min_marker_size) / len(plot_benefit_cost_scatter_df)))
 
-                st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
+                    benefit_cost_scatter_fig = scatter_fig(
+                        df = plot_benefit_cost_scatter_df,
+                        xy_cols_dict = {
+                            'total_costs':{'uncertainty_col':None, 'label': 'Costs ($)'},
+                            'total_benefits':{'uncertainty_col':None, 'label': 'Benefits ($)'}
+                            },
+                        marker_size = marker_size,
+                        color_by_col = reconstruct_column_name(catalog_by_filter),
+                        label_points = False,
+                        labels = plot_benefit_cost_scatter_df['id'].tolist(),
+                        label_size = 10,
+                        figsize = (8, 6),
+                        title = "Benefits and Costs by ID",
+                        xlims = [plot_x_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_x_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
+                        xlabel = f'Costs {plot_benefit_cost_scatter_unit_labels[0]}',
+                        ylims = [plot_y_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_y_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
+                        ylabel = f'Benefits {plot_benefit_cost_scatter_unit_labels[1]}',
+                        legend = True,
+                        legend_labels = sorted(list(plot_benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
+                        legend_loc = "upper left",
+                    )
+
+                    st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
+                else:
+                    benefit_cost_scatter_df.sort_values(by=[reconstruct_column_name(catalog_by_filter), 'total_benefits'], ascending=[True, False], inplace=True)
+                    benefit_cost_scatter_df[reconstruct_column_name(catalog_by_filter)] = benefit_cost_scatter_df[reconstruct_column_name(catalog_by_filter)].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+
+                    st.dataframe(
+                        benefit_cost_scatter_df[['id', reconstruct_column_name(catalog_by_filter), 'total_costs', 'total_benefits']], 
+                        width='stretch', 
+                        hide_index=True,
+                        column_config={
+                            reconstruct_column_name(catalog_by_filter): st.column_config.TextColumn(
+                                label=space_and_title(reconstruct_column_name(catalog_by_filter)),
+                            ),
+                            'total_costs': st.column_config.NumberColumn(
+                                label="Costs ($)",
+                                format="dollar",
+                            ),
+                            'total_benefits': st.column_config.NumberColumn(
+                                label="Benefits ($)",
+                                format="dollar",
+                            )
+                        }
+                    )
 
             st.divider()
             # Benefits and Costs Analysis
-            st.markdown("#### Benefits Analysis")
-            st.markdown("##### Explore Results by Impact Category and Value Stream")
+
+            header_col1, header_col2 = st.columns(spec=[0.45, 0.55], gap="medium", border=False)
+            with header_col1:
+                st.markdown("#### Benefits Analysis")
+                st.markdown("##### Explore Results by Impact Category and Value Stream")
+            
+            with header_col2:    
+                bar_pie_fig_or_table = st.segmented_control(
+                    label = "**Display**", 
+                    options = ['Figures', 'Tables'], 
+                    default='Figures',
+                    key = "bar_pie_fig_or_table"
+                    ) 
 
             benefits_commodity_options_df = con.execute(generate_benefits_commodity_options_query(where_sql)).df()
-            benefits_commodity_options = [commodity.title().replace("Nei", "NEI") for commodity in benefits_commodity_options_df['commodity'].tolist()]
+            
+            benefits_commodity_options = [space_and_title(commodity) for commodity in benefits_commodity_options_df['commodity'].tolist()]
 
             commodity_filter = st.radio(
-                label = "Select Impact Category:", 
+                label = "**Impact Category**", 
                 options = benefits_commodity_options, 
                 horizontal = True,
                 index = 0 if 'ELECTRIC' not in benefits_commodity_options else benefits_commodity_options.index('ELECTRIC'), 
@@ -296,7 +379,6 @@ else:
             else:
                 unit = ''
             
-
             temporal_cols = ['hour_of_day', 'month', 'year']
 
             populated_temporal_cols = []
@@ -307,29 +389,31 @@ else:
                     populated_temporal_cols.append(col)
 
             temporal_aggregation_filter = 'year'
-            if len(populated_temporal_cols) > 1:
-                subcol1, subcol2, subcol3 = st.columns(spec=[0.3, 0.3, 0.4], gap="medium", border=False)
-
-                temporal_aggregation_filter = subcol1.radio(
-                    label = "Aggregate results by:",
-                    options = [space_and_title(col) for col in populated_temporal_cols],
-                    index = 0,
-                    horizontal = True,
-                    )
 
             col1, col2 = st.columns(spec=[0.58, 0.42], gap="medium", border=False)
 
             # Benefits  
-            with col1:
+            with col1:  
+
                 if len(populated_temporal_cols) > 1:
-                    temporal_aggregation_filter = reconstruct_column_name(temporal_aggregation_filter)
-                    
-                    null_aggregation_benefits_df = con.execute(generate_null_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter)).df()
-                    if len(null_aggregation_benefits_df) > 0:
-                        null_aggregation_benefits = null_aggregation_benefits_df['final_dollar_value'].values[0]
-                        subcol2.write(f"")
-                        subcol2.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help="Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here.")
-                    
+                    subcol1, subcol2, subcol3 = st.columns(spec=[0.45, 0.5, 0.05], gap="medium", border=False)
+
+                    temporal_aggregation_filter = subcol1.radio(
+                        label = "**Aggregation**",
+                        options = [space_and_title(col) for col in populated_temporal_cols],
+                        index = 0,
+                        horizontal = True,
+                        )
+
+                    if len(populated_temporal_cols) > 1:
+                        temporal_aggregation_filter = reconstruct_column_name(temporal_aggregation_filter)
+                        
+                        null_aggregation_benefits_df = con.execute(generate_null_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter)).df()
+                        if len(null_aggregation_benefits_df) > 0:
+                            null_aggregation_benefits = null_aggregation_benefits_df['final_dollar_value'].values[0]
+                            subcol2.write(f"")
+                            subcol2.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help="Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here.")
+                        
                 temporal_aggregation_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=False)).df()
                 temporal_aggregation_results_df, temporal_aggregation_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings' if unit != '' else None)
                 temporal_aggregation_value_stream_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=True)).df()
@@ -348,63 +432,104 @@ else:
                         default = None
                     )
                 
-                temporal_aggregation_bar_fig = numeric_bar_fig(
-                    df = temporal_aggregation_results_df,
-                    col = 'final_dollar_value',
-                    category = temporal_aggregation_filter,
-                    value_stream_df = temporal_aggregation_value_stream_results_df.query(f"value_stream in {st.session_state.show_value_streams_filter}") if len(st.session_state.show_value_streams_filter) > 0 else None,
-                    figsize= (10, 6),
-                    y2_col = None if unit == '' else 'net_lifecycle_energy_savings',
-                    pin_yaxis_zeros = True,
-                    single_bar_color="cornflowerblue",
-                    space_fraction = 0.65,
-                    title = f"Benefits by {temporal_aggregation_filter.title().replace('_', ' ')}",
-                    xlabel = None,
-                    ylabel = f'Benefits{temporal_aggregation_results_unit_labels[0]}',
-                    y2label = f'Savings ({temporal_aggregation_results_unit_labels[1][2] if len(temporal_aggregation_results_unit_labels[1]) > 2 else ''}{unit})',
-                    legend = True if len(st.session_state.show_value_streams_filter) > 0 else False,
-                    legend_loc = None,
-                )
+                if bar_pie_fig_or_table == 'Figures':
+                    temporal_aggregation_bar_fig = numeric_bar_fig(
+                        df = temporal_aggregation_results_df,
+                        col = 'final_dollar_value',
+                        category = temporal_aggregation_filter,
+                        value_stream_df = temporal_aggregation_value_stream_results_df.query(f"value_stream in {st.session_state.show_value_streams_filter}") if len(st.session_state.show_value_streams_filter) > 0 else None,
+                        figsize= (10, 6),
+                        y2_col = None if unit == '' else 'net_lifecycle_energy_savings',
+                        pin_yaxis_zeros = True,
+                        single_bar_color="cornflowerblue",
+                        space_fraction = 0.65,
+                        title = f"Benefits by {space_and_title(temporal_aggregation_filter)}",
+                        xlabel = None,
+                        ylabel = f'Benefits{temporal_aggregation_results_unit_labels[0]}',
+                        y2label = f'Savings ({temporal_aggregation_results_unit_labels[1][2] if len(temporal_aggregation_results_unit_labels[1]) > 2 else ''}{unit})'.replace('$', ''),
+                        legend = True if len(st.session_state.show_value_streams_filter) > 0 else False,
+                        legend_loc = None,
+                    )
 
-                st.pyplot(temporal_aggregation_bar_fig, clear_figure=True)
+                    st.pyplot(temporal_aggregation_bar_fig, clear_figure=True)
+
+                else:
+                    st.dataframe(
+                    temporal_aggregation_results_df[[temporal_aggregation_filter,'final_dollar_value_original', 'net_lifecycle_energy_savings_original']],
+                    width='stretch',
+                    hide_index=True,
+                    column_config={
+                        temporal_aggregation_filter: st.column_config.NumberColumn(
+                            label=space_and_title(temporal_aggregation_filter),
+                            format="%.0f",
+                        ),
+                        'final_dollar_value_original': st.column_config.NumberColumn(
+                            label="Benefits ($)",
+                            format="dollar",
+                        ),
+                    'net_lifecycle_energy_savings_original': st.column_config.NumberColumn(
+                        label=f'Savings ({temporal_aggregation_results_unit_labels[1][2] if len(temporal_aggregation_results_unit_labels[1]) > 2 else ''}{unit})'.replace('$', ''),
+                        format="%.2f",
+                        )},
+                    )
         
             with col2:
-                pos_value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, commodity_filter)).df().query("final_dollar_value > 0")
-                neg_value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, commodity_filter)).df().query("final_dollar_value < 0")
-                
-                if len(pos_value_stream_benefits_df) + len(neg_value_stream_benefits_df) == 1:
-                    value_stream_benefits = pd.concat([pos_value_stream_benefits_df, neg_value_stream_benefits_df])['final_dollar_value'].values[0]
+                st.write(f"")
+                value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, commodity_filter)).df()
+                pos_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value > 0")
+                neg_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value < 0")
+                st.markdown(f"#### {space_and_title(commodity_filter)} Benefit Value Streams")
+                if len(value_stream_benefits_df) == 1:
+                    value_stream_benefits = value_stream_benefits_df['final_dollar_value'].values[0]
 
                     for i in range(11):
                         st.write(f"")
+                    
                     st.markdown(f"#### {space_and_title(commodity_filter)} Benefits = **${value_stream_benefits:,.0f}**")
 
                 else:
-                    st.markdown(f"#### {space_and_title(commodity_filter)} Benefit Value Streams")
-                    if len(pos_value_stream_benefits_df) > 0:
-                        pos_value_stream_benefits_df, pos_value_stream_benefits_unit_labels = determine_dollar_magnitude(pos_value_stream_benefits_df, x_col='final_dollar_value', y_col=None)
-                    
-                    if len(neg_value_stream_benefits_df) > 0:
-                        neg_value_stream_benefits_df, neg_value_stream_benefits_unit_labels = determine_dollar_magnitude(neg_value_stream_benefits_df, x_col='final_dollar_value', y_col=None)
+                    if bar_pie_fig_or_table == 'Figures':
+                        
+                        if len(pos_value_stream_benefits_df) > 0:
+                            pos_value_stream_benefits_df, pos_value_stream_benefits_unit_labels = determine_dollar_magnitude(pos_value_stream_benefits_df, x_col='final_dollar_value', y_col=None)
+                        
+                        if len(neg_value_stream_benefits_df) > 0:
+                            neg_value_stream_benefits_df, neg_value_stream_benefits_unit_labels = determine_dollar_magnitude(neg_value_stream_benefits_df, x_col='final_dollar_value', y_col=None)
 
-                    pie_chart_fig = pie_chart(
-                        df = pos_value_stream_benefits_df if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_df,
-                        col = 'final_dollar_value',
-                        label_col = 'value_stream',
-                        figsize = (9, 5),
-                        title = f"{space_and_title(commodity_filter)} Benefits{pos_value_stream_benefits_unit_labels[0] if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_unit_labels[0]}"
-                    )
+                        pie_chart_fig = pie_chart(
+                            df = pos_value_stream_benefits_df if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_df,
+                            col = 'final_dollar_value',
+                            label_col = 'value_stream',
+                            figsize = (9, 5),
+                            title = f"{space_and_title(commodity_filter)} Benefits{pos_value_stream_benefits_unit_labels[0] if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_unit_labels[0]}"
+                        )
 
-                    st.pyplot(pie_chart_fig, clear_figure=True)
+                        st.pyplot(pie_chart_fig, clear_figure=True)
 
-                    if len(neg_value_stream_benefits_df) > 0 and len(neg_value_stream_benefits_df) < len(pos_value_stream_benefits_df) + len(neg_value_stream_benefits_df):
-                        st.markdown("##### Additional Negative Benefits Value Streams")
+                        if len(neg_value_stream_benefits_df) > 0 and len(neg_value_stream_benefits_df) < len(pos_value_stream_benefits_df) + len(neg_value_stream_benefits_df):
+                            st.markdown("##### Additional Negative Benefits Value Streams")
+                            st.dataframe(
+                                neg_value_stream_benefits_df[['value_stream', 'final_dollar_value_original']],
+                                width='stretch',
+                                hide_index=True,
+                                column_config={
+                                    'final_dollar_value_original': st.column_config.NumberColumn(
+                                        label="Benefits ($)",
+                                        format="dollar",
+                                    ),
+                                    'value_stream': st.column_config.TextColumn(
+                                        label = "Value Stream",
+                                    )
+                                    }
+                                )
+
+                    else:
                         st.dataframe(
-                            neg_value_stream_benefits_df[['value_stream', 'final_dollar_value_original']],
+                            value_stream_benefits_df[['value_stream', 'final_dollar_value']],
                             width='stretch',
                             hide_index=True,
                             column_config={
-                                'final_dollar_value_original': st.column_config.NumberColumn(
+                                'final_dollar_value': st.column_config.NumberColumn(
                                     label="Benefits ($)",
                                     format="dollar",
                                 ),
@@ -428,10 +553,10 @@ else:
 
             with col1:
                 category_filter = st.radio(
-                    label = "Compare Net Benefits (Benefits - Costs) By:",
-                    options = [space_and_title(filter) for filter in category_filters],
-                    index = 0,
-                    horizontal = True,
+                    label="**Compare Net Benefits (Benefits - Costs) By**",
+                    options=[space_and_title(filter) for filter in category_filters],
+                    index=0,
+                    horizontal=True,
                 )
 
                 category_filter_sql = f"{reconstruct_column_name(category_filter)}"
@@ -458,7 +583,7 @@ else:
                 grouping_option = 'None'        
                 if len(categorical_bar_radio_options.keys()) > 1:
                     grouping_option = st.radio(
-                        label = "Break Out Results By:",
+                        label = "**Break Out Results By**",
                         options = categorical_bar_radio_options.keys(),
                         index = 0,
                         horizontal = True,

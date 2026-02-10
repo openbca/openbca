@@ -5,7 +5,7 @@ from matplotlib.ticker import AutoMinorLocator
 from matplotlib.patches import ConnectionPatch, Patch
 from math import floor, log10
 from typing import Optional
-
+from helper_functions import space_and_title
 
 
 def get_colors():
@@ -1022,7 +1022,7 @@ def categorical_bar_fig(
         shift = bar_width * (-0.5 - i + num_bars / 2)
 
         # Create legend labels or use the provided mapping
-        label = " ".join(str(group).split("_")).title()
+        label = space_and_title(group)
 
         if horizontal:
             ax.barh(
@@ -1103,13 +1103,13 @@ def categorical_bar_fig(
         sxlab = ax.set_xlabel
 
     sylab(y_label, size=16, labelpad=5)
-    sxlab(" ".join(category.split("_")).title() if xlabel == None else xlabel, size=16)
+    sxlab(space_and_title(category) if xlabel == None else xlabel, size=16)
 
     ax.tick_params(left=True, bottom=True, length=4, width=1, labelsize=15)
     ax.tick_params(which="minor", bottom=True, left=True, length=2)
 
     unique_xtick_labels = [
-        replace_multiple_string_elements(" ".join(str(cat).title().split("_")))
+        space_and_title(cat)
         for cat in list(df[category].unique())
     ]
 

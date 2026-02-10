@@ -10,9 +10,11 @@ WITH lifecycle_savings_calc AS (
 		, m.measure_name::VARCHAR AS measure_name
 		, m.project_id::VARCHAR AS project_id
 		, m.program_name::VARCHAR AS program_name
-		, m.ntg 
-		, m.estimated_useful_life
-		, m.unit_quantity 
+		, m.avoided_cost_subset::VARCHAR AS avoided_cost_subset
+		, m.start_year::INTEGER AS start_year
+		, m.ntg::FLOAT AS ntg
+		, m.estimated_useful_life::INTEGER AS estimated_useful_life
+		, m.unit_quantity::INTEGER AS unit_quantity
 		, cls.commodity::VARCHAR AS commodity
 		, label_1::VARCHAR AS label_1
 		, label_2::VARCHAR AS label_2
@@ -36,6 +38,8 @@ WITH lifecycle_savings_calc AS (
 			, measure_name
 			, project_id
 			, program_name
+			, avoided_cost_subset
+			, start_year
 			, ntg 
 			, estimated_useful_life
 			, unit_quantity 
@@ -110,6 +114,7 @@ WITH lifecycle_savings_calc AS (
 , total_values AS (
 	SELECT 
 		id
+		, MIN(year) AS start_year
 		, SUM(CASE WHEN commodity IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN final_dollar_value END) AS total_costs
 		, SUM(CASE WHEN commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN final_dollar_value END) AS total_benefits
 		, SUM(final_dollar_value) AS total_net_benefits
@@ -124,8 +129,9 @@ SELECT
 	WHEN tv.id = m.id THEN 'Measure' ELSE 'Program' END AS type
 	, tv.id
 	, COALESCE(lc.program_name, tv.id) AS program_name
-	, lc.* EXCEPT(id, program_name)
-	, tv.* EXCEPT(id)
+	, COALESCE(lc.start_year, tv.start_year) AS start_year
+	, lc.* EXCEPT(id, program_name, start_year)
+	, tv.* EXCEPT(id, start_year)
 	, cv.* EXCEPT(id)
 	, vs.* EXCEPT(id)
 FROM

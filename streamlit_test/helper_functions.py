@@ -4,7 +4,12 @@ from itertools import product
 
 
 def space_and_title(text: str) -> str:
-    return ' '.join(str(text).split('_')).title().replace(" Id", " ID").replace("Of", "of")
+    return ' '.join(str(text).split('_')).title().replace(
+        " Id", " ID").replace(
+        "Of", "of").replace(
+        "Hvac", "HVAC").replace(
+        "Ac ", "AC ").replace(
+        "Nei", "NEI")
 
 
 def reconstruct_column_name(text: str) -> str:
