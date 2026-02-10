@@ -804,7 +804,7 @@ wheels = [
 [[package]]
 name = "open-bca"
 version = "0.0.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "altair" },
     { name = "duckdb" },

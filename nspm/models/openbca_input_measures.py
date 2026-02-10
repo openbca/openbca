@@ -2,9 +2,9 @@ from typing import Any
 from pandas import DataFrame
 from sqlmesh import model, ExecutionContext
 import pandas as pd
-import os
-import re
+
 from parsing_helper_functions import clean_header
+from config.paths import get_input_templates_dir
 
 ID_COLUMNS = ["id", "measure_id", "project_id"]
 
@@ -81,9 +81,6 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     )
 
 
-BASE_DIR = os.path.dirname(__file__)  # directory of the model file
-DATA_DIR = os.path.join(BASE_DIR, "..", "input_templates")  # adjust if needed
-
 # def clean_header(col: str) -> str:
 #     col = str(col).strip().lower()
 
@@ -118,7 +115,7 @@ def load_measure_inputs_from_excel(
     """
     Load Measure Inputs sheet from Excel into a DataFrame.
     """
-    file_path = os.path.join(DATA_DIR, input_file)
+    file_path = get_input_templates_dir() / input_file
 
     # Read sheet
     df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=skiprows)
@@ -156,7 +153,7 @@ def load_measure_inputs_from_excel(
         '''
         Generate dataframe to classify value stream grouping from the Configuration Data sheet in the OpenBCA CONFIG file.
         '''
-        file_path_config = os.path.join(DATA_DIR, 'OpenBCA Configuration.xlsm')
+        file_path_config = get_input_templates_dir() / 'OpenBCA Configuration.xlsm'
         xls_config = pd.ExcelFile(file_path_config)
         
         custom_avoided_cost_names_df = pd.read_excel(

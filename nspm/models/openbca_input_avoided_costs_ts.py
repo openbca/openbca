@@ -1,7 +1,8 @@
 from typing import Any
 from sqlmesh import model, ExecutionContext
 import pandas as pd
-import os
+
+from config.paths import get_input_templates_dir
 
 ID_COLUMNS = [
     "avoided_cost", "year", "quarter", "month", "day_of_year", "type_of_day",
@@ -33,9 +34,6 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
         skiprows=3
     )
 
-BASE_DIR = os.path.dirname(__file__)  # directory of the model file
-DATA_DIR = os.path.join(BASE_DIR, "..", "input_templates")  # adjust if needed
-
 def load_avoided_costs_from_excel(
     input_file: str,
     skip_sheets: set,
@@ -44,7 +42,7 @@ def load_avoided_costs_from_excel(
     """
     Load and consolidate timeseries data from an Excel workbook, enforce schema, and pivot to long format.
     """
-    file_path = os.path.join(DATA_DIR, input_file)
+    file_path = get_input_templates_dir() / input_file
     xls = pd.ExcelFile(file_path)
 
     def custom_period_to_hour_of_year_map():

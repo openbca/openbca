@@ -26,6 +26,9 @@ dependencies = [
   "xlwings",
 ]
 
+[tool.hatch.build.targets.wheel]
+include = ["config"]
+
 [tool.uv]
-package = false
+package = true
 constraint-dependencies = []
