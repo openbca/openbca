@@ -112,7 +112,7 @@ else:
             filters_options_dict = {}
             with st.container(border=True):
                 
-                st.markdown("##### Comprehensive Filters", help="Make desired selections and apply them via the 'Apply Selection' button.")
+                st.markdown("##### Universal Filters", help="Make desired selections and apply them via the 'Apply Selection' button.")
                 st.markdown("###### These selections will be applied to all analyses below.")
                 
                 for j in range(num_filter_rows):
