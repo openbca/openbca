@@ -2,9 +2,22 @@ import streamlit as st
 import os
 import subprocess
 import shutil
+import sys
 from pathlib import Path
 from datetime import datetime
 import duckdb
+
+from config.paths import (
+    get_repo_root, 
+    get_input_templates_dir, 
+    get_output_dir, 
+    get_streamlit_app_dir,
+    get_nspm_project_dir,
+    get_core_project_dir,
+)
+import engine
+
+
 from validation_functions import (
     validate_required_parameters, 
     validate_unique_ids, 
@@ -16,7 +29,7 @@ st.set_page_config(layout="wide")
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
-LOGOS_DIR = Path(__file__).resolve().parent / "logos"
+LOGOS_DIR = get_streamlit_app_dir() / "logos"
 with col1:
     logo_col, _spacer_col = st.columns([2, 1])
     with logo_col:
@@ -36,15 +49,15 @@ st.markdown("## Welcome to the OpenBCA")
 st.markdown("###### The OpenBCA software executes Jurisdiction Specific Tests developed under National Standard Practice Manual guidance.")
 
 # Resolve paths relative to this file, not the current working directory.
-REPO_ROOT = Path(__file__).resolve().parents[1]
-INPUT_TEMPLATES_DIR = REPO_ROOT / "nspm" / "input_templates"
-OUTPUT_DIR = REPO_ROOT / "output"
+REPO_ROOT = get_repo_root()
+INPUT_TEMPLATES_DIR = get_input_templates_dir()
+OUTPUT_DIR = get_output_dir()
 INPUT_TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
 
 # Match Makefile defaults (DB?=output/openbca.db, DBV?=output/openbca_input_validation.db) if not set.
-DEFAULT_OUTPUT_DB = REPO_ROOT / "output" / "openbca.db"
+DEFAULT_OUTPUT_DB = OUTPUT_DIR / "openbca.db"
 DEFAULT_OUTPUT_DB.parent.mkdir(parents=True, exist_ok=True)
-DEFAULT_VALIDATION_DB = REPO_ROOT / "output" / "openbca_input_validation.db"
+DEFAULT_VALIDATION_DB = OUTPUT_DIR / "openbca_input_validation.db"
 DEFAULT_VALIDATION_DB.parent.mkdir(parents=True, exist_ok=True)
 
 program_input_file_name = "OpenBCA Program Input.xlsx"
@@ -117,28 +130,17 @@ with col2:
                 if validation_db_exists_initial:
                     validation_db_path.unlink()
 
-                cmd = ["make", "run-input-transform-validations"]
-                env = os.environ.copy()
-                # Set DBV to the validation database path (Makefile will use DB=$(DBV))
-                env["DBV"] = str(validation_db_path)
-
                 with st.spinner("Running input parsing and validations... this can take a bit.", show_time=True):
                     try:
-                        result = subprocess.run(
-                            cmd,
-                            cwd=str(REPO_ROOT),
-                            env=env,
-                            capture_output=True,
-                            text=True,
-                        )
+                        engine.run_input_transform_validations()
+                    
                     except FileNotFoundError as e:
                         st.error(f"Failed to run command: {e}")
-                    
-                    else:
-                        if result.returncode == 0:
-                            pass
-                        else:
-                            st.error(f"Validations failed (exit code {result.returncode}).")
+                        raise
+
+                    except Exception as e:
+                        st.error(f"An error occurred while running validations: {e}")
+                        raise
 
                 with duckdb.connect(str(validation_db_path)) as con:
 
@@ -262,32 +264,25 @@ if db_handling in ["Overwrite existing output database", "Backup existing output
                     st.error(f"Failed to backup and remove existing database: {e}")
                     st.stop()
 
-        cmd = ["uv", "run", "sqlmesh", "-p", "nspm", "-p", "core", "plan", "--auto-apply"]
-        env = os.environ.copy()
-        env["DB"] = str(db_path)
-
         with col2:
             with st.spinner("Running OpenBCA Model... this can take a bit.", show_time=True):
+
                 try:
-                    result = subprocess.run(
-                        cmd,
-                        cwd=str(REPO_ROOT),
-                        env=env,
-                        capture_output=True,
-                        text=True,
-                    )
+                    engine.run_all()
+                    st.session_state.model_run_status = "success"
+                    st.session_state.model_run_error = None
+                    st.balloons()
+
                 except FileNotFoundError as e:
                     st.session_state.model_run_status = "error"
-                    st.session_state.model_run_error = f"Failed to run command: {e}"
+                    st.session_state.model_run_error = f"Failed to run OpenBCA model: {e}"
+                    raise
+
+                except Exception as e:
+                    st.session_state.model_run_status = "error"
+                    st.session_state.model_run_error = f"An error occurred while running the model: {e}"
+                    raise
                 
-                else:
-                    if result.returncode == 0:
-                        st.session_state.model_run_status = "success"
-                        st.session_state.model_run_error = None
-                        st.balloons()
-                    else:
-                        st.session_state.model_run_status = "error"
-                        st.session_state.model_run_error = f"Model failed (exit code {result.returncode})."
     
     # Display persistent status messages
     with col2:
