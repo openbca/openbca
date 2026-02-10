@@ -40,3 +40,4 @@ def get_logs_dir() -> Path:
     logs_dir = get_repo_root() / 'logs'
     logs_dir.mkdir(parents=True, exist_ok=True)
     return logs_dir
+
