@@ -101,7 +101,7 @@ def generate_populated_temporal_cols_query(where_sql, commodity_filter, col):
 
 
 def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream: bool = False):
-    temporal_aggregation_benefits_sql = f"""
+    temporal_aggregation_query = f"""
     WITH benefits AS (
         SELECT 
         {temporal_aggregation_filter}
@@ -117,46 +117,41 @@ def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, te
         {temporal_aggregation_filter}
         {', value_stream' if group_by_value_stream else ''}
     )
-    """
 
-    temporal_aggregation_savings_sql = f"""
-        , savings AS (
-        SELECT 
+    , savings_data AS (
+        SELECT
+        DISTINCT
         {temporal_aggregation_filter}
-        , sum(net_energy_savings) AS net_lifecycle_energy_savings
+        , ROUND(sum(net_energy_savings), 5) AS net_lifecycle_energy_savings
+        , count(*) as relative_granularity
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fsc
         JOIN openbca.core_layer0_base.measures m ON 
         fsc.id = m.id
         {where_sql} 
         AND commodity = '{commodity_filter}'
-        AND value_stream IN ('Energy Generation (E)', 'Fuel Supply and O&M (NG)', 'Propane Supply', 'Oil Supply', 'Diesel Supply')
         GROUP BY 
         {temporal_aggregation_filter}
-            
+        , value_stream
     )
-    """
+    
+    , savings as (
+        SELECT  
+        {temporal_aggregation_filter}
+        , net_lifecycle_energy_savings  
+        FROM
+        savings_data
+        QUALIFY RANK() OVER(PARTITION BY {temporal_aggregation_filter} ORDER BY relative_granularity DESC) = 1
+    )
 
-    if unit == '':
-        temporal_aggregation_query = f"""
-            {temporal_aggregation_benefits_sql}
-            select
-            *
-            from benefits
-        """
-        
-    else:
-        temporal_aggregation_query = f"""
-            {temporal_aggregation_benefits_sql}
-            {temporal_aggregation_savings_sql}
-            SELECT 
-            b.*
-            , s.net_lifecycle_energy_savings
-            FROM 
-            benefits b 
-            JOIN savings s ON 
-            b.{temporal_aggregation_filter} = s.{temporal_aggregation_filter}
-        """
+    SELECT 
+    b.*
+    , s.net_lifecycle_energy_savings
+    FROM 
+    benefits b 
+    FULL OUTER JOIN savings s ON 
+    b.{temporal_aggregation_filter} = s.{temporal_aggregation_filter}
+    """
 
     return temporal_aggregation_query
 

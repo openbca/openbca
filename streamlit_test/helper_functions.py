@@ -5,6 +5,7 @@ from itertools import product
 
 def space_and_title(text: str) -> str:
     return ' '.join(str(text).split('_')).title().replace(
+        "Commodity", "Impact Category").replace(
         " Id", " ID").replace(
         "Of", "of").replace(
         "Hvac", "HVAC").replace(
@@ -13,7 +14,7 @@ def space_and_title(text: str) -> str:
 
 
 def reconstruct_column_name(text: str) -> str:
-    return str(text).lower().replace(" ", "_")
+    return str(text).lower().replace(" ", "_").replace("impact_category", "commodity")
 
 
 def determine_label_sig_figs(num_bars: int) -> int:
@@ -47,8 +48,6 @@ def determine_dollar_magnitude(df:pd.DataFrame, x_col: str = None, y_col: str = 
                 dollar_magnitude = np.floor(len(str(np.floor(max(abs(df[col].max()), abs(df[col].min()))))) / 3) - 1
                 dollar_magnitude = max(0, dollar_magnitude)
                 rescale = True
-        # else:
-        #     unit_labels.append('')
         
     for col in [x_col, y_col]:
         if rescale:
@@ -69,7 +68,6 @@ def determine_dollar_magnitude(df:pd.DataFrame, x_col: str = None, y_col: str = 
 
 
 def generate_all_row_combinations_df(df: pd.DataFrame, col_1, col_2, numeric_cols = []) -> pd.DataFrame:
-    print(col_2)
     if str(col_2.lower()) == 'none':
         return df
 

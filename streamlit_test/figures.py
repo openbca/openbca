@@ -88,6 +88,17 @@ replace_elements = {
     }
 
 
+# def optimal_legend_location(min_x_val, max_x_val, min_y_val, max_y_val):
+#     if min_y_val < 0 and max_x_val < 0:
+#         return "lower right"
+#     elif min_x_val > 0 and max_x_val > 0:
+#         return "upper left"
+#     elif min_y_val < 0 and max_y_val < 0:
+#         return "upper right"
+#     elif min_y_val > 0 and max_y_val > 0:
+#         return "lower left"
+
+
 def get_unit_from_column_name(col: str):
     """Automatically extract units from column names
 
@@ -681,44 +692,6 @@ def numeric_bar_fig(
                 zorder=1000
             )
 
-    if y2_col != None:
-        ax1 = ax.twinx()
-        ax1.scatter(
-            df[category],
-            df[y2_col],
-            s=75,
-            color="firebrick",
-            label="Count Meters" if y2label is None else y2label,
-        )
-
-        ax1.set_ylabel(
-            "Savings" if y2label is None else y2label,
-            size=16,
-            labelpad=20,
-            rotation=-90,
-        )
-
-        if pin_yaxis_zeros:
-            a = ax.get_ylim()[1]
-            b = ax.get_ylim()[0]
-            c = max(df[y2_col]) * 1.05
-            if c > 0:
-                ax1.set_ylim(c * (1 - (a - b) / a), c)
-            else:
-                c = min(df[y2_col]) * 1.05
-                ax1.set_ylim(c, a)
-
-        if legend:
-            ax1.legend(
-                ["Count Meters" if y2label is None else y2label],
-                frameon=False,
-                bbox_to_anchor=(1.0, 1.1),
-                prop={"size": 15},
-            )
-
-        ax1.grid(False)
-        ax1.tick_params(left=False, right=True, length=4, width=1, labelsize=15)
-
     ax.set_title(
         "Load Impact" if title is None else title,
         fontsize=19,
@@ -774,6 +747,7 @@ def numeric_bar_fig(
         ax.yaxis.set_minor_locator(AutoMinorLocator())
 
     ax.grid(axis='x' if horizontal else 'y', alpha=0.5)
+    
     if horizontal:
         ax.axvline(0)
     else:
@@ -785,7 +759,45 @@ def numeric_bar_fig(
             fontsize=11,
             frameon=True,
             labelspacing=0.78,
+            prop={"size": 15 - np.floor(len(value_stream_df['value_stream'].unique()) * 0.5)},
         )
+
+    if y2_col != None:
+        ax1 = ax.twinx()
+        ax1.scatter(
+            df[category],
+            df[y2_col],
+            s=75,
+            color="firebrick",
+            label="Count Meters" if y2label is None else y2label,
+        )
+
+        ax1.set_ylabel(
+            "Savings" if y2label is None else y2label,
+            size=16,
+            labelpad=20,
+            rotation=-90,
+        )
+
+        if pin_yaxis_zeros:
+            a = ax.get_ylim()[1]
+            b = ax.get_ylim()[0]
+            c = max(df[y2_col]) * 1.05
+            if c > 0:
+                ax1.set_ylim(c * (1 - (a - b) / a), c)
+            else:
+                c = min(df[y2_col]) * 1.05
+                ax1.set_ylim(c, a)
+
+        ax1.legend(
+            ["Count Meters" if y2label is None else y2label],
+            frameon=False,
+            bbox_to_anchor=(1.0, 1.1),
+            prop={"size": 15},
+        )
+
+        ax1.grid(False)
+        ax1.tick_params(left=False, right=True, length=4, width=1, labelsize=15)
 
     return fig
 
@@ -848,8 +860,6 @@ def scatter_fig(
     if ax is None:
         fig = plt.figure(figsize=figsize, dpi=120)
         ax = fig.gca()
-
-    # legend_labels_ovewrite = legend_labels
 
     # Generate column list and legend labels
     col_list, leg_labels = generate_legend_labels(df=df, cols_dict=xy_cols_dict)
@@ -1043,43 +1053,6 @@ def categorical_bar_fig(
                 zorder=1000
             )
 
-    if y2_col != None:
-        ax1.scatter(
-            x1,
-            df[(df[groupings] == groups[0])][y2_col],
-            s=75,
-            color="firebrick",
-            label="Count Meters" if y2label is None else y2label,
-        )
-
-        ax1.set_ylabel(
-            "Count Meters" if y2label is None else y2label,
-            size=16,
-            labelpad=20,
-            rotation=-90,
-        )
-
-        if pin_yaxis_zeros:
-            a = ax.get_ylim()[1]
-            b = ax.get_ylim()[0]
-            c = max(df[(df[groupings] == groups[0])][y2_col]) * 1.05
-            if c > 0:
-                ax1.set_ylim(c * (1 - (a - b) / a), c)
-            else:
-                c = min(df[(df[groupings] == groups[0])][y2_col]) * 1.05
-                ax1.set_ylim(c, a)
-
-        if legend:
-            ax1.legend(
-                ["Count Meters" if y2label is None else y2label],
-                frameon=False,
-                bbox_to_anchor=(1.0, 1.1),
-                prop={"size": 15},
-            )
-
-        ax1.grid(False)
-        ax1.tick_params(left=False, right=True, length=4, width=1, labelsize=15)
-
     ax.set_title(
         "Load Impact" if title is None else title,
         fontsize=19,
@@ -1142,14 +1115,51 @@ def categorical_bar_fig(
             labels[::-1],
             frameon=False,
             loc="upper left" if legend_loc == None else legend_loc,
-            prop={"size": 15},
+            prop={"size": 15 - np.floor(len(groups) * 0.3)},
         )
 
     ax.grid(axis='x' if horizontal else 'y', alpha=0.5)
+    
     if horizontal:
         ax.axvline(0)
     else:
         ax.axhline(0)
+
+    if y2_col != None:
+        ax1.scatter(
+            x1,
+            df[(df[groupings] == groups[0])][y2_col],
+            s=75,
+            color="firebrick",
+            label="Count Meters" if y2label is None else y2label,
+        )
+
+        ax1.set_ylabel(
+            "Count Meters" if y2label is None else y2label,
+            size=16,
+            labelpad=20,
+            rotation=-90,
+        )
+
+        if pin_yaxis_zeros:
+            a = ax.get_ylim()[1]
+            b = ax.get_ylim()[0]
+            c = max(df[(df[groupings] == groups[0])][y2_col]) * 1.05
+            if c > 0:
+                ax1.set_ylim(c * (1 - (a - b) / a), c)
+            else:
+                c = min(df[(df[groupings] == groups[0])][y2_col]) * 1.05
+                ax1.set_ylim(c, a)
+
+        ax1.legend(
+            ["Count Meters" if y2label is None else y2label],
+            frameon=False,
+            bbox_to_anchor=(1.0, 1.1),
+            prop={"size": 15},
+        )
+
+        ax1.grid(False)
+        ax1.tick_params(left=False, right=True, length=4, width=1, labelsize=15)
 
     return fig
 
@@ -1164,7 +1174,6 @@ def pie_chart(
     title: str = "Proportional Values",
     ):
     
-
     conditional = '>' if len(df.query(f"{col} > 0")) > 0 else '<'
 
     df_pos_pie = df[[label_col, col]].query(f"{col} {conditional} 0").sort_values(by=col, ascending=False).reset_index(drop=True)

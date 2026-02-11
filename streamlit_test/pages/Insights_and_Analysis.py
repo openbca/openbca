@@ -112,7 +112,7 @@ else:
             filters_options_dict = {}
             with st.container(border=True):
                 
-                st.markdown("##### Universal Filters", help="Make desired selections and apply them via the 'Apply Selection' button.")
+                st.markdown("##### Universal Filters")
                 st.markdown("###### These selections will be applied to all analyses below.")
                 
                 for j in range(num_filter_rows):
@@ -309,14 +309,14 @@ else:
                         labels = plot_benefit_cost_scatter_df['id'].tolist(),
                         label_size = 10,
                         figsize = (8, 6),
-                        title = "Benefits and Costs by ID",
+                        title = f"Benefits and Costs by {catalog_by_filter}",
                         xlims = [plot_x_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_x_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
                         xlabel = f'Costs {plot_benefit_cost_scatter_unit_labels[0]}',
                         ylims = [plot_y_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_y_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
                         ylabel = f'Benefits {plot_benefit_cost_scatter_unit_labels[1]}',
                         legend = True,
                         legend_labels = sorted(list(plot_benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
-                        legend_loc = "upper left",
+                        legend_loc = 'best' 
                     )
 
                     st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
@@ -360,26 +360,24 @@ else:
                     ) 
 
             benefits_commodity_options_df = con.execute(generate_benefits_commodity_options_query(where_sql)).df()
-            
             benefits_commodity_options = [space_and_title(commodity) for commodity in benefits_commodity_options_df['commodity'].tolist()]
 
             commodity_filter = st.radio(
                 label = "**Impact Category**", 
                 options = benefits_commodity_options, 
                 horizontal = True,
-                index = 0 if 'ELECTRIC' not in benefits_commodity_options else benefits_commodity_options.index('ELECTRIC'), 
+                index = 0 if 'Electric' not in benefits_commodity_options else benefits_commodity_options.index('Electric'), 
                 )
-            
-            commodity_filter = commodity_filter.upper()
 
-            if commodity_filter == 'ELECTRIC':
+            if commodity_filter == 'Electric':
                 unit = 'kWh'
-            elif commodity_filter in ['NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL']:
+            elif commodity_filter in ['Natural Gas', 'Propane', 'Oil', 'Diesel']:
                 unit = 'MMBtu'
             else:
                 unit = ''
             
             temporal_cols = ['hour_of_day', 'month', 'year']
+            commodity_filter = commodity_filter.upper()
 
             populated_temporal_cols = []
             for col in temporal_cols:
@@ -405,20 +403,18 @@ else:
                         horizontal = True,
                         )
 
-                    if len(populated_temporal_cols) > 1:
-                        temporal_aggregation_filter = reconstruct_column_name(temporal_aggregation_filter)
+                    temporal_aggregation_filter = reconstruct_column_name(temporal_aggregation_filter)
                         
-                        null_aggregation_benefits_df = con.execute(generate_null_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter)).df()
-                        if len(null_aggregation_benefits_df) > 0:
-                            null_aggregation_benefits = null_aggregation_benefits_df['final_dollar_value'].values[0]
-                            subcol2.write(f"")
-                            subcol2.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help="Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here.")
-                        
-                temporal_aggregation_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=False)).df()
-                temporal_aggregation_results_df, temporal_aggregation_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings' if unit != '' else None)
-                temporal_aggregation_value_stream_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=True)).df()
+                    null_aggregation_benefits_df = con.execute(generate_null_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter)).df()
+                    if len(null_aggregation_benefits_df) > 0:
+                        null_aggregation_benefits = null_aggregation_benefits_df['final_dollar_value'].values[0]
+                        subcol2.write(f"")
+                        subcol2.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help="Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here.")
+                    
+                temporal_aggregation_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=False)).df().query(f"~{temporal_aggregation_filter}.isna()")
+                temporal_aggregation_results_df, temporal_aggregation_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings')# if unit != '' else None)
+                temporal_aggregation_value_stream_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=True)).df().query(f"~{temporal_aggregation_filter}.isna()")
                 temporal_aggregation_value_stream_results_df, temporal_aggregation_value_stream_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_value_stream_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings' if unit != '' else None)
-                
                 value_streams = sorted(temporal_aggregation_value_stream_results_df['value_stream'].unique().tolist())
                 
                 if 'show_value_streams_filter' not in st.session_state:
@@ -430,8 +426,8 @@ else:
                         options = value_streams,
                         key = "value_streams_filter",
                         default = None
-                    )
-                
+                    )   
+
                 if bar_pie_fig_or_table == 'Figures':
                     temporal_aggregation_bar_fig = numeric_bar_fig(
                         df = temporal_aggregation_results_df,
@@ -439,7 +435,7 @@ else:
                         category = temporal_aggregation_filter,
                         value_stream_df = temporal_aggregation_value_stream_results_df.query(f"value_stream in {st.session_state.show_value_streams_filter}") if len(st.session_state.show_value_streams_filter) > 0 else None,
                         figsize= (10, 6),
-                        y2_col = None if unit == '' else 'net_lifecycle_energy_savings',
+                        y2_col = 'net_lifecycle_energy_savings' if len(temporal_aggregation_results_df.query("~net_lifecycle_energy_savings.isna()")) > 0 else None,
                         pin_yaxis_zeros = True,
                         single_bar_color="cornflowerblue",
                         space_fraction = 0.65,
@@ -447,8 +443,8 @@ else:
                         xlabel = None,
                         ylabel = f'Benefits{temporal_aggregation_results_unit_labels[0]}',
                         y2label = f'Savings ({temporal_aggregation_results_unit_labels[1][2] if len(temporal_aggregation_results_unit_labels[1]) > 2 else ''}{unit})'.replace('$', ''),
-                        legend = True if len(st.session_state.show_value_streams_filter) > 0 else False,
-                        legend_loc = None,
+                        legend = True if len(st.session_state.show_value_streams_filter) > 0 else False, 
+                        legend_loc = 'best',
                     )
 
                     st.pyplot(temporal_aggregation_bar_fig, clear_figure=True)
@@ -482,7 +478,7 @@ else:
                 if len(value_stream_benefits_df) == 1:
                     value_stream_benefits = value_stream_benefits_df['final_dollar_value'].values[0]
 
-                    for i in range(11):
+                    for i in range(8):
                         st.write(f"")
                     
                     st.markdown(f"#### {space_and_title(commodity_filter)} Benefits = **${value_stream_benefits:,.0f}**")
@@ -617,7 +613,7 @@ else:
                 ylabel = f"Net Benefits{categorical_bar_radio_options[grouping_option][1][0]}",
                 y2label = None,
                 legend = True,
-                legend_loc = None,
+                legend_loc = 'best',
                 )
 
                 st.pyplot(categorical_summary_bar_fig, clear_figure=True)

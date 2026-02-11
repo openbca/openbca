@@ -144,7 +144,7 @@ UNION ALL
 UNION ALL 
 
 (
-    select  
+    SELECT  
     false::BOOLEAN AS coincident_peak_capacity_calc
     , ac.avoided_cost
     , ac.avoided_cost_subset 
