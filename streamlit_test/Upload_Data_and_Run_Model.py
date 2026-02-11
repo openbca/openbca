@@ -15,7 +15,7 @@ from config.paths import (
     get_nspm_project_dir,
     get_core_project_dir,
 )
-import engine
+import model_runners
 
 
 from validation_functions import (
@@ -132,7 +132,7 @@ with col2:
 
                 with st.spinner("Running input parsing and validations... this can take a bit.", show_time=True):
                     try:
-                        engine.run_input_transform_validations()
+                        model_runners.run_input_transform_validations()
                     
                     except FileNotFoundError as e:
                         st.error(f"Failed to run command: {e}")
@@ -268,7 +268,7 @@ if db_handling in ["Overwrite existing output database", "Backup existing output
             with st.spinner("Running OpenBCA Model... this can take a bit.", show_time=True):
 
                 try:
-                    engine.run_all()
+                    model_runners.run_all()
                     st.session_state.model_run_status = "success"
                     st.session_state.model_run_error = None
                     st.balloons()
