@@ -1211,8 +1211,6 @@ def pie_chart(
         explode = [0]*len(pie_vals)
         ax1.set_title(title, fontsize=14, loc="left")
 
-    
-
     # rotate so that first wedge is split by the x-axis
     angle = -180 * pie_vals[0]
     # Greens palette: sample from matplotlib colormap (same idea as seaborn "Greens")
@@ -1289,4 +1287,4 @@ def pie_chart(
         con.set_linestyle('dotted')
         ax2.add_artist(con)
 
-    return fig#, df_neg 
+    return fig

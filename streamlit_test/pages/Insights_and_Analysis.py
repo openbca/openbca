@@ -36,6 +36,7 @@ from helper_functions import (
     reconstruct_column_name,
     determine_label_sig_figs, 
     determine_dollar_magnitude,
+    determine_savings_magnitude,
     generate_all_row_combinations_df
 )
 
@@ -182,7 +183,6 @@ else:
                         key = "waterfall_scatter_fig_or_table"
                         )   
   
-
                 waterfall_options = ["Impact Category", "Value Stream"]
                 
                 #with subcol2:
@@ -193,15 +193,25 @@ else:
                     index = 0, 
                     )
 
+                max_waterfall_steps = 20
                 waterfall_column = reconstruct_column_name(waterfall_filter).replace("impact_category", "commodity")
 
-                waterfall_results_df = con.execute(generate_waterfall_query(where_sql, waterfall_column)).df()
-                waterfall_results_total_df = pd.DataFrame([['total', waterfall_results_df['final_dollar_value'].sum()]], columns=[waterfall_column, 'final_dollar_value'])
-                waterfall_results_df = pd.concat([waterfall_results_df, waterfall_results_total_df])
+                waterfall_results_initial_df = con.execute(generate_waterfall_query(where_sql, waterfall_column)).df().sort_values(by='final_dollar_value', key=abs, ascending=False)
+                waterfall_results_total_df = pd.DataFrame([['total', waterfall_results_initial_df['final_dollar_value'].sum()]], columns=[waterfall_column, 'final_dollar_value'])
+                waterfall_results_other_df = pd.DataFrame([], columns=[waterfall_column, 'final_dollar_value'])
+                
+                if len(waterfall_results_initial_df) > max_waterfall_steps:
+                    waterfall_results_other_df = pd.DataFrame([['Other', waterfall_results_initial_df.tail(len(waterfall_results_initial_df) - max_waterfall_steps)['final_dollar_value'].sum()]], columns=[waterfall_column, 'final_dollar_value'])
+                
+                waterfall_results_df = pd.concat([
+                    waterfall_results_initial_df.head(max_waterfall_steps),
+                    waterfall_results_other_df,
+                    waterfall_results_total_df
+                ])
+                
                 waterfall_results_df['total'] = waterfall_results_df[waterfall_column].apply(lambda x: True if x == 'total' else False)
-
                 waterfall_results_df, waterfall_unit_labels = determine_dollar_magnitude(waterfall_results_df, y_col='final_dollar_value')
-
+                
                 num_bars = len(waterfall_results_df)
                 num_bars_sig_figs = determine_label_sig_figs(num_bars)
 
@@ -219,25 +229,32 @@ else:
                         value_labels_decimals = num_bars_sig_figs,
                         title = "Benefit and Cost Breakdown",
                         annotations = [None],
-                        ylabel = f'Dollars {waterfall_unit_labels[1]}',
+                        ylabel = f'Dollars {waterfall_unit_labels[0]}',
                         ylims = None,
                     )
 
                     st.pyplot(waterfall_fig, clear_figure=True)
 
                 else:
-                    waterfall_results_df.sort_values(by=['total', 'final_dollar_value'], ascending=[True, False], inplace=True)
-                    waterfall_results_df[waterfall_column] = waterfall_results_df[waterfall_column].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+                    waterfall_results_display_df = pd.concat([
+                            waterfall_results_initial_df[[waterfall_column, 'final_dollar_value']],
+                            waterfall_results_total_df[[waterfall_column, 'final_dollar_value']]
+                        ])
+                    
+                    waterfall_results_display_df['total'] = waterfall_results_display_df[waterfall_column].apply(lambda x: True if x == 'total' else False)
+                    
+                    waterfall_results_display_df.sort_values(by=['total', 'final_dollar_value'], ascending=[True, False], inplace=True)
+                    waterfall_results_display_df[waterfall_column] = waterfall_results_display_df[waterfall_column].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
                 
                     st.dataframe(
-                        waterfall_results_df[[waterfall_column, 'final_dollar_value_original']], 
+                        waterfall_results_display_df[[waterfall_column, 'final_dollar_value']],
                         width='stretch', 
                         hide_index=True,
                         column_config={
                             waterfall_column: st.column_config.TextColumn(
                                 label=space_and_title(waterfall_column),
                             ),
-                            'final_dollar_value_original': st.column_config.NumberColumn(
+                            'final_dollar_value': st.column_config.NumberColumn(
                                 label="Dollars ($)",
                                 format="dollar",
                             )
@@ -412,9 +429,10 @@ else:
                         subcol2.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help="Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here.")
                     
                 temporal_aggregation_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=False)).df().query(f"~{temporal_aggregation_filter}.isna()")
-                temporal_aggregation_results_df, temporal_aggregation_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings')# if unit != '' else None)
+                temporal_aggregation_results_df, temporal_aggregation_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_results_df, x_col='final_dollar_value')#, y_col='net_lifecycle_energy_savings')
+                temporal_aggregation_results_df, temporal_aggregation_results_savings_unit_labels = determine_savings_magnitude(temporal_aggregation_results_df, x_col='net_lifecycle_energy_savings', unit=unit)
                 temporal_aggregation_value_stream_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=True)).df().query(f"~{temporal_aggregation_filter}.isna()")
-                temporal_aggregation_value_stream_results_df, temporal_aggregation_value_stream_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_value_stream_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings' if unit != '' else None)
+                temporal_aggregation_value_stream_results_df, temporal_aggregation_value_stream_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_value_stream_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings')
                 value_streams = sorted(temporal_aggregation_value_stream_results_df['value_stream'].unique().tolist())
                 
                 if 'show_value_streams_filter' not in st.session_state:
@@ -442,7 +460,8 @@ else:
                         title = f"Benefits by {space_and_title(temporal_aggregation_filter)}",
                         xlabel = None,
                         ylabel = f'Benefits{temporal_aggregation_results_unit_labels[0]}',
-                        y2label = f'Savings ({temporal_aggregation_results_unit_labels[1][2] if len(temporal_aggregation_results_unit_labels[1]) > 2 else ''}{unit})'.replace('$', ''),
+                        y2label = f'Savings {temporal_aggregation_results_savings_unit_labels[0]}', 
+                        #({temporal_aggregation_results_unit_labels[1][2] if len(temporal_aggregation_results_unit_labels[1]) > 2 else ''}{unit})'.replace('$', ''),
                         legend = True if len(st.session_state.show_value_streams_filter) > 0 else False, 
                         legend_loc = 'best',
                     )
@@ -474,11 +493,11 @@ else:
                 value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, commodity_filter)).df()
                 pos_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value > 0")
                 neg_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value < 0")
-                st.markdown(f"#### {space_and_title(commodity_filter)} Benefit Value Streams")
+                st.markdown(f"##### {space_and_title(commodity_filter)} Benefit Value Streams (${value_stream_benefits_df['final_dollar_value'].sum():,.0f})")
                 if len(value_stream_benefits_df) == 1:
                     value_stream_benefits = value_stream_benefits_df['final_dollar_value'].values[0]
 
-                    for i in range(8):
+                    for i in range(6):
                         st.write(f"")
                     
                     st.markdown(f"#### {space_and_title(commodity_filter)} Benefits = **${value_stream_benefits:,.0f}**")
