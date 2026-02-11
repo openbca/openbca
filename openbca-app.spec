@@ -65,9 +65,9 @@ datas += [
     ('streamlit_test/pages/*.py', 'streamlit_test/pages'),
 ]
 
-# Add engine module (required by streamlit app)
+# Add model_runners module (required by streamlit app)
 datas += [
-    ('engine.py', '.'),
+    ('model_runners.py', '.'),
 ]
 
 # Add explicit hidden imports for key dependencies
@@ -79,7 +79,7 @@ hiddenimports += [
     'sqlmesh.core.context',
     'watchdog',
     'tabulate',
-    'engine',
+    # 'model_runners',
     # 'nspm',
     # 'core',
     # 'streamlit_test',

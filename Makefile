@@ -42,6 +42,16 @@ test-parsing:
 	@echo "\nTesting parsing of Excel input templates."
 	cd excel_input_parsing && PYTHONPATH=.. uv run python test_parsing.py
 
+
+build-pyinstaller-package:
+	@echo "Building PyInstaller openbca-app..."
+	uv run pyinstaller openbca-app.spec --clean --noconfirm
+
+# Note: this assumes the package has already been built with the above command, and will fail if it has not been built yet
+run-pyinstaller-package:
+	@echo "Running PyInstaller openbca-app..."
+	@./dist/openbca-app/openbca-app
+
 clean:
 	@rm -rf logs && rm -rf output/*
 	@find . -type d -name ".cache" -exec rm -rf {} +
