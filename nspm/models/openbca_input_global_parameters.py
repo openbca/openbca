@@ -1,7 +1,8 @@
 from typing import Any
 from sqlmesh import model, ExecutionContext
 import pandas as pd
-import os
+
+from config.paths import get_input_templates_dir
 
 @model(
     name='openbca_input.global_parameters',
@@ -23,9 +24,6 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
         input_file='OpenBCA Configuration.xlsm'
     )
 
-BASE_DIR = os.path.dirname(__file__)  # directory of the model file
-DATA_DIR = os.path.join(BASE_DIR, '..', 'input_templates')  # adjust if needed
-
 real_nominal_row = 9
 inflation_rate_row = 7
 dollar_year_row = 4
@@ -40,7 +38,7 @@ def compile_global_parameters_from_excel(
     '''
     Generate dataframe to store global parameters from the Common Data sheet in the OpenBCA CONFIG file.
     '''
-    file_path = os.path.join(DATA_DIR, input_file)
+    file_path = get_input_templates_dir() / input_file
     xls = pd.ExcelFile(file_path)
 
     real_nominal_df = pd.read_excel(

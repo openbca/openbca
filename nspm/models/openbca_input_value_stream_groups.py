@@ -1,7 +1,8 @@
 from typing import Any
 from sqlmesh import model, ExecutionContext
 import pandas as pd
-import os
+
+from config.paths import get_input_templates_dir
 
 ID_COLUMNS = ['avoided_cost', 'commodity', 'include_in_test', 'calc_type', 'pct_adder', 'value_stream_group']
 
@@ -23,9 +24,6 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_value_stream_groups_from_excel(
         input_file='OpenBCA Configuration.xlsm'
     )
-
-BASE_DIR = os.path.dirname(__file__)  # directory of the model file
-DATA_DIR = os.path.join(BASE_DIR, '..', 'input_templates')  # adjust if needed
 
 non_system_commodities = [
     'Host Customer Risk', 
@@ -98,7 +96,7 @@ def load_value_stream_groups_from_excel(
     '''
     Generate dataframe to classify value stream grouping from the Configuration Data sheet in the OpenBCA CONFIG file.
     '''
-    file_path = os.path.join(DATA_DIR, input_file)
+    file_path = get_input_templates_dir() / input_file
     xls = pd.ExcelFile(file_path)
     
     value_stream_groups_df = pd.read_excel(

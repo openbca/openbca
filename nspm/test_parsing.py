@@ -5,10 +5,6 @@ This tests that all Excel files can be successfully read and parsed.
 """
 
 import sys
-import os
-
-# Add parent directory to path so we can import from models
-sys.path.insert(0, os.path.dirname(__file__))
 
 from models.openbca_input_measures import load_measure_inputs_from_excel
 from models.openbca_input_load_shapes_ts import load_load_shapes_from_excel

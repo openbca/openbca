@@ -6,6 +6,7 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 import numpy as np
+
 from sql_queries import (
     generate_measure_filters_query,
     generate_jst_query, 
@@ -39,12 +40,22 @@ from helper_functions import (
     determine_savings_magnitude,
     generate_all_row_combinations_df
 )
+from config.paths import (
+    get_repo_root, 
+    get_input_templates_dir, 
+    get_output_dir, 
+    get_streamlit_app_dir,
+    get_nspm_project_dir,
+    get_core_project_dir,
+    get_logos_dir,
+    get_logs_dir,
+)
 
 st.set_page_config(layout="wide")
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
-LOGOS_DIR = Path(__file__).resolve().parents[1] / "logos"
+LOGOS_DIR = get_logos_dir()
 with col1:
     logo_col, _spacer_col = st.columns([2, 1])
     with logo_col:
@@ -61,11 +72,11 @@ with col5:
     st.image(str(LOGOS_DIR / "RECURVE.jpg"), width='stretch')
 
 # Resolve paths relative to this file, not the current working directory.
-REPO_ROOT = Path(__file__).resolve().parents[1]
-OUTPUT_DIR = REPO_ROOT / "output"
+REPO_ROOT = get_repo_root()
+OUTPUT_DIR = get_output_dir()
 
 # Match Makefile defaults (DB?=output/openbca.db, DBV?=output/openbca_input_validation.db) if not set.
-DEFAULT_OUTPUT_DB = REPO_ROOT / "output" / "openbca.db"
+DEFAULT_OUTPUT_DB = OUTPUT_DIR / "openbca.db"
 DEFAULT_OUTPUT_DB.parent.mkdir(parents=True, exist_ok=True)
 
 db_value = os.environ.get("DB", str(DEFAULT_OUTPUT_DB))
