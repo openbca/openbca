@@ -13,6 +13,12 @@ def setup_env_vars():
     dotenv_path = repo_root / '.env'
     if dotenv_path.exists():
         load_dotenv(dotenv_path)
+
+        #Since .env file may use relative paths, we need to ensure that the DB and DBV environment variables are set to absolute paths 
+        if 'DB' in os.environ:
+            os.environ['DB'] = str((repo_root / os.environ['DB']).resolve())
+        if 'DBV' in os.environ:
+            os.environ['DBV'] = str((repo_root / os.environ['DBV']).resolve())
     
     # Set default values for environment variables if they are not already set
     if 'DB' not in os.environ:
