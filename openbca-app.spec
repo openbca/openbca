@@ -2,6 +2,8 @@
 
 import os
 from PyInstaller.utils.hooks import collect_all, collect_submodules
+from PyInstaller.building.build_main import Analysis
+from PyInstaller.building.api import PYZ, EXE, COLLECT
 
 # Collect all modules from packages that might have hidden imports
 datas = []
@@ -35,6 +37,16 @@ hiddenimports += collect_submodules('sqlglot.dialects')
 datas += [
     ('nspm/input_templates/OpenBCA Configuration.xlsm', 'nspm/input_templates'),
     ('nspm/input_templates/OpenBCA Program Input.xlsx', 'nspm/input_templates'),
+]
+
+# Add Output directory for generated files
+datas += [
+    ('output/.keepme', 'output'),
+]
+
+# Add .env file if it exists
+datas += [
+    ('.env', '.'),
 ]
 
 # Add logos
