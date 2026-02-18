@@ -48,10 +48,3 @@ def clean_output_directory():
             item.unlink()
         elif item.is_dir():
             rmtree(item)
-
-    
-if __name__ == "__main__":
-    clean_output_directory()
-    # run_all()
-    run_input_transform_validations()
-    
