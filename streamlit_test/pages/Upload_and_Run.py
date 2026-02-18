@@ -303,3 +303,11 @@ if db_handling in ["Overwrite existing output database", "Backup existing output
 
         elif st.session_state.model_run_status == "error" and st.session_state.model_run_error:
             st.error(st.session_state.model_run_error)
+
+st.divider()
+if st.button("Quit OpenBCA Streamlit App", type="primary"):
+    print("Exiting Streamlit app...")
+    
+    # Get current pid and send SIGTERM to gracefully shut down the Streamlit server process
+    import signal
+    os.kill(os.getpid(), signal.SIGTERM)
