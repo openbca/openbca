@@ -10,25 +10,15 @@ datas = []
 binaries = []
 hiddenimports = []
 
-# Collect openpyxl
-tmp_ret = collect_all('openpyxl')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+# List of packages to collect (add any additional packages that are part of the app)
+package_list = ['openpyxl', 'sqlmesh', 'streamlit', 'sqlglot', 'duckdb', 'config']
 
-# Collect sqlmesh
-tmp_ret = collect_all('sqlmesh')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-
-# Collect streamlit
-tmp_ret = collect_all('streamlit')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-
-# Collect sqlglot (required by sqlmesh)
-tmp_ret = collect_all('sqlglot')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-
-# Collect duckdb
-tmp_ret = collect_all('duckdb')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+# Collect all specified packages and their dependencies
+for package in package_list:
+    collected_data, collected_binaries, collected_hiddenimports = collect_all(package)
+    datas += collected_data
+    binaries += collected_binaries
+    hiddenimports += collected_hiddenimports
 
 # Add all sqlglot dialects explicitly
 hiddenimports += collect_submodules('sqlglot.dialects')
@@ -49,56 +39,29 @@ datas += [
     ('.env', '.'),
 ]
 
-# Add logos
-datas += [
-    ('streamlit_test/logos', 'streamlit_test/logos'),
-]
-
-# Add nspm package files
+# Add nspm sqlmesh files and additional helper modules
 datas += [
     ('nspm/models', 'nspm/models'),
-    ('nspm/*', 'nspm'),
+    ('nspm/config.yaml', 'nspm'),
+    ('nspm/*.py', 'nspm'),
 ]
 
-# Add core package files
+# Add core sqlmesh files
 datas += [
     ('core/models', 'core/models'),
     ('core/config.yaml', 'core'),
 ]
 
-# Add config package
-datas += [
-    ('config', 'config'),
-]
-
-# Add streamlit test helper modules
+# Add streamlit test app files, including logos
 datas += [
     ('streamlit_test/*.py', 'streamlit_test'),
     ('streamlit_test/pages/*.py', 'streamlit_test/pages'),
+    ('streamlit_test/logos', 'streamlit_test/logos'),
 ]
 
 # Add model_runners module (required by streamlit app)
 datas += [
     ('model_runners.py', '.'),
-]
-
-# Add explicit hidden imports for key dependencies
-hiddenimports += [
-    'openpyxl.cell._writer',
-    'pandas',
-    'numpy',
-    'sqlmesh.core.model',
-    'sqlmesh.core.context',
-    'watchdog',
-    'tabulate',
-    # 'model_runners',
-    # 'nspm',
-    # 'core',
-    # 'streamlit_test',
-    # 'validation_functions',
-    # 'helper_functions',
-    # 'figures',
-    # 'sql_queries',
 ]
 
 a = Analysis(
