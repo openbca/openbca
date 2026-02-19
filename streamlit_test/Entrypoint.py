@@ -18,7 +18,7 @@ st.sidebar.markdown("#### [National Standard Practice Manual](http://www.nationa
 st.sidebar.markdown("#### [Open Source GitHub Repository](https://github.com/openbca/openbca)")
 
 st.sidebar.divider()
-if st.sidebar.button("Quit OpenBCA Streamlit App", type="primary"):
+if st.sidebar.button("Quit OpenBCA App", type="primary"):
     print("Exiting Streamlit app...")
     
     # Get current pid and send SIGTERM to gracefully shut down the Streamlit server process
