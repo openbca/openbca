@@ -280,7 +280,7 @@ if db_handling in ["Overwrite existing output database", "Backup existing output
             with st.spinner("Running OpenBCA Model... this can take a bit.", show_time=True):
 
                 try:
-                    model_runners.run_all()
+                    model_runners.run_nspm()
                     st.session_state.model_run_status = "success"
                     st.session_state.model_run_error = None
                     st.balloons()

@@ -5,7 +5,7 @@ from sqlmesh.core.context import Context
 from config.paths import get_nspm_project_dir, get_core_project_dir, get_output_dir, get_logs_dir
 from config.env import setup_env_vars
 
-def run_all() -> None:
+def run_nspm() -> None:
     setup_env_vars()
 
     ctx = Context(
