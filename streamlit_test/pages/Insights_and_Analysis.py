@@ -6,6 +6,7 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 import numpy as np
+import base64
 
 from sql_queries import (
     generate_measure_filters_query,
@@ -41,35 +42,63 @@ from helper_functions import (
     generate_all_row_combinations_df
 )
 from config.paths import (
-    get_repo_root, 
-    get_input_templates_dir, 
-    get_output_dir, 
+    get_repo_root,
+    get_input_templates_dir,
+    get_output_dir,
     get_streamlit_app_dir,
     get_nspm_project_dir,
     get_core_project_dir,
-    get_logos_dir,
-    get_logs_dir,
+    # get_logos_dir,
+    # get_logs_dir,
 )
 
 st.set_page_config(layout="wide")
 
+if 'show_value_streams_filter' not in st.session_state:
+    st.session_state.show_value_streams_filter = None
+
+if 'isolate_peak_filter' not in st.session_state:
+    st.session_state.isolate_peak_filter = False
+
+# if 'peak_months_filter' not in st.session_state:
+#     st.session_state.peak_months_filter = []
+
+# if 'define_peak_hours_filter' not in st.session_state:
+#     st.session_state.define_peak_hours_filter = []
+
+
 col1, col2, col3, col4, col5 = st.columns(5)
 
-LOGOS_DIR = get_logos_dir()
+LOGOS_DIR = get_streamlit_app_dir() / "logos"
 with col1:
     logo_col, _spacer_col = st.columns([2, 1])
     with logo_col:
-        st.image(str(LOGOS_DIR / "NASEO.jpg"), width='stretch')
+        naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
+        naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
+        st.markdown(
+            f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:100%;height:auto;"/>](https://naseo.org/)',
+            unsafe_allow_html=True,
+        )
 with col2:
     _spacer_col = st.columns([1, 1])
 with col3:
     logo_col, _spacer_col = st.columns([1, 1])
     with logo_col:
-        st.image(str(LOGOS_DIR / "ICF.jpg"), width='stretch')
+        icf_logo_path = LOGOS_DIR / "ICF.jpg"
+        icf_logo_b64 = base64.b64encode(icf_logo_path.read_bytes()).decode()
+        st.markdown(
+            f'[<img src="data:image/jpeg;base64,{icf_logo_b64}" style="max-width:100%;height:auto;"/>](https://icf.com/)',
+            unsafe_allow_html=True,
+        )
 with col4:
     _spacer_col = st.columns([1, 1])
 with col5:
-    st.image(str(LOGOS_DIR / "RECURVE.jpg"), width='stretch')
+    recurve_logo_path = LOGOS_DIR / "RECURVE.jpg"
+    recurve_logo_b64 = base64.b64encode(recurve_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{recurve_logo_b64}" style="max-width:100%;height:auto;"/>](https://recurve.com/)',
+        unsafe_allow_html=True,
+    )
 
 # Resolve paths relative to this file, not the current working directory.
 REPO_ROOT = get_repo_root()
@@ -82,7 +111,7 @@ DEFAULT_OUTPUT_DB.parent.mkdir(parents=True, exist_ok=True)
 db_value = os.environ.get("DB", str(DEFAULT_OUTPUT_DB))
 db_path = Path(db_value).expanduser()
 
-st.title("OpenBCA Insights and Analysis")
+st.markdown("## OpenBCA Insights and Analysis")
 st.markdown("#### Explore the results of your Jurisdiction Specific Test")
 db_exists_now = db_path.exists()
 
@@ -156,6 +185,10 @@ else:
                                 where_snippet = ", ".join(["'{}'".format(value) for value in filters_dict[category]])
                                 where_sql += f" AND m.{category} IN ({where_snippet})"
 
+        
+        active_filter_str = f"Active filters: {', '.join([space_and_title(word.split('.')[1]) for word in where_sql.split(' ') if word.startswith('m.')])}"
+        if active_filter_str != 'Active filters: ':
+            st.warning(active_filter_str)
 
         jst_results_df = con.execute(generate_jst_query(where_sql)).df()
         if len(jst_results_df) == 0:
@@ -205,20 +238,23 @@ else:
                     )
 
                 max_waterfall_steps = 20
-                waterfall_column = reconstruct_column_name(waterfall_filter).replace("impact_category", "commodity")
+                waterfall_column = reconstruct_column_name(waterfall_filter)
 
                 waterfall_results_initial_df = con.execute(generate_waterfall_query(where_sql, waterfall_column)).df().sort_values(by='final_dollar_value', key=abs, ascending=False)
+                #waterfall_results_initial_df[waterfall_column] = waterfall_results_initial_df[waterfall_column].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
                 waterfall_results_total_df = pd.DataFrame([['total', waterfall_results_initial_df['final_dollar_value'].sum()]], columns=[waterfall_column, 'final_dollar_value'])
-                waterfall_results_other_df = pd.DataFrame([], columns=[waterfall_column, 'final_dollar_value'])
                 
+                waterfall_results_other_df = pd.DataFrame([], columns=[waterfall_column, 'final_dollar_value'])
                 if len(waterfall_results_initial_df) > max_waterfall_steps:
                     waterfall_results_other_df = pd.DataFrame([['Other', waterfall_results_initial_df.tail(len(waterfall_results_initial_df) - max_waterfall_steps)['final_dollar_value'].sum()]], columns=[waterfall_column, 'final_dollar_value'])
                 
-                waterfall_results_df = pd.concat([
+                concat_parts = [
                     waterfall_results_initial_df.head(max_waterfall_steps),
-                    waterfall_results_other_df,
                     waterfall_results_total_df
-                ])
+                ]
+                if len(waterfall_results_other_df) > 0:
+                    concat_parts.insert(1, waterfall_results_other_df)
+                waterfall_results_df = pd.concat(concat_parts)
                 
                 waterfall_results_df['total'] = waterfall_results_df[waterfall_column].apply(lambda x: True if x == 'total' else False)
                 waterfall_results_df, waterfall_unit_labels = determine_dollar_magnitude(waterfall_results_df, y_col='final_dollar_value')
@@ -283,31 +319,47 @@ else:
                         horizontal = True,
                     )
 
+                benefits_vs_costs_or_jst_ratio = st.segmented_control(
+                    label = "**Plot**", 
+                    options = ['Benefits vs Costs', 'JST Ratio vs Net Benefits'], 
+                    default='Benefits vs Costs',
+                    key = "benefits_vs_costs_or_jst"
+                    ) 
+
+                if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs':
+                    scatter_x_col = 'total_costs'
+                    scatter_y_col = 'total_benefits'
+                elif benefits_vs_costs_or_jst_ratio == 'JST Ratio vs Net Benefits':
+                    scatter_x_col = 'net_benefits'
+                    scatter_y_col = 'jst_ratio'
+
                 benefit_cost_scatter_df = con.execute(generate_benefit_cost_scatter_query(where_sql, reconstruct_column_name(catalog_by_filter))).df()
                 if num_filters > 0:
-                    benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].fillna("None", inplace=True)
+                    cat_col = reconstruct_column_name(catalog_by_filter)
+                    benefit_cost_scatter_df[cat_col] = benefit_cost_scatter_df[cat_col].fillna("None")
 
                 if waterfall_scatter_fig_or_table == 'Figures':            
-                    min_scatter_val = benefit_cost_scatter_df[['total_costs', 'total_benefits']].min().min()
-                    max_scatter_val = benefit_cost_scatter_df[['total_costs', 'total_benefits']].max().max()
+                    min_scatter_val = benefit_cost_scatter_df[[scatter_x_col, scatter_y_col]].min().min()
+                    max_scatter_val = benefit_cost_scatter_df[[scatter_x_col, scatter_y_col]].max().max()
                     scatter_range = max_scatter_val - min_scatter_val
                     initial_padding = 0.05
                     axis_min = min_scatter_val - initial_padding * scatter_range
                     axis_max = max_scatter_val + initial_padding * scatter_range
 
-                    x_min_scatter_val = benefit_cost_scatter_df['total_costs'].min()
-                    x_max_scatter_val = benefit_cost_scatter_df['total_costs'].max()
-                    y_min_scatter_val = benefit_cost_scatter_df['total_benefits'].min()
-                    y_max_scatter_val = benefit_cost_scatter_df['total_benefits'].max()
+                    x_min_scatter_val = benefit_cost_scatter_df[scatter_x_col].min()
+                    x_max_scatter_val = benefit_cost_scatter_df[scatter_x_col].max()
+                    y_min_scatter_val = benefit_cost_scatter_df[scatter_y_col].min()
+                    y_max_scatter_val = benefit_cost_scatter_df[scatter_y_col].max()
 
                     zoom_padding = 0.005
-                    x_min = x_min_scatter_val + scatter_range * zoom_padding
-                    x_max = x_max_scatter_val - scatter_range * zoom_padding
-                    y_min = y_min_scatter_val + scatter_range * zoom_padding
-                    y_max = y_max_scatter_val - scatter_range * zoom_padding
+                    safe_range = np.nan_to_num(scatter_range, nan=0.0)
+                    x_min = np.nan_to_num(x_min_scatter_val, nan=0.0) + safe_range * zoom_padding
+                    x_max = np.nan_to_num(x_max_scatter_val, nan=0.0) - safe_range * zoom_padding
+                    y_min = np.nan_to_num(y_min_scatter_val, nan=0.0) + safe_range * zoom_padding
+                    y_max = np.nan_to_num(y_max_scatter_val, nan=0.0) - safe_range * zoom_padding
 
-                    zoom = st.slider("Zoom:", min_value=0.0, max_value=0.999, value=0.0, step=0.001)
-                    
+                    zoom = st.session_state.get("benefit_cost_zoom", 0.0)
+
                     plot_x_axis_min = min(axis_min*(1 - zoom), x_max)
                     plot_x_axis_max = max(axis_max*(1 - zoom), x_min)
                     plot_y_axis_min = min(axis_min*(1 - zoom), y_max)
@@ -315,9 +367,9 @@ else:
 
                     plot_benefit_cost_scatter_df, plot_benefit_cost_scatter_unit_labels, plot_benefit_cost_scatter_scale_exponent = determine_dollar_magnitude(
                         benefit_cost_scatter_df.query(
-                            f"{plot_x_axis_min} <= total_costs <= {plot_x_axis_max} and {plot_y_axis_min} <= total_benefits <= {plot_y_axis_max}"), 
-                            x_col='total_costs', 
-                            y_col='total_benefits',
+                            f"{plot_x_axis_min} <= {scatter_x_col} <= {plot_x_axis_max} and {plot_y_axis_min} <= {scatter_y_col} <= {plot_y_axis_max}"), 
+                            x_col=scatter_x_col, 
+                            y_col=scatter_y_col,
                             return_scale_exponent=True
                             )
 
@@ -328,8 +380,8 @@ else:
                     benefit_cost_scatter_fig = scatter_fig(
                         df = plot_benefit_cost_scatter_df,
                         xy_cols_dict = {
-                            'total_costs':{'uncertainty_col':None, 'label': 'Costs ($)'},
-                            'total_benefits':{'uncertainty_col':None, 'label': 'Benefits ($)'}
+                            scatter_x_col:{'uncertainty_col':None, 'label': f'{scatter_x_col} ($)'},
+                            scatter_y_col:{'uncertainty_col':None, 'label': f'{scatter_y_col} ($)'}
                             },
                         marker_size = marker_size,
                         color_by_col = reconstruct_column_name(catalog_by_filter),
@@ -337,23 +389,35 @@ else:
                         labels = plot_benefit_cost_scatter_df['id'].tolist(),
                         label_size = 10,
                         figsize = (8, 6),
-                        title = f"Benefits and Costs by {catalog_by_filter}",
+                        title = f"{space_and_title(benefits_vs_costs_or_jst_ratio)} by {catalog_by_filter}",
                         xlims = [plot_x_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_x_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                        xlabel = f'Costs {plot_benefit_cost_scatter_unit_labels[0]}',
+                        xlabel = f"{'Costs' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'Net Benefits'} {plot_benefit_cost_scatter_unit_labels[0]}",
                         ylims = [plot_y_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_y_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                        ylabel = f'Benefits {plot_benefit_cost_scatter_unit_labels[1]}',
+                        ylabel = f"{'Benefits' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'JST Ratio'} {plot_benefit_cost_scatter_unit_labels[1] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else ''}",
                         legend = True,
                         legend_labels = sorted(list(plot_benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
                         legend_loc = 'best' 
                     )
 
                     st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
+
+                    spacer_col, zoom_col = st.columns(spec=[0.1, 0.9], gap="small", border=False)
+                    with zoom_col:
+                        st.slider(
+                            "Zoom:",
+                            min_value=0.0,
+                            max_value=0.999,
+                            value=zoom,
+                            step=0.001,
+                            key="benefit_cost_zoom",
+                        )
+
                 else:
                     benefit_cost_scatter_df.sort_values(by=[reconstruct_column_name(catalog_by_filter), 'total_benefits'], ascending=[True, False], inplace=True)
                     benefit_cost_scatter_df[reconstruct_column_name(catalog_by_filter)] = benefit_cost_scatter_df[reconstruct_column_name(catalog_by_filter)].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
 
                     st.dataframe(
-                        benefit_cost_scatter_df[['id', reconstruct_column_name(catalog_by_filter), 'total_costs', 'total_benefits']], 
+                        benefit_cost_scatter_df[['id', reconstruct_column_name(catalog_by_filter), 'total_costs', 'total_benefits', 'net_benefits', 'jst_ratio']], 
                         width='stretch', 
                         hide_index=True,
                         column_config={
@@ -367,6 +431,14 @@ else:
                             'total_benefits': st.column_config.NumberColumn(
                                 label="Benefits ($)",
                                 format="dollar",
+                            ),
+                            'net_benefits': st.column_config.NumberColumn(
+                                label="Net Benefits ($)",
+                                format="dollar",
+                            ),
+                            'jst_ratio': st.column_config.NumberColumn(
+                                label="JST Ratio",
+                                format="%.2f",
                             )
                         }
                     )
@@ -374,7 +446,7 @@ else:
             st.divider()
             # Benefits and Costs Analysis
 
-            header_col1, header_col2 = st.columns(spec=[0.45, 0.55], gap="medium", border=False)
+            header_col1, header_col2 = st.columns(spec=[0.55, 0.45], gap="medium", border=False)
             with header_col1:
                 st.markdown("#### Benefits Analysis")
                 st.markdown("##### Explore Results by Impact Category and Value Stream")
@@ -419,10 +491,11 @@ else:
             col1, col2 = st.columns(spec=[0.58, 0.42], gap="medium", border=False)
 
             # Benefits  
+
             with col1:  
 
                 if len(populated_temporal_cols) > 1:
-                    subcol1, subcol2, subcol3 = st.columns(spec=[0.45, 0.5, 0.05], gap="medium", border=False)
+                    subcol1, subcol2, subcol3 = st.columns(spec=[0.46, 0.53, 0.01], gap="small", border=False)
 
                     temporal_aggregation_filter = subcol1.radio(
                         label = "**Aggregation**",
@@ -437,47 +510,119 @@ else:
                     if len(null_aggregation_benefits_df) > 0:
                         null_aggregation_benefits = null_aggregation_benefits_df['final_dollar_value'].values[0]
                         subcol2.write(f"")
-                        subcol2.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help="Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here.")
-                    
-                temporal_aggregation_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=False)).df().query(f"~{temporal_aggregation_filter}.isna()")
-                temporal_aggregation_results_df, temporal_aggregation_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_results_df, x_col='final_dollar_value')#, y_col='net_lifecycle_energy_savings')
+                        with subcol2.container(border=True):
+                            st.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help="Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here.")
+
+                # Use widget key "isolate_peak" for current value (updated at run start); fallback to isolate_peak_filter
+                isolate_peak_active = (
+                    commodity_filter.upper() == 'ELECTRIC'
+                    and temporal_aggregation_filter == 'hour_of_day'
+                    and st.session_state.get("isolate_peak", st.session_state.isolate_peak_filter)
+                )
+
+                # Reset peak filters when they don't apply
+                if not (commodity_filter.upper() == 'ELECTRIC' and temporal_aggregation_filter == 'hour_of_day'):
+                    st.session_state.isolate_peak_filter = False
+                    if "isolate_peak" in st.session_state:
+                        st.session_state["isolate_peak"] = False
+                    st.session_state["peak_months_filter"] = []
+                    st.session_state["peak_hours_filter"] = []
+                elif not isolate_peak_active:
+                    # User turned off "Isolate Peak Period" or not in peak context — clear month/hour selections
+                    st.session_state["peak_months_filter"] = []
+                    st.session_state["peak_hours_filter"] = []
+
+                filtercol1, filtercol2 = st.columns(spec=[0.5, 0.5], gap="medium", border=False)
+
+                temporal_aggregation_results_df = con.execute(
+                    generate_temporal_aggregation_benefits_query(
+                        where_sql, 
+                        commodity_filter, 
+                        temporal_aggregation_filter, 
+                        peak_months=st.session_state.get("peak_months_filter", []) if isolate_peak_active else [], 
+                        group_by_value_stream=False
+                    )
+                ).df().query(f"~{temporal_aggregation_filter}.isna()")
+
+                temporal_aggregation_results_df, temporal_aggregation_results_unit_labels, temporal_aggregation_results_scale_exponent = determine_dollar_magnitude(temporal_aggregation_results_df, x_col='final_dollar_value', return_scale_exponent=True)
                 temporal_aggregation_results_df, temporal_aggregation_results_savings_unit_labels = determine_savings_magnitude(temporal_aggregation_results_df, x_col='net_lifecycle_energy_savings', unit=unit)
-                temporal_aggregation_value_stream_results_df = con.execute(generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream=True)).df().query(f"~{temporal_aggregation_filter}.isna()")
-                temporal_aggregation_value_stream_results_df, temporal_aggregation_value_stream_results_unit_labels = determine_dollar_magnitude(temporal_aggregation_value_stream_results_df, x_col='final_dollar_value', y_col='net_lifecycle_energy_savings')
+                
+                temporal_aggregation_value_stream_results_df = con.execute(
+                    generate_temporal_aggregation_benefits_query(
+                        where_sql, 
+                        commodity_filter, 
+                        temporal_aggregation_filter, 
+                        peak_months=st.session_state.get("peak_months_filter", []) if isolate_peak_active else [], 
+                        group_by_value_stream=True
+                    )
+                ).df().query(f"~{temporal_aggregation_filter}.isna()")
+
+                temporal_aggregation_value_stream_results_df['final_dollar_value_original'] = temporal_aggregation_value_stream_results_df['final_dollar_value']
+                temporal_aggregation_value_stream_results_df['final_dollar_value'] = temporal_aggregation_value_stream_results_df['final_dollar_value'] / 10**(temporal_aggregation_results_scale_exponent)
+                temporal_aggregation_value_stream_results_df['value_stream'] = temporal_aggregation_value_stream_results_df['value_stream'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+
                 value_streams = sorted(temporal_aggregation_value_stream_results_df['value_stream'].unique().tolist())
                 
-                if 'show_value_streams_filter' not in st.session_state:
-                    st.session_state.show_value_streams_filter = None
-                
                 if len(value_streams) > 1:
-                    st.session_state.show_value_streams_filter = st.multiselect(
-                        label = f"Show Specific Value Streams:",
-                        options = value_streams,
-                        key = "value_streams_filter",
-                        default = None
-                    )   
+                    value_streams_filter = st.session_state.get("value_streams_filter", [])
+
+                if commodity_filter.upper() == 'ELECTRIC' and temporal_aggregation_filter == 'hour_of_day':
+                    st.session_state.isolate_peak_filter = st.checkbox(
+                        label = f"**Isolate Peak Period**",
+                        value = False,
+                        key = "isolate_peak",
+                    )
+                
+                if isolate_peak_active:
+                    with st.container(border=True):
+                        peakfiltercol1, peakfiltercol2 = st.columns(spec=[0.5, 0.5], gap="medium", border=False)
+                    
+                        with peakfiltercol1:
+                                
+                            st.multiselect(
+                                label = f"**Define Peak Months:**",
+                                options = range(1, 13),
+                                key = "peak_months_filter",
+                                default = []
+                            )
+
+                        with peakfiltercol2:
+
+                            st.multiselect(
+                                label = f"**Define Peak Hours:**",
+                                options = range(0, 24),
+                                key = "peak_hours_filter",
+                                default = []
+                            )
 
                 if bar_pie_fig_or_table == 'Figures':
                     temporal_aggregation_bar_fig = numeric_bar_fig(
                         df = temporal_aggregation_results_df,
                         col = 'final_dollar_value',
                         category = temporal_aggregation_filter,
-                        value_stream_df = temporal_aggregation_value_stream_results_df.query(f"value_stream in {st.session_state.show_value_streams_filter}") if len(st.session_state.show_value_streams_filter) > 0 else None,
+                        value_stream_df = temporal_aggregation_value_stream_results_df.query(f"value_stream in {value_streams_filter}") if len(value_streams_filter) > 0 else None,
                         figsize= (10, 6),
                         y2_col = 'net_lifecycle_energy_savings' if len(temporal_aggregation_results_df.query("~net_lifecycle_energy_savings.isna()")) > 0 else None,
                         pin_yaxis_zeros = True,
                         single_bar_color="cornflowerblue",
                         space_fraction = 0.65,
+                        peak_period = st.session_state.get('peak_hours_filter', []),# if isolate_peak_active else None,
                         title = f"Benefits by {space_and_title(temporal_aggregation_filter)}",
                         xlabel = None,
                         ylabel = f'Benefits{temporal_aggregation_results_unit_labels[0]}',
                         y2label = f'Savings {temporal_aggregation_results_savings_unit_labels[0]}', 
-                        #({temporal_aggregation_results_unit_labels[1][2] if len(temporal_aggregation_results_unit_labels[1]) > 2 else ''}{unit})'.replace('$', ''),
-                        legend = True if len(st.session_state.show_value_streams_filter) > 0 else False, 
+                        legend = True if len(value_streams_filter) > 0 else False, 
                         legend_loc = 'best',
                     )
 
                     st.pyplot(temporal_aggregation_bar_fig, clear_figure=True)
+
+                    st.multiselect(
+                        label = f"**Show Specific Value Streams:**",
+                        options = value_streams,
+                        key = "value_streams_filter",
+                        default = []
+                    )   
 
                 else:
                     st.dataframe(
@@ -494,52 +639,76 @@ else:
                             format="dollar",
                         ),
                     'net_lifecycle_energy_savings_original': st.column_config.NumberColumn(
-                        label=f'Savings ({temporal_aggregation_results_unit_labels[1][2] if len(temporal_aggregation_results_unit_labels[1]) > 2 else ''}{unit})'.replace('$', ''),
+                        label=f'Benefits{temporal_aggregation_results_unit_labels[0]}',
                         format="%.2f",
                         )},
                     )
         
             with col2:
-                st.write(f"")
-                value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, commodity_filter)).df()
-                pos_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value > 0")
-                neg_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value < 0")
-                st.markdown(f"##### {space_and_title(commodity_filter)} Benefit Value Streams (${value_stream_benefits_df['final_dollar_value'].sum():,.0f})")
-                if len(value_stream_benefits_df) == 1:
-                    value_stream_benefits = value_stream_benefits_df['final_dollar_value'].values[0]
 
-                    for i in range(6):
-                        st.write(f"")
-                    
-                    st.markdown(f"#### {space_and_title(commodity_filter)} Benefits = **${value_stream_benefits:,.0f}**")
+                def pie_fig_section( 
+                    isolate_peak: bool = False,
+                    peak_months: list[int] = [],
+                    peak_hours: list[int] = [],
+                ):
+                    st.write(f"")
+                    value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, commodity_filter, peak_months=peak_months, peak_hours=peak_hours)).df()
+                    value_stream_benefits_df['value_stream'] = value_stream_benefits_df['value_stream'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+                    pos_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value > 0")
+                    neg_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value < 0")
+                    st.markdown(f"##### {'Peak ' if isolate_peak else 'Total '}{space_and_title(commodity_filter)} Benefit Value Streams (${value_stream_benefits_df['final_dollar_value'].sum():,.0f})")
 
-                else:
-                    if bar_pie_fig_or_table == 'Figures':
+                    if len(value_stream_benefits_df) == 1:
+                        value_stream_benefits = value_stream_benefits_df['final_dollar_value'].values[0]
+
+                        for i in range(6):
+                            st.write(f"")
                         
-                        if len(pos_value_stream_benefits_df) > 0:
-                            pos_value_stream_benefits_df, pos_value_stream_benefits_unit_labels = determine_dollar_magnitude(pos_value_stream_benefits_df, x_col='final_dollar_value', y_col=None)
-                        
-                        if len(neg_value_stream_benefits_df) > 0:
-                            neg_value_stream_benefits_df, neg_value_stream_benefits_unit_labels = determine_dollar_magnitude(neg_value_stream_benefits_df, x_col='final_dollar_value', y_col=None)
+                        st.markdown(f"#### {space_and_title(commodity_filter)} Benefits = **${value_stream_benefits:,.0f}**")
 
-                        pie_chart_fig = pie_chart(
-                            df = pos_value_stream_benefits_df if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_df,
-                            col = 'final_dollar_value',
-                            label_col = 'value_stream',
-                            figsize = (9, 5),
-                            title = f"{space_and_title(commodity_filter)} Benefits{pos_value_stream_benefits_unit_labels[0] if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_unit_labels[0]}"
-                        )
+                    else:
+                        if bar_pie_fig_or_table == 'Figures':
+                            
+                            if len(pos_value_stream_benefits_df) > 0:
+                                pos_value_stream_benefits_df, pos_value_stream_benefits_unit_labels = determine_dollar_magnitude(pos_value_stream_benefits_df, x_col='final_dollar_value', y_col=None)
+                            
+                            if len(neg_value_stream_benefits_df) > 0:
+                                neg_value_stream_benefits_df, neg_value_stream_benefits_unit_labels = determine_dollar_magnitude(neg_value_stream_benefits_df, x_col='final_dollar_value', y_col=None)
 
-                        st.pyplot(pie_chart_fig, clear_figure=True)
+                            pie_chart_fig = pie_chart(
+                                df = pos_value_stream_benefits_df if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_df,
+                                col = 'final_dollar_value',
+                                label_col = 'value_stream',
+                                figsize = (9, 5),
+                                title = f"{space_and_title(commodity_filter)} Benefits{pos_value_stream_benefits_unit_labels[0] if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_unit_labels[0]}"
+                            )
 
-                        if len(neg_value_stream_benefits_df) > 0 and len(neg_value_stream_benefits_df) < len(pos_value_stream_benefits_df) + len(neg_value_stream_benefits_df):
-                            st.markdown("##### Additional Negative Benefits Value Streams")
+                            st.pyplot(pie_chart_fig, clear_figure=True)
+
+                            if len(neg_value_stream_benefits_df) > 0 and len(neg_value_stream_benefits_df) < len(pos_value_stream_benefits_df) + len(neg_value_stream_benefits_df):
+                                st.markdown("##### Additional Negative Benefits Value Streams")
+                                st.dataframe(
+                                    neg_value_stream_benefits_df[['value_stream', 'final_dollar_value_original']],
+                                    width='stretch',
+                                    hide_index=True,
+                                    column_config={
+                                        'final_dollar_value_original': st.column_config.NumberColumn(
+                                            label="Benefits ($)",
+                                            format="dollar",
+                                        ),
+                                        'value_stream': st.column_config.TextColumn(
+                                            label = "Value Stream",
+                                        )
+                                        }
+                                    )
+
+                        else:
                             st.dataframe(
-                                neg_value_stream_benefits_df[['value_stream', 'final_dollar_value_original']],
+                                value_stream_benefits_df[['value_stream', 'final_dollar_value']],
                                 width='stretch',
                                 hide_index=True,
                                 column_config={
-                                    'final_dollar_value_original': st.column_config.NumberColumn(
+                                    'final_dollar_value': st.column_config.NumberColumn(
                                         label="Benefits ($)",
                                         format="dollar",
                                     ),
@@ -548,22 +717,13 @@ else:
                                     )
                                     }
                                 )
+                                
+                    return
 
-                    else:
-                        st.dataframe(
-                            value_stream_benefits_df[['value_stream', 'final_dollar_value']],
-                            width='stretch',
-                            hide_index=True,
-                            column_config={
-                                'final_dollar_value': st.column_config.NumberColumn(
-                                    label="Benefits ($)",
-                                    format="dollar",
-                                ),
-                                'value_stream': st.column_config.TextColumn(
-                                    label = "Value Stream",
-                                )
-                                }
-                            )
+                if isolate_peak_active and (len(st.session_state.get("peak_months_filter", [])) > 0 or len(st.session_state.get("peak_hours_filter", [])) > 0):
+                    pie_fig_section(isolate_peak=True, peak_months=st.session_state.get("peak_months_filter", []), peak_hours=st.session_state.get("peak_hours_filter", []))
+                    st.divider()
+                pie_fig_section(isolate_peak=False, peak_months=[], peak_hours=[])
 
     ### Comparative Analysis
         category_filters = con.execute(
@@ -585,10 +745,21 @@ else:
                     horizontal=True,
                 )
 
+                net_benefits_or_jst_ratio = st.segmented_control(
+                    label = "**Plot**", 
+                    options = ['Net Benefits', 'JST Ratio'], 
+                    default='Net Benefits',
+                    key = "net_benefits_or_jst"
+                    ) 
+
+                bar_col = 'final_dollar_value'
+                if net_benefits_or_jst_ratio == 'JST Ratio':
+                    bar_col = 'jst_ratio'
+
                 category_filter_sql = f"{reconstruct_column_name(category_filter)}"
 
                 categorical_summary_df = con.execute(generate_categorical_summary_query(where_sql, category_filter_sql)).df().query(f"not {category_filter_sql}.isnull()")
-                categorical_summary_df, categorical_summary_unit_labels = determine_dollar_magnitude(categorical_summary_df, x_col='final_dollar_value', y_col=None)        
+                categorical_summary_df, categorical_summary_unit_labels = determine_dollar_magnitude(categorical_summary_df, x_col=bar_col, y_col=None)        
                 categorical_summary_df[f"{category_filter_sql}"] = categorical_summary_df[f"{category_filter_sql}"].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
                 
                 remaining_category_filters = [filter for filter in category_filters if filter != category_filter_sql]
@@ -601,7 +772,7 @@ else:
                     categorical_grouping_summary_df = con.execute(generate_categorical_summary_query(where_sql, category_filter_sql, grouping_filter = grouping_filter)).df().query(f"not {grouping_filter}.isnull()")
                     
                     if len(categorical_grouping_summary_df) > len(categorical_summary_df):
-                        categorical_grouping_summary_df, categorical_grouping_summary_unit_labels = determine_dollar_magnitude(categorical_grouping_summary_df, x_col='final_dollar_value', y_col=None)
+                        categorical_grouping_summary_df, categorical_grouping_summary_unit_labels = determine_dollar_magnitude(categorical_grouping_summary_df, x_col=bar_col, y_col=None)
                         categorical_grouping_summary_df[f"{grouping_filter}"] = categorical_grouping_summary_df[f"{grouping_filter}"].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
                         
                         categorical_bar_radio_options[space_and_title(grouping_filter)] = [categorical_grouping_summary_df, categorical_grouping_summary_unit_labels]
@@ -622,19 +793,19 @@ else:
                     df=categorical_bar_radio_options[grouping_option][0], 
                     col_1=category_filter_sql, 
                     col_2=reconstruct_column_name(grouping_option), 
-                    numeric_cols=['final_dollar_value', 'final_dollar_value_original']
-                    ).rename(columns={'final_dollar_value_original': 'Net Benefits ($)', category_filter_sql:category_filter})
+                    numeric_cols=[bar_col, bar_col+'_original']
+                    ).rename(columns={category_filter_sql:category_filter})
                 
                 if grouping_option != 'None':
                     plot_df = plot_df.rename(columns={reconstruct_column_name(grouping_option): grouping_option})
                 
                 categorical_summary_bar_fig = categorical_bar_fig(
                 df = plot_df,
-                col = 'final_dollar_value',
+                col = bar_col,
                 category = category_filter,
                 groupings = None if grouping_option == 'None' else grouping_option,
                 figsize = (10, 6),
-                single_bar_color = "darkgreen",
+                single_bar_color = "darkolivegreen",
                 space_fraction = 0.65,
                 sort_by = None,
                 sort_ascending = True,
@@ -653,16 +824,23 @@ else:
                 grouping_column = []
                 if grouping_option != 'None':
                     grouping_column = [grouping_option]
+
+                if 'final_dollar_value_original' not in plot_df.columns:
+                    plot_df['final_dollar_value_original'] = plot_df['final_dollar_value'] 
                 
                 st.dataframe(
-                    plot_df[[category_filter] + grouping_column + ['Net Benefits ($)']].query("`Net Benefits ($)` != 0"), 
+                    plot_df[[category_filter] + grouping_column + ['final_dollar_value_original', 'jst_ratio']].query("final_dollar_value_original != 0"), 
                     width='stretch', 
                     hide_index=True,
                     column_config={
-                        'Net Benefits ($)': st.column_config.NumberColumn(
+                        'final_dollar_value_original': st.column_config.NumberColumn(
                         label="Net Benefits ($)",
                         format="dollar",
-                        )
+                        ),
+                        'jst_ratio': st.column_config.NumberColumn(
+                        label="JST Ratio",
+                        format="%.2f",
+                        ),
                     }
                 )
         
@@ -685,7 +863,7 @@ else:
                 category = 'commodity',
                 figsize= (9, 5),
                 pin_yaxis_zeros = True,
-                single_bar_color="darkred",
+                single_bar_color="indianred",
                 horizontal = True,
                 space_fraction = 0.65,
                 title = f"Costs by Type",
@@ -715,8 +893,9 @@ else:
                 )
 
         st.divider()
+        
         summary_results_df = con.execute(generate_summary_results_query()).df()
         st.markdown("### Summary Results Table:")
         st.dataframe(summary_results_df, width='stretch', hide_index=True)
-        st.write(f"Using Database: `{db_value}`")
         
+        st.write(f"Using Database: `{db_value}`")

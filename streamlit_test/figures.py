@@ -88,17 +88,6 @@ replace_elements = {
     }
 
 
-# def optimal_legend_location(min_x_val, max_x_val, min_y_val, max_y_val):
-#     if min_y_val < 0 and max_x_val < 0:
-#         return "lower right"
-#     elif min_x_val > 0 and max_x_val > 0:
-#         return "upper left"
-#     elif min_y_val < 0 and max_y_val < 0:
-#         return "upper right"
-#     elif min_y_val > 0 and max_y_val > 0:
-#         return "lower left"
-
-
 def get_unit_from_column_name(col: str):
     """Automatically extract units from column names
 
@@ -324,7 +313,8 @@ def waterfall_multitier_fig(
         sort_directions = [True] * len(sorting_list)
 
     unique_xtick_labels = [
-        replace_multiple_string_elements(" ".join(str(cat).title().split("_")))
+        #replace_multiple_string_elements(" ".join(str(cat).title().split("_")))
+        space_and_title(cat)
         for cat in list(
             df.sort_values(by=sorting_list, ascending=sort_directions)[
                 category
@@ -634,6 +624,7 @@ def numeric_bar_fig(
     single_bar_color="dimgray",
     horizontal: bool = False,  # Whether to plot a horizontal bar chart
     space_fraction: float = 0.65,
+    peak_period: list[int] = [],
     title: str = None,
     xlabel: str = None,
     ylabel: str = None,
@@ -664,6 +655,22 @@ def numeric_bar_fig(
             color=colors[i] if single_bar_color is None else single_bar_color,
             alpha=1 if value_stream_df is None else 0.75,
             zorder=1000
+        )
+    
+    if len(peak_period) > 0:
+        ax.bar(
+            x=df.query(f"{category} in {peak_period}")[category],
+            height=df.query(f"{category} in {peak_period}")[col],
+            width=space_fraction,
+            color="dimgray",
+            label="Peak Period",
+            alpha=1 if value_stream_df is None else 0.75,
+            zorder=1000
+        )
+
+        ax.legend(
+            frameon=False,
+            fontsize=12,
         )
 
     line_colors = [
@@ -798,6 +805,7 @@ def numeric_bar_fig(
 
         ax1.grid(False)
         ax1.tick_params(left=False, right=True, length=4, width=1, labelsize=15)
+        ax1.yaxis.set_minor_locator(AutoMinorLocator())
 
     return fig
 

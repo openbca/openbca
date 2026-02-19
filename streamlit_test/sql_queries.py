@@ -42,7 +42,7 @@ def generate_waterfall_query(where_sql, waterfall_column):
     waterfall_query = f"""
         SELECT 
         {waterfall_column} 
-        , sum(final_dollar_value) as final_dollar_value
+        , sum(final_dollar_value) AS final_dollar_value
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fvc 
         FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
@@ -61,8 +61,10 @@ def generate_benefit_cost_scatter_query(where_sql, catalog_by_filter):
         SELECT 
         id
         , {catalog_by_filter}
-        , ifnull(total_benefits, 0) as total_benefits
-        , -ifnull(total_costs, 0) as total_costs
+        , ifnull(total_benefits, 0) AS total_benefits
+        , -ifnull(total_costs, 0) AS total_costs
+        , total_net_benefits AS net_benefits
+        , -ifnull(total_benefits, 0)/ifnull(total_costs, 0) AS jst_ratio
         FROM 
         openbca.core_layer3_finalization.results_summary_by_id m
         {where_sql} 
@@ -100,7 +102,12 @@ def generate_populated_temporal_cols_query(where_sql, commodity_filter, col):
     return populated_temporal_cols_query
 
 
-def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, unit, group_by_value_stream: bool = False):
+def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, peak_months:list[int] = [], group_by_value_stream: bool = False):
+    
+    peak_months_where_sql = ''
+    if len(peak_months) > 0:
+        peak_months_where_sql = f"AND month IN ({', '.join(map(str, peak_months))})"
+
     temporal_aggregation_query = f"""
     WITH benefits AS (
         SELECT 
@@ -112,6 +119,7 @@ def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, te
         FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
+        {peak_months_where_sql}
         AND commodity = '{commodity_filter}'
         GROUP BY 
         {temporal_aggregation_filter}
@@ -129,6 +137,7 @@ def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, te
         JOIN openbca.core_layer0_base.measures m ON 
         fsc.id = m.id
         {where_sql} 
+        {peak_months_where_sql}
         AND commodity = '{commodity_filter}'
         GROUP BY 
         {temporal_aggregation_filter}
@@ -172,7 +181,16 @@ def generate_null_aggregation_benefits_query(where_sql, commodity_filter, tempor
     return null_aggregation_benefits_query
 
 
-def generate_value_stream_benefits_query(where_sql, commodity_filter):
+def generate_value_stream_benefits_query(where_sql, commodity_filter, peak_months:list[int] = [], peak_hours:list[int] = []):
+    
+    peak_months_where_sql = ''
+    if len(peak_months) > 0:
+        peak_months_where_sql = f"AND month IN ({', '.join(map(str, peak_months))})"
+
+    peak_hours_where_sql = ''
+    if len(peak_hours) > 0:
+        peak_hours_where_sql = f"AND hour_of_day IN ({', '.join(map(str, peak_hours))})"
+
     value_stream_benefits_query = f"""
         SELECT 
         value_stream 
@@ -182,6 +200,8 @@ def generate_value_stream_benefits_query(where_sql, commodity_filter):
         FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
+        {peak_months_where_sql}
+        {peak_hours_where_sql}
         AND commodity = '{commodity_filter}'
         GROUP BY 
         value_stream
@@ -271,7 +291,8 @@ def generate_categorical_summary_query(where_sql, category_filter, grouping_filt
         SELECT 
         {category_filter_coalesce} AS {category_filter}
         {f", {grouping_filter_coalesce} AS {grouping_filter}" if grouping_filter is not None else ''}
-        , sum(final_dollar_value) AS final_dollar_value
+        , SUM(ifnull(final_dollar_value, 0)) AS final_dollar_value
+        , -SUM(CASE WHEN commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN ifnull(final_dollar_value, 0) END) / SUM(CASE WHEN commodity IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN ifnull(final_dollar_value, 0) END) AS jst_ratio
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fvc 
         FULL OUTER JOIN openbca.core_layer0_base.measures m ON 

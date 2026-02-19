@@ -12,7 +12,7 @@ install:
 	uv sync
 
 test-streamlit:
-	uv run streamlit run streamlit_test/Upload_Data_and_Run_Model.py
+	uv run streamlit run streamlit_test/Entrypoint.py
 
 # test-core:
 # 	uv run sqlmesh -p core test

@@ -10,7 +10,15 @@ def space_and_title(text: str) -> str:
         "Of", "of").replace(
         "Hvac", "HVAC").replace(
         "Ac ", "AC ").replace(
-        "Nei", "NEI")
+        "Nei", "NEI").replace(
+        "Ghg", "GHG").replace(
+        " (E)", "").replace(
+        " (Ng)", "").replace(
+        "Jst", "JST").replace(
+        " Dollar Per Unit Year", '',).replace(
+        " Dollar Per Unit", '').replace(
+        " Dollar Per Year", '').replace(
+        "Vs", "vs")
 
 
 def reconstruct_column_name(text: str) -> str:
