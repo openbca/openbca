@@ -12,7 +12,7 @@ def run_all() -> None:
             paths=[get_nspm_project_dir(), get_core_project_dir()],
     )
     try:
-        plan = ctx.plan()
+        plan = ctx.plan(run=True, ignore_cron=True)
         ctx.apply(plan)
     finally:
         ctx.close()
