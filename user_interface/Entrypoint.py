@@ -17,9 +17,9 @@ st.sidebar.markdown("#### [Background](http://www.nationalenergyscreeningproject
 st.sidebar.markdown("#### [National Standard Practice Manual](http://www.nationalenergyscreeningproject.org/national-standard-practice-manual/)")
 st.sidebar.markdown("#### [Open Source GitHub Repository](https://github.com/openbca/openbca)")
 
-st.sidebar.divider()
-if st.sidebar.button("Quit OpenBCA App", type="primary"):
-    print("Exiting Streamlit app...")
+# st.sidebar.divider()
+# if st.sidebar.button("Quit OpenBCA App", type="primary"):
+#     print("Exiting Streamlit app...")
     
-    # Get current pid and send SIGTERM to gracefully shut down the Streamlit server process
-    os.kill(os.getpid(), signal.SIGTERM)
+#     # Get current pid and send SIGTERM to gracefully shut down the Streamlit server process
+#     os.kill(os.getpid(), signal.SIGTERM)

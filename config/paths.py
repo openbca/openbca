@@ -23,7 +23,7 @@ def get_nspm_project_dir() -> Path:
 
 
 def get_streamlit_app_dir() -> Path:
-    return get_repo_root() / 'streamlit_test'
+    return get_repo_root() / 'user_interface'
 
 
 def get_input_templates_dir() -> Path:

@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import signal
 import subprocess
 import shutil
 import sys
@@ -57,7 +58,14 @@ with col5:
         unsafe_allow_html=True,
     )
 
-st.markdown("## Welcome to the OpenBCA")
+title_col, quit_col = st.columns(spec=[0.88, 0.12], gap="small", border=False)
+with title_col:
+    st.markdown("## Welcome to the OpenBCA")
+with quit_col:
+    if st.button("Exit OpenBCA", type="primary"):
+        print("Exiting Streamlit app...")
+        # Get current pid and send SIGTERM to gracefully shut down the Streamlit server process
+        os.kill(os.getpid(), signal.SIGTERM)
 st.markdown("###### The OpenBCA software executes Jurisdiction Specific Tests developed under National Standard Practice Manual guidance.")
 
 # Resolve paths relative to this file, not the current working directory.

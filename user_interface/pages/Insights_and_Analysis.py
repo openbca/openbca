@@ -2,6 +2,7 @@ from typing import Any
 from pandas.core.dtypes.cast import CategoricalDtype
 import streamlit as st 
 import os
+import signal
 from pathlib import Path
 import duckdb
 import pandas as pd
@@ -60,13 +61,6 @@ if 'show_value_streams_filter' not in st.session_state:
 if 'isolate_peak_filter' not in st.session_state:
     st.session_state.isolate_peak_filter = False
 
-# if 'peak_months_filter' not in st.session_state:
-#     st.session_state.peak_months_filter = []
-
-# if 'define_peak_hours_filter' not in st.session_state:
-#     st.session_state.define_peak_hours_filter = []
-
-
 col1, col2, col3, col4, col5 = st.columns(5)
 
 LOGOS_DIR = get_streamlit_app_dir() / "logos"
@@ -111,7 +105,15 @@ DEFAULT_OUTPUT_DB.parent.mkdir(parents=True, exist_ok=True)
 db_value = os.environ.get("DB", str(DEFAULT_OUTPUT_DB))
 db_path = Path(db_value).expanduser()
 
-st.markdown("## OpenBCA Insights and Analysis")
+title_col, quit_col = st.columns(spec=[0.88, 0.12], gap="small", border=False)
+with title_col:
+    st.markdown("## OpenBCA Insights and Analysis")
+with quit_col:
+    if st.button("Exit OpenBCA", type="primary"):
+        print("Exiting Streamlit app...")
+        # Get current pid and send SIGTERM to gracefully shut down the Streamlit server process
+        os.kill(os.getpid(), signal.SIGTERM)
+
 st.markdown("#### Explore the results of your Jurisdiction Specific Test")
 db_exists_now = db_path.exists()
 
@@ -770,11 +772,9 @@ else:
                 for grouping_filter in remaining_category_filters:
 
                     categorical_grouping_summary_df = con.execute(generate_categorical_summary_query(where_sql, category_filter_sql, grouping_filter = grouping_filter)).df().query(f"not {grouping_filter}.isnull()")
-                    
                     if len(categorical_grouping_summary_df) > len(categorical_summary_df):
                         categorical_grouping_summary_df, categorical_grouping_summary_unit_labels = determine_dollar_magnitude(categorical_grouping_summary_df, x_col=bar_col, y_col=None)
                         categorical_grouping_summary_df[f"{grouping_filter}"] = categorical_grouping_summary_df[f"{grouping_filter}"].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
-                        
                         categorical_bar_radio_options[space_and_title(grouping_filter)] = [categorical_grouping_summary_df, categorical_grouping_summary_unit_labels]
                 
                 grouping_option = 'None'        
@@ -793,9 +793,9 @@ else:
                     df=categorical_bar_radio_options[grouping_option][0], 
                     col_1=category_filter_sql, 
                     col_2=reconstruct_column_name(grouping_option), 
-                    numeric_cols=[bar_col, bar_col+'_original']
+                    numeric_cols=[bar_col, bar_col+'_original']+[col for col in ['jst_ratio', 'final_dollar_value'] if col != bar_col]
                     ).rename(columns={category_filter_sql:category_filter})
-                
+
                 if grouping_option != 'None':
                     plot_df = plot_df.rename(columns={reconstruct_column_name(grouping_option): grouping_option})
                 
@@ -811,7 +811,7 @@ else:
                 sort_ascending = True,
                 title = f"Benefits by {category_filter}",
                 xlabel = '',
-                ylabel = f"Net Benefits{categorical_bar_radio_options[grouping_option][1][0]}",
+                ylabel = f"{'Net Benefits' if net_benefits_or_jst_ratio == 'Net Benefits' else 'JST Ratio'}{plot_benefit_cost_scatter_unit_labels[1] if net_benefits_or_jst_ratio == 'Net Benefits' else ''}",#f"Net Benefits{categorical_bar_radio_options[grouping_option][1][0]}",
                 y2label = None,
                 legend = True,
                 legend_loc = 'best',
@@ -826,6 +826,7 @@ else:
                     grouping_column = [grouping_option]
 
                 if 'final_dollar_value_original' not in plot_df.columns:
+                    print(plot_df.columns)
                     plot_df['final_dollar_value_original'] = plot_df['final_dollar_value'] 
                 
                 st.dataframe(
