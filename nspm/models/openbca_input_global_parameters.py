@@ -8,12 +8,12 @@ from config.paths import get_input_templates_dir
     name='openbca_input.global_parameters',
     kind='FULL',
     columns={
-        #'real_or_nominal_inputs': 'string',
         'inflation_rate': 'float',
         'dollar_year': 'int',
         'discount_rate': 'float',
         'discount_cadence': 'int',
         'electric_line_loss': 'float',
+        'peak_capacity_line_loss': 'float',
         'natural_gas_line_loss': 'float',
         'cost_treatment': 'string',
     },
@@ -29,8 +29,8 @@ inflation_rate_row = 7
 dollar_year_row = 4
 discount_rate_row = 9
 discount_cadence_row = 10
-line_losses_rows = [12, 13]
-cost_treatment_row = 14
+line_losses_rows = [12, 13, 14]
+cost_treatment_row = 15
 
 def compile_global_parameters_from_excel(
     input_file: str,
@@ -102,7 +102,7 @@ def compile_global_parameters_from_excel(
         skiprows=lambda x: x not in line_losses_rows, 
         usecols='D').T.reset_index()
 
-    line_losses_df.columns = ['electric_line_loss', 'natural_gas_line_loss']
+    line_losses_df.columns = ['electric_line_loss', 'peak_capacity_line_loss', 'natural_gas_line_loss']
 
     cost_treatment_df = pd.read_excel(
         xls, 
@@ -126,5 +126,5 @@ def compile_global_parameters_from_excel(
 
     global_parameters_df['inflation_rate'] = global_parameters_df['real_inputs'].apply(lambda x: 0.0 if x else global_parameters_df['inflation_rate'])
     global_parameters_df.drop(columns=['real_inputs'], inplace=True)
-    
+
     return global_parameters_df

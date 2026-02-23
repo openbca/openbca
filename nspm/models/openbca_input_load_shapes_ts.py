@@ -28,7 +28,7 @@ ID_COLUMNS = [
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_load_shapes_from_excel(
         input_file="OpenBCA Program Input.xlsx",
-        skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Updates & Improvements", "Custom Period - LS Support"},
+        skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Dictionary", "Updates & Improvements"},
         skiprows=1,
     )
 
@@ -48,7 +48,7 @@ def load_load_shapes_from_excel(
 
         if sheet in skip_sheets:
             continue
-
+        
         df = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=skiprows)
         df = df.dropna(how="all").dropna(axis=1, how="all")
         if df.empty:
@@ -75,7 +75,7 @@ def load_load_shapes_from_excel(
     if not all_frames:
         return pd.DataFrame()
 
-    combined_df = pd.concat(all_frames, ignore_index=True)
+    combined_df = pd.concat(all_frames, ignore_index=True).rename({'Hour': 'hour_of_year'}, axis = 1)
 
     # --- Ensure required ID columns exist ---
     for col in ["quarter", "month", "day", "hour_of_year"]:
@@ -97,4 +97,13 @@ def load_load_shapes_from_excel(
     # Adjust hour_of_year from 1 - 8760 to 0 - 8759
     long_df['hour_of_year'] = long_df['hour_of_year'] - 1
 
+    # print(long_df.columns)
+
+    # for col in ['load_shape_value']:
+    #     print(col)
+    #     print(long_df[col].values)
+    #     print('Add tool tips' in long_df[col].values)
+        # if 'Add tool tips' in long_df[col].values:
+        #     print(col)
+        #     print(long_df.query(f"{col} == 'Add tool tips'"))
     return long_df

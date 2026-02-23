@@ -8,49 +8,112 @@ from config.paths import get_input_templates_dir
 
 ID_COLUMNS = ["id", "measure_id", "project_id"]
 
+# Column order must match the model schema below and the final returned dataframe.
+MEASURES_SCHEMA_COLUMN_ORDER = [
+    "id",
+    "program_name",
+    "label_1",
+    "label_2",
+    "label_3",
+    "label_4",
+    "label_5",
+    "measure_id",
+    "project_id",
+    "measure_name",
+    "avoided_cost_subset",
+    "start_year",
+    "start_quarter",
+    "discount_rate",
+    "measure_unit",
+    "unit_quantity",
+    "estimated_useful_life",
+    "ntg",
+    "administration_costs_upfront_dollar",
+    "administration_costs_annual_dollar_per_year",
+    "utility_incentive_upfront_dollar",
+    "utility_incentive_annual_dollar_per_year",
+    "incremental_costs_upfront_dollar",
+    "incremental_costs_annual_dollar_per_year",
+    "host_customer_transaction_costs_dollar",
+    "host_customer_interconnection_costs_dollar",
+    "host_customer_tax_incentive_upfront_dollar",
+    "electric_savings_load_shape",
+    "annual_electric_savings_kwh",
+    "coincident_peak_savings_kw",
+    "natural_gas_savings_load_shape",
+    "annual_natural_gas_savings_mmbtu",
+    "annual_propane_savings_mmbtu",
+    "annual_oil_savings_mmbtu",
+    "annual_diesel_savings_mmbtu",
+    "host_customer_non_energy_impacts_dollar",
+    "host_customer_non_energy_impacts_low_income_dollar",
+    "change_in_host_customer_risk_dollar",
+    "change_in_host_customer_reliability_dollar",
+    "change_in_host_customer_resilience_dollar",
+    "change_in_societal_resilience_dollar",
+    "custom_1_value_stream_name",
+    "custom_1_value_stream_commodity",
+    "custom_1_annual_savings",
+    "custom_2_value_stream_name",
+    "custom_2_value_stream_commodity",
+    "custom_2_annual_savings",
+    "custom_3_value_stream_name",
+    "custom_3_value_stream_commodity",
+    "custom_3_annual_savings",
+    "custom_4_value_stream_name",
+    "custom_4_value_stream_commodity",
+    "custom_4_annual_savings",
+    "custom_5_value_stream_name",
+    "custom_5_value_stream_commodity",
+    "custom_5_annual_savings",
+]
+
 @model(
     name="openbca_input.measures",
     kind="FULL",
     grain=ID_COLUMNS,
     columns={
         "id": "string",
+        "program_name": "string",
+        "label_1": "string",    
+        "label_2": "string",
+        "label_3": "string",
+        "label_4": "string",
+        "label_5": "string",
         "measure_id": "string",
         "project_id": "string",
-        "program_name": "string",
-        "measure_include": "string",
-        "version": "string",
+        "measure_name": "string",
         "avoided_cost_subset": "string",
         "start_year": "int",
         "start_quarter": "int",
         "discount_rate": "float", 
-        "measure_name": "string",
         "measure_unit": "string",
         "unit_quantity": "float",
-        "electric_load_shape": "string",
+        "estimated_useful_life": "int",
+        "ntg": "float",
+        "administration_costs_upfront_dollar": "float",
+        "administration_costs_annual_dollar_per_year": "float",
+        "utility_incentive_upfront_dollar": "float",
+        "utility_incentive_annual_dollar_per_year": "float",
+        "incremental_costs_upfront_dollar": "float",
+        "incremental_costs_annual_dollar_per_year": "float",
+        "host_customer_transaction_costs_dollar": "float",
+        "host_customer_interconnection_costs_dollar": "float",
+        "host_customer_tax_incentive_upfront_dollar": "float",
+        "electric_savings_load_shape": "string",
         "annual_electric_savings_kwh": "float",
         "coincident_peak_savings_kw": "float",
-        "natural_gas_load_shape": "string",
+        "natural_gas_savings_load_shape": "string",
         "annual_natural_gas_savings_mmbtu": "float",
         "annual_propane_savings_mmbtu": "float",
         "annual_oil_savings_mmbtu": "float",
         "annual_diesel_savings_mmbtu": "float",
-        "estimated_useful_life": "int",
-        "ntg": "float",
-        "administration_costs_upfront_dollar_per_unit": "float",
-        "administration_costs_annual_dollar_per_unit_year": "float",
-        "utility_incentive_upfront_dollar_per_unit": "float",
-        "utility_incentive_annual_dollar_per_unit_year": "float",
-        "incremental_costs_upfront_dollar_per_unit": "float",
-        "incremental_costs_annual_dollar_per_unit_year": "float",
-        "host_customer_transaction_costs_dollar_per_unit": "float",
-        "host_customer_interconnection_costs_dollar_per_unit": "float",
-        "host_customer_tax_incentive_upfront_dollar_per_unit": "float",
-        "host_customer_non_energy_impacts_dollar_per_unit": "float",
-        "host_customer_non_energy_impacts_low_income_dollar_per_unit": "float",
-        "change_in_host_customer_risk_dollar_per_unit": "float",
-        "change_in_host_customer_reliability_dollar_per_unit": "float",
-        "change_in_host_customer_resilience_dollar_per_unit": "float",
-        "change_in_societal_resilience_dollar_per_unit": "float",
+        "host_customer_non_energy_impacts_dollar": "float",
+        "host_customer_non_energy_impacts_low_income_dollar": "float",
+        "change_in_host_customer_risk_dollar": "float",
+        "change_in_host_customer_reliability_dollar": "float",
+        "change_in_host_customer_resilience_dollar": "float",
+        "change_in_societal_resilience_dollar": "float",
         "custom_1_value_stream_name": "string",
         "custom_1_value_stream_commodity": "string",
         "custom_1_annual_savings": "float", 
@@ -66,46 +129,15 @@ ID_COLUMNS = ["id", "measure_id", "project_id"]
         "custom_5_value_stream_name": "string",
         "custom_5_value_stream_commodity": "string",
         "custom_5_annual_savings": "float", 
-        "label_1": "string",    
-        "label_2": "string",
-        "label_3": "string",
-        "label_4": "string",
-        "label_5": "string",
     },
 )
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_measure_inputs_from_excel(
         input_file="OpenBCA Program Input.xlsx",
         sheet_name="Measure Inputs",
-        skiprows=2
+        skiprows=3
     )
 
-
-# def clean_header(col: str) -> str:
-#     col = str(col).strip().lower()
-
-#     # Replace spaces, hyphens with underscore
-#     col = col.replace(" ", "_").replace("-", "_")
-
-#     # Remove parentheses
-#     col = re.sub(r"[()]", "", col)
-
-#     # Replace : and & with _
-#     col = col.replace(":", "_").replace("&", "_")
-
-#     # Replace $/ with _dollar_per_
-#     col = col.replace("$/", "_dollar_per_")
-
-#     # Replace $ with _dollar_
-#     col = col.replace("$", "_dollar_")
-
-#     # Collapse multiple underscores
-#     col = re.sub(r"__+", "_", col)
-
-#     # Strip trailing/leading underscores
-#     col = col.strip("_")
-
-#     return col
 
 def load_measure_inputs_from_excel(
     input_file: str,
@@ -125,7 +157,7 @@ def load_measure_inputs_from_excel(
 
     # Fill in null values of avoided cost subset with 'System-wide'
 
-    df['avoided_cost_subset'].fillna('System-wide', inplace=True)
+    df['avoided_cost_subset'] = df['avoided_cost_subset'].fillna('System-wide')
 
     def fill_savings_for_dimensioned_load_shapes(load_shape_col: str, savings_col: float):
         """
@@ -145,9 +177,9 @@ def load_measure_inputs_from_excel(
         # Both are invalid, return None (will become NaN in Pandas)
         return None
 
-    df['annual_electric_savings_kwh'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['electric_load_shape'], x['annual_electric_savings_kwh']), axis = 1)
+    df['annual_electric_savings_kwh'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['electric_savings_load_shape'], x['annual_electric_savings_kwh']), axis = 1)
     
-    df['annual_natural_gas_savings_mmbtu'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['natural_gas_load_shape'], x['annual_natural_gas_savings_mmbtu']), axis = 1)
+    df['annual_natural_gas_savings_mmbtu'] = df.apply(lambda x: fill_savings_for_dimensioned_load_shapes(x['natural_gas_savings_load_shape'], x['annual_natural_gas_savings_mmbtu']), axis = 1)
 
     def load_value_stream_groups_from_excel(df) -> pd.DataFrame:
         '''
@@ -184,7 +216,11 @@ def load_measure_inputs_from_excel(
     df.rename(
         {
             'estimated_useful_life_years':'estimated_useful_life',
-        }, 
-        axis = 1, inplace = True)
+            'unique_id':'id'
+        },
+        axis=1,
+        inplace=True,
+    )
 
-    return df
+    # Enforce schema column order; KeyError if a schema column is missing from the Excel
+    return df[MEASURES_SCHEMA_COLUMN_ORDER]

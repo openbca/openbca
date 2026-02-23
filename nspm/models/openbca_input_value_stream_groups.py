@@ -46,28 +46,28 @@ config_cost_name_commodity_map_dict = {
 
 config_measure_cost_fields_map_dict = {
     'Utility Program Admin Costs': [
-            'administration_costs_upfront_dollar_per_unit',
-            'administration_costs_annual_dollar_per_unit_year',
+            'administration_costs_upfront_dollar',
+            'administration_costs_annual_dollar_per_year',
             'program_admin_costs_dollar_per_year'
         ],
     'Utility Financial Incentives': [
-            'utility_incentive_upfront_dollar_per_unit',
-            'utility_incentive_annual_dollar_per_unit_year',
+            'utility_incentive_upfront_dollar',
+            'utility_incentive_annual_dollar_per_year',
             'program_incentive_utility_to_customer_dollar_per_year',
             #'program_performance_incentive_govt_to_utility_dollar_per_year'
         ],
     'Host Customer Incremental Cost': [
-            'incremental_costs_upfront_dollar_per_unit',
-            'incremental_costs_annual_dollar_per_unit_year'
+            'incremental_costs_upfront_dollar',
+            'incremental_costs_annual_dollar_per_year'
         ],
     'Host Customer Transaction Cost': [
-        'host_customer_transaction_costs_dollar_per_unit'
+        'host_customer_transaction_costs_dollar'
     ],        
     'Host Customer Interconn Cost': [
-        'host_customer_interconnection_costs_dollar_per_unit'
+        'host_customer_interconnection_costs_dollar'
     ],
     'Host Customer Tax Incentives': [
-            'host_customer_tax_incentive_upfront_dollar_per_unit',
+            'host_customer_tax_incentive_upfront_dollar',
             #'program_federal_incentive_dollar_per_year'
         ],
     'Program Level Benefits': [
@@ -81,10 +81,10 @@ config_measure_cost_fields_map_dict = {
 #program_federal_incentive_dollar_per_year
 
 repeating_annual_costs = [
-    'administration_costs_annual_dollar_per_unit_year',
+    'administration_costs_annual_dollar_per_year',
     'program_admin_costs_dollar_per_year', 
-    'utility_incentive_annual_dollar_per_unit_year',
-    'incremental_costs_annual_dollar_per_unit_year',
+    'utility_incentive_annual_dollar_per_year',
+    'incremental_costs_annual_dollar_per_year',
     'program_incentive_utility_to_customer_dollar_per_year',
     'program_performance_incentive_govt_to_utility_dollar_per_year',
     'program_federal_incentive_dollar_per_year'

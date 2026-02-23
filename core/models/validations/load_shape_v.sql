@@ -5,14 +5,14 @@ MODEL(
 
 WITH measure_electric_load_shapes AS (
     SELECT
-        DISTINCT electric_load_shape AS load_shape
+        DISTINCT electric_savings_load_shape AS load_shape
     FROM
         openbca_input.measures
 )
 
 , measure_natural_gas_load_shapes AS (
     SELECT
-        DISTINCT natural_gas_load_shape AS load_shape
+        DISTINCT natural_gas_savings_load_shape AS load_shape
     FROM
         openbca_input.measures
 )

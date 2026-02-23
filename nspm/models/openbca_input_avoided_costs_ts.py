@@ -51,7 +51,7 @@ def load_avoided_costs_from_excel(
             xls, 
             sheet_name='Common Data', 
             usecols='C:Z', 
-            skiprows=28
+            skiprows=29
             ).reset_index().rename({'index':'month'}, axis=1)
 
         custom_period_df['month'] = custom_period_df['month'] + 1
@@ -143,7 +143,7 @@ def load_avoided_costs_from_excel(
         value_vars=[c for c in combined.columns if c not in ID_COLUMNS],
         var_name="avoided_cost_subset",
         value_name="avoided_cost_value"
-    ).dropna(axis=0, subset=['avoided_cost_value'])#.rename({'day': 'day_of_year'}, axis = 1)
+    ).dropna(axis=0, subset=['avoided_cost_value'])
 
     # Trim "Input" text if present
     long_df["avoided_cost_subset"] = long_df["avoided_cost_subset"].str.replace(" Inputs", "", regex=False)

@@ -7,7 +7,7 @@ WITH load_shapes_in_use AS (
 	SELECT 
 		DISTINCT
 		'ELECTRIC' AS commodity
-		, electric_load_shape AS load_shape
+		, electric_savings_load_shape AS load_shape
 	FROM 
 		openbca_input.measures
 		
@@ -16,7 +16,7 @@ WITH load_shapes_in_use AS (
 	SELECT 
 		DISTINCT
 		'NATURAL GAS' AS commodity
-		, natural_gas_load_shape AS load_shape
+		, natural_gas_savings_load_shape AS load_shape
 	FROM 
 		openbca_input.measures
 )

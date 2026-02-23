@@ -798,7 +798,7 @@ else:
 
                 if grouping_option != 'None':
                     plot_df = plot_df.rename(columns={reconstruct_column_name(grouping_option): grouping_option})
-                
+
                 categorical_summary_bar_fig = categorical_bar_fig(
                 df = plot_df,
                 col = bar_col,
@@ -811,7 +811,7 @@ else:
                 sort_ascending = True,
                 title = f"Benefits by {category_filter}",
                 xlabel = '',
-                ylabel = f"{'Net Benefits' if net_benefits_or_jst_ratio == 'Net Benefits' else 'JST Ratio'}{plot_benefit_cost_scatter_unit_labels[1] if net_benefits_or_jst_ratio == 'Net Benefits' else ''}",#f"Net Benefits{categorical_bar_radio_options[grouping_option][1][0]}",
+                ylabel = f"{'Net Benefits' if net_benefits_or_jst_ratio == 'Net Benefits' else 'JST Ratio'}{categorical_summary_unit_labels[0] if net_benefits_or_jst_ratio == 'Net Benefits' else ''}",
                 y2label = None,
                 legend = True,
                 legend_loc = 'best',
@@ -826,7 +826,6 @@ else:
                     grouping_column = [grouping_option]
 
                 if 'final_dollar_value_original' not in plot_df.columns:
-                    print(plot_df.columns)
                     plot_df['final_dollar_value_original'] = plot_df['final_dollar_value'] 
                 
                 st.dataframe(

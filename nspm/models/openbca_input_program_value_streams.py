@@ -61,6 +61,4 @@ def load_program_value_streams_from_excel(
         value_name="avoided_cost_value"
     ).dropna(axis=0, subset=['avoided_cost_value'])
 
-    print(program_value_streams_df.head())
-
     return program_value_streams_df

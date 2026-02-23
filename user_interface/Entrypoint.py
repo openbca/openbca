@@ -1,5 +1,3 @@
-import os, signal
-
 import streamlit as st
 
 st.set_page_config(layout="wide")
@@ -16,10 +14,3 @@ st.sidebar.markdown("## OpenBCA Resources")
 st.sidebar.markdown("#### [Background](http://www.nationalenergyscreeningproject.org/open-source-bca-tool/)")
 st.sidebar.markdown("#### [National Standard Practice Manual](http://www.nationalenergyscreeningproject.org/national-standard-practice-manual/)")
 st.sidebar.markdown("#### [Open Source GitHub Repository](https://github.com/openbca/openbca)")
-
-# st.sidebar.divider()
-# if st.sidebar.button("Quit OpenBCA App", type="primary"):
-#     print("Exiting Streamlit app...")
-    
-#     # Get current pid and send SIGTERM to gracefully shut down the Streamlit server process
-#     os.kill(os.getpid(), signal.SIGTERM)

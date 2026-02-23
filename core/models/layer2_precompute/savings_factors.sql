@@ -11,6 +11,7 @@ WITH discount_rates AS (
         , start_quarter 
         , estimated_useful_life
         , m.discount_rate 
+        , gp.inflation_rate
         , discount_cadence
     FROM
         core_layer0_base.measures m, core_layer0_base.global_parameters gp
@@ -22,7 +23,7 @@ WITH discount_rates AS (
         ((quarter_index - quarter_index % 4) / 4) AS year,
         (quarter_index % 4 + 1) AS quarter,
         1.0 / POW(
-            1.0 + (discount_rate / 4),
+            1.0 + ((discount_rate - inflation_rate) / 4),
             ((year - start_year) * 4) + quarter - start_quarter
         ) AS discount_factor
         , discount_cadence
@@ -38,7 +39,7 @@ WITH discount_rates AS (
         year_index AS year,
         quarter_index AS quarter,
         1.0 / POW(
-            1.0 + discount_rate,
+            1.0 + (discount_rate - inflation_rate),
             (year - start_year) 
         ) AS discount_factor
         , discount_cadence
@@ -81,7 +82,6 @@ SELECT
     , k.commodity AS commodity
     , year 
     , quarter
-    --, energy_savings_by_commodity[k.commodity] AS energy_savings
     , discount_factor
     , 1.0 / POW(
         1.0 + gp.inflation_rate,
@@ -96,12 +96,15 @@ SELECT
     ELSE 1.0 
     END AS line_loss_factor
     , CASE 
+    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN 1/(1-peak_capacity_line_loss)  
+    END AS peak_capacity_line_loss_factor
+    , CASE 
     WHEN UPPER(k.commodity) = 'ELECTRIC' THEN energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor  / ((1-electric_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))  
     WHEN UPPER(k.commodity) = 'NATURAL GAS' THEN energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor / ((1-natural_gas_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))
     ELSE energy_savings_by_commodity[k.commodity] * unit_quantity * ntg * discount_factor / (POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))
     END AS energy_savings_factors_applied
     , CASE 
-    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN coincident_peak_savings_kw * unit_quantity * ntg * discount_factor / ((1-electric_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year))) 
+    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN coincident_peak_savings_kw * unit_quantity * ntg * discount_factor / ((1-peak_capacity_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year))) 
     ELSE NULL 
     END AS coincident_peak_savings_factors_applied
 FROM 
@@ -120,7 +123,6 @@ SELECT
     , k.commodity
     , year 
     , quarter
-    --, NULL AS energy_savings
     , discount_factor
     , 1.0 / POW(
         1.0 + gp.inflation_rate,
@@ -130,6 +132,7 @@ SELECT
     , unit_quantity
     , NULL AS annual_net_energy_savings
     , NULL AS line_loss_factor
+    , NULL AS peak_capacity_line_loss_factor
     , NULL AS energy_savings_factors_applied
     , NULL AS coincident_peak_savings_factors_applied
 FROM 
