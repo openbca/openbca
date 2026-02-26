@@ -74,6 +74,9 @@ run-nspm:
 	@echo "Evaluating and writing output in output/results_summary_by_id.csv..."
 	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id) TO 'output/results_summary_by_id.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
+run-test-measures:
+	@uv run sqlmesh -p nspm -p core plan --select-model openbca_input.global_parameters --select-model openbca_input.measures --select-model core_layer0_base.measures --auto-apply
+
 # run-nspm-group-outputs:
 # 	@time uv run sqlmesh -p nspm -p core plan --auto-apply
 # 	@echo "Evaluating and writing output in output/results_summary_by_id.csv..."

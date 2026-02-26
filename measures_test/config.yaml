@@ -1,0 +1,18 @@
+gateways:
+  # Output results gateway
+  local_duckdb:
+    connection:
+      type: duckdb
+      database: {{ env_var('DB') }}
+  
+  # Separate gateway for input transform validation only
+  validations_duckdb:
+    connection:
+      type: duckdb
+      database: {{ env_var('DBV') }}
+
+default_gateway: local_duckdb
+
+model_defaults:
+  dialect: duckdb
+  allow_partials: true # We only have FULL models, this forces SQLMesh to refresh the full model when uses with --ignore-cron
