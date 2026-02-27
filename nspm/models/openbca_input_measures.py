@@ -8,15 +8,18 @@ from config.paths import get_input_templates_dir
 
 ID_COLUMNS = ["id", "measure_id", "project_id"]
 
+input_file = "OpenBCA Program Input.xlsx"
+sheet_name = "Measure Inputs"
+file_path = get_input_templates_dir() / input_file
+skiprows = 3
+
+# Read sheet; use cleaned headers so MEASURES_SCHEMA_COLUMN_ORDER matches df.columns after clean_header()
+custom_headers = [clean_header(c) for c in pd.read_excel(file_path, sheet_name=sheet_name, skiprows=skiprows, nrows=1).columns[2:7]]
+
 # Column order must match the model schema below and the final returned dataframe.
 MEASURES_SCHEMA_COLUMN_ORDER = [
     "id",
     "program_name",
-    "label_1",
-    "label_2",
-    "label_3",
-    "label_4",
-    "label_5",
     "measure_id",
     "project_id",
     "measure_name",
@@ -66,76 +69,76 @@ MEASURES_SCHEMA_COLUMN_ORDER = [
     "custom_5_value_stream_name",
     "custom_5_value_stream_commodity",
     "custom_5_annual_savings",
-]
+] + custom_headers
+
+columns={
+    "id": "string",
+    "program_name": "string",
+    "measure_id": "string",
+    "project_id": "string",
+    "measure_name": "string",
+    "avoided_cost_subset": "string",
+    "start_year": "int",
+    "start_quarter": "int",
+    "discount_rate": "float", 
+    "measure_unit": "string",
+    "unit_quantity": "float",
+    "estimated_useful_life": "int",
+    "ntg": "float",
+    "administration_costs_upfront_dollar": "float",
+    "administration_costs_annual_dollar_per_year": "float",
+    "utility_incentive_upfront_dollar": "float",
+    "utility_incentive_annual_dollar_per_year": "float",
+    "incremental_costs_upfront_dollar": "float",
+    "incremental_costs_annual_dollar_per_year": "float",
+    "host_customer_transaction_costs_dollar": "float",
+    "host_customer_interconnection_costs_dollar": "float",
+    "host_customer_tax_incentive_upfront_dollar": "float",
+    "electric_savings_load_shape": "string",
+    "annual_electric_savings_kwh": "float",
+    "coincident_peak_savings_kw": "float",
+    "natural_gas_savings_load_shape": "string",
+    "annual_natural_gas_savings_mmbtu": "float",
+    "annual_propane_savings_mmbtu": "float",
+    "annual_oil_savings_mmbtu": "float",
+    "annual_diesel_savings_mmbtu": "float",
+    "host_customer_non_energy_impacts_dollar": "float",
+    "host_customer_non_energy_impacts_low_income_dollar": "float",
+    "change_in_host_customer_risk_dollar": "float",
+    "change_in_host_customer_reliability_dollar": "float",
+    "change_in_host_customer_resilience_dollar": "float",
+    "change_in_societal_resilience_dollar": "float",
+    "custom_1_value_stream_name": "string",
+    "custom_1_value_stream_commodity": "string",
+    "custom_1_annual_savings": "float", 
+    "custom_2_value_stream_name": "string",
+    "custom_2_value_stream_commodity": "string",
+    "custom_2_annual_savings": "float", 
+    "custom_3_value_stream_name": "string",
+    "custom_3_value_stream_commodity": "string",
+    "custom_3_annual_savings": "float", 
+    "custom_4_value_stream_name": "string",
+    "custom_4_value_stream_commodity": "string",
+    "custom_4_annual_savings": "float", 
+    "custom_5_value_stream_name": "string",
+    "custom_5_value_stream_commodity": "string",
+    "custom_5_annual_savings": "float", 
+} 
+
+for header in custom_headers:
+    columns[header] = "string"
 
 @model(
     name="openbca_input.measures",
     kind="FULL",
     grain=ID_COLUMNS,
-    columns={
-        "id": "string",
-        "program_name": "string",
-        "label_1": "string",    
-        "label_2": "string",
-        "label_3": "string",
-        "label_4": "string",
-        "label_5": "string",
-        "measure_id": "string",
-        "project_id": "string",
-        "measure_name": "string",
-        "avoided_cost_subset": "string",
-        "start_year": "int",
-        "start_quarter": "int",
-        "discount_rate": "float", 
-        "measure_unit": "string",
-        "unit_quantity": "float",
-        "estimated_useful_life": "int",
-        "ntg": "float",
-        "administration_costs_upfront_dollar": "float",
-        "administration_costs_annual_dollar_per_year": "float",
-        "utility_incentive_upfront_dollar": "float",
-        "utility_incentive_annual_dollar_per_year": "float",
-        "incremental_costs_upfront_dollar": "float",
-        "incremental_costs_annual_dollar_per_year": "float",
-        "host_customer_transaction_costs_dollar": "float",
-        "host_customer_interconnection_costs_dollar": "float",
-        "host_customer_tax_incentive_upfront_dollar": "float",
-        "electric_savings_load_shape": "string",
-        "annual_electric_savings_kwh": "float",
-        "coincident_peak_savings_kw": "float",
-        "natural_gas_savings_load_shape": "string",
-        "annual_natural_gas_savings_mmbtu": "float",
-        "annual_propane_savings_mmbtu": "float",
-        "annual_oil_savings_mmbtu": "float",
-        "annual_diesel_savings_mmbtu": "float",
-        "host_customer_non_energy_impacts_dollar": "float",
-        "host_customer_non_energy_impacts_low_income_dollar": "float",
-        "change_in_host_customer_risk_dollar": "float",
-        "change_in_host_customer_reliability_dollar": "float",
-        "change_in_host_customer_resilience_dollar": "float",
-        "change_in_societal_resilience_dollar": "float",
-        "custom_1_value_stream_name": "string",
-        "custom_1_value_stream_commodity": "string",
-        "custom_1_annual_savings": "float", 
-        "custom_2_value_stream_name": "string",
-        "custom_2_value_stream_commodity": "string",
-        "custom_2_annual_savings": "float", 
-        "custom_3_value_stream_name": "string",
-        "custom_3_value_stream_commodity": "string",
-        "custom_3_annual_savings": "float", 
-        "custom_4_value_stream_name": "string",
-        "custom_4_value_stream_commodity": "string",
-        "custom_4_annual_savings": "float", 
-        "custom_5_value_stream_name": "string",
-        "custom_5_value_stream_commodity": "string",
-        "custom_5_annual_savings": "float", 
-    },
+    columns=columns,
 )
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_measure_inputs_from_excel(
-        input_file="OpenBCA Program Input.xlsx",
-        sheet_name="Measure Inputs",
-        skiprows=3
+        input_file=input_file,
+        sheet_name=sheet_name,
+        skiprows=skiprows
     )
 
 

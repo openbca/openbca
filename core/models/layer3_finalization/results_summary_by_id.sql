@@ -16,11 +16,11 @@ WITH lifecycle_savings_calc AS (
 		, m.estimated_useful_life::INTEGER AS estimated_useful_life
 		, m.unit_quantity::INTEGER AS unit_quantity
 		, cls.commodity::VARCHAR AS commodity
-		, label_1::VARCHAR AS label_1
-		, label_2::VARCHAR AS label_2
-		, label_3::VARCHAR AS label_3
-		, label_4::VARCHAR AS label_4
-		, label_5::VARCHAR AS label_5
+		, m.label_1::VARCHAR AS label_1
+		, m.label_2::VARCHAR AS label_2
+		, m.label_3::VARCHAR AS label_3
+		, m.label_4::VARCHAR AS label_4
+		, m.label_5::VARCHAR AS label_5
 		, cls.total_net_annual_energy_savings * m.estimated_useful_life AS total_net_lifecycle_energy_savings
 	FROM
 		core_layer1_mappings.commodity_load_shape_by_id cls 
