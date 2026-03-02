@@ -4,10 +4,10 @@ logs
 duckdb.db
 .idea
 
-# Ignore all files in the output and nspm/input_templates directories except .keepme
+# Ignore all files in the output and excel_input_parsing/input_templates directories except .keepme
 # This keeps the input/output directories in git even if they are otherwise empty
 output/*
-nspm/input_templates/*
+excel_input_parsing/input_templates/*
 !.keepme
 
 __pycache__

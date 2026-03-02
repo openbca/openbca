@@ -18,8 +18,8 @@ def get_core_project_dir() -> Path:
     return get_repo_root() / 'core'
 
 
-def get_nspm_project_dir() -> Path:
-    return get_repo_root() / 'nspm'
+def get_excel_input_parsing_project_dir() -> Path:
+    return get_repo_root() / 'excel_input_parsing'
 
 
 def get_streamlit_app_dir() -> Path:
@@ -27,7 +27,7 @@ def get_streamlit_app_dir() -> Path:
 
 
 def get_input_templates_dir() -> Path:
-    return get_nspm_project_dir() / 'input_templates'
+    return get_excel_input_parsing_project_dir() / 'input_templates'
 
 
 def get_output_dir() -> Path:

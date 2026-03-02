@@ -14,7 +14,7 @@ from config.paths import (
     get_input_templates_dir,
     get_output_dir,
     get_streamlit_app_dir,
-    get_nspm_project_dir,
+    get_excel_input_parsing_project_dir,
     get_core_project_dir,
 )
 import model_runners
@@ -288,7 +288,7 @@ if db_handling in ["Overwrite existing output database", "Backup existing output
             with st.spinner("Running OpenBCA Model... this can take a bit.", show_time=True):
 
                 try:
-                    model_runners.run_nspm()
+                    model_runners.run_excel_input_parsing()
                     st.session_state.model_run_status = "success"
                     st.session_state.model_run_error = None
                     st.balloons()

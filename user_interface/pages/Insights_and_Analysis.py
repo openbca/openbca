@@ -47,7 +47,7 @@ from config.paths import (
     get_input_templates_dir,
     get_output_dir,
     get_streamlit_app_dir,
-    get_nspm_project_dir,
+    get_excel_input_parsing_project_dir,
     get_core_project_dir,
     # get_logos_dir,
     # get_logs_dir,

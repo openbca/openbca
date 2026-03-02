@@ -2,14 +2,14 @@ from shutil import rmtree
 
 from sqlmesh.core.context import Context
 
-from config.paths import get_nspm_project_dir, get_core_project_dir, get_output_dir, get_logs_dir
+from config.paths import get_excel_input_parsing_project_dir, get_core_project_dir, get_output_dir, get_logs_dir
 from config.env import setup_env_vars
 
-def run_nspm() -> None:
+def run_excel_input_parsing() -> None:
     setup_env_vars()
 
     ctx = Context(
-            paths=[get_nspm_project_dir(), get_core_project_dir()],
+            paths=[get_excel_input_parsing_project_dir(), get_core_project_dir()],
     )
     try:
         plan = ctx.plan(run=True, ignore_cron=True)
@@ -21,11 +21,11 @@ def run_nspm() -> None:
 def run_input_transform_validations() -> None:
     print("\nRunning input transformation validations...")
 # Note: we use a separate DuckDB instance and gateway for validation of initial parsing and ingestion steps
-	# @uv run sqlmesh --gateway validations_duckdb -p nspm -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
+	# @uv run sqlmesh --gateway validations_duckdb -p excel_input_parsing -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
     setup_env_vars()
 
     ctx = Context(
-            paths=[get_nspm_project_dir(), get_core_project_dir()],
+            paths=[get_excel_input_parsing_project_dir(), get_core_project_dir()],
             gateway="validations_duckdb",
     )
     
