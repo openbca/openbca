@@ -4,105 +4,208 @@ This library provides aggregators, program administrators, utilities, and regula
 
 Accurate cost-effectiveness tests that account for energy impacts and progress toward other policy objectives are critical for optimal demand side program design and informed decision making. However, traditional cost effectiveness tests (e.g., Total Resource Cost test, Utility Cost Test etc.) are often too restrictive, utilize non-transparent inputs, and do not fully reflect the goals and objectives of a jurisdiction. In such cases, benefit-cost testing can lead to poor demand side program design and ultimately unbalanced investment across energy resources. To help address these shortcomings, E4TheFuture’s [National Energy Screening Project](https://www.nationalenergyscreeningmeasure.org/) (NESP) published the [National Standard Practice Manual](https://www.nationalenergyscreeningmeasure.org/national-standard-practice-manual/) for Benefit-Cost Analysis of DERs (NSPM) in 2020. The NSPM provides a set of core principles and a process for developing complete and symmetric JSTs for demand side programs. Following the NSPM guidance, a regulator, utility, and/or other party can develop a JST that properly accounts for the utility system costs and benefits of a DER program or investment strategy, as well as any non-utility system impacts applicable to the jurisdiction’s priority policy goals and objectives.
 
-To support a balanced and comprehensive BCA architecture, this library enables comprehenseive and flexible configuration and computation required for the formulation of JSTs.
+To support a balanced and comprehensive BCA architecture, this library enables comprehenseive and flexible configuration and computation required for the formulation of JSTs. The OpenBCA is designed to be used in one of two main ways:
+
+### 1. Standalone Pathway
+This mode is intended for non-technical users. It is designed to run exclusively using local hardware and operate end-to-end without the need for users to write code, use terminal applications, or manage databases.
+
+Defining characteristics of the Standalone pathway include:
+
+- Use of the Excel input templates
+- Use of the user interface to upload completed input templates, launch the model, and explore and download results.
+
+The amount of data that can be processed and computational speed to run the OpenBCA model will be limited by the user's hardware. Generally it is recommended users have at least 16 GB of RAM, though for smaller jobs less will suffice.
+
+### 2. Integrated Pathway
+This mode is intended for inclusion of the OpenBCA in existing sofware systems and technical workflows. For instance, if a user needs to leverage cloud computing or data storage resources or wishes to automate benefit-cost analysis as part of a larger analytics pipeline. The integrated pathway is most appropriate for users who:
+
+- Need to scale analysis across very large datasets
+- Need maximum flexibility for novel use cases
+- Need to embed OpenBCA in existing data pipelines and workflows
+- Wish to develop custom user interfaces
+
+Users of the integrated pathway will need to input data as defined by the schemas resulting from the input parsing step of the Standalone pathway (and reproduced below for reference). 
+
+Generally speaking, the Integrated pathway is for expert users and will not be explicity supported by the development team.
+
+## 🛠️ Key Dependencies
+
+The OpenBCA software heavily leverages: 
+
+- [uv](https://docs.astral.sh/uv/) for Python package management.
+- [Pandas ExcelFile](https://pandas.pydata.org/docs/reference/api/pandas.ExcelFile.html) for parsing data from Excel input templates.
+- [SQLmesh](https://sqlmesh.readthedocs.io/en/stable/) to orchestrate data and computational pipelines.
+- [DuckDB](https://duckdb.org/) for local database management and execution of SQL queries.
+- [Streamlit](https://streamlit.io/) for the user interface.
 
 ## ⚙️ Project Architecture
 
-The repository contains three main systems:
+The repository contains three main related systems housed in the following folders:
 
-- **`reference/`**  
-  Contains reference datasets for avoided costs and load shapes. Currently focused on California, but designed to be extensible to other jurisdictions.
+- **`excel_input_parsing/`**  
+  This directory stores the populated input templates and contains a SQLmesh pipeline to parse the input files into the OpenBCA schema.
 
 - **`core/`**  
-  The heart of the OpenBCA logic. This houses the generic, jurisdiction-agnostic impact calculation code. It defines the contract (schemas) between input and output layers and can run with any input backend (CSV, Excel, BigQuery, Streamlit app, etc.). It only generates SQL Views to let the client application handle the actual data loading and output.
+  The heart of the OpenBCA logic. This houses the generic, jurisdiction-agnostic impact computation code, again in the form of a SQLmesh pipeline. It can run with any input backend (CSV, Excel, BigQuery, Streamlit app, etc.). It only generates SQL views to let the client application handle the actual data loading and output.
 
-- **`demo/`**  
-  A minimal CSV-based working example. It runs the OpenBCA logic using sample data files (avoided costs, load shapes, measures) and outputs the results to a local CSV.
+- **`user_interface/`**  
+  This folder contains a Streamlit application that launches a web app. The web app contains a page that allows users to upload populated input templates and another page devoted to exploration of results.
 
-- **`app/`**  
-  A Streamlit-powered UI for exploring and visualizing BCA results. Useful for prototyping, internal review, and debugging.
-
-- **`nspm/`**  
-  Contains NSPM-specific preprocessing logic and loaders to handle technical configurations from Excel files or other structured formats. It leverages the core logic after reshaping inputs accordingly.
-
-The `demo`, `app`, and `nspm` sub-projects are designed to be run independently, they all depend on the `core` project for the actual BCA calculations.
-
+## OpenBCA Process Flow
 ```mermaid
-%%{ init: { "theme": "default", "themeVariables": { "fontSize": "15px" }, "flowchart": { "nodeSpacing": 40, "curve": "basis" } } }%%
+%%{init: {'themeVariables': {'fontSize': '18px'}}}%%
 flowchart TD
 
-    subgraph Reference ["📚 Reference"]
-        style Reference fill:#e8f5e9,stroke:#388e3c,color:#1b5e20,stroke-width:2px
-        ReferenceNote[("<sub><i>CA-specific Avoided Costs & Load Shapes</i></sub>")]
-        style ReferenceNote fill:#e8f5e9,stroke:#388e3c,color:#1b5e20,stroke-width:2px
+    subgraph Input_Templates["<span style='font-size:1.35em'>🔢 Input Templates</span>"]
+        A1[**Configuration**
+        -Calculation parameters
+        -JST formulation
+        -Avoided cost time series
+        ]
+        +((**+**))
+        A2[**Program Input**
+        -Row-level inputs
+        -Program-level inputs
+        -Savings load shapes]
+        A1~~~+~~~A2
     end
 
-    subgraph NSPM ["📘 NSPM"]
-        style NSPM fill:#ede7f6,stroke:#7b1fa2,color:#4a148c,stroke-width:2px
-        NspmExcelFiles[/"NSPM Excel Files"/]
-        NspmCore["🧠 Core"]
-        NspmOutput[/"NSPM output Files"/]
-        style NspmExcelFiles fill:#ede7f6,stroke:#7b1fa2,color:#4a148c,stroke-width:2px
-        style NspmOutput fill:#ede7f6,stroke:#7b1fa2,color:#4a148c,stroke-width:2px
+    subgraph OpenBCA_Core["<span style='font-size:1.35em'>🧮 OpenBCA Core</span>"]
+        B1[**Base**
+        Assemble Core Input Tables]
+        B2[**Mappings**
+        Establish combinations
+        -ID+Avoided Cost Subset
+        -ID+Load Shape+Commodity]
+        B3[**Precompute**
+        -Avoided Cost x Load Shape
+        -NPV time series
+        -Multiplicative factors
+        ]
+        B4[**Finalization**
+        -Final time series savings, costs, and benefits
+        -Summary tables]
+        B1 --> B2 --> B3 --> B4
+    end
+
+    subgraph User_Interface["<span style='font-size:1.35em'>📽️ User Interface</span>"]
+        C1[**Upload & Run**
+        -Upload input templates
+        -Validate input data
+        -Run OpenBCA model]
+        C2[**Explore Outputs**
+        -Filter results
+        -Visualizations
+        -Tabular summaries
+        -Download]
+        C1 --> C2
+    end
+
+    Input_Templates--Input Parsing-->OpenBCA_Core
+    OpenBCA_Core<-->User_Interface
+
+    %% Subgraph backgrounds: input = blue, core = violet, UI = green (darker fills)
+    style Input_Templates fill:#64b5f6,stroke:#1565c0,stroke-width:2px
+    style OpenBCA_Core fill:#9575cd,stroke:#7b1fa2,stroke-width:2px
+    style User_Interface fill:#81c784,stroke:#2e7d32,stroke-width:2px
+```
+
+## OpenBCA Core Model
+```mermaid
+%%{init: {'themeVariables': {'fontSize': '11px'}}}%%
+flowchart LR
+    leg_base[Base]~~~leg_mappings[Mappings]~~~leg_precompute[Precompute]~~~leg_finalization[Finalization]
+    style leg_base fill:#1976d2,stroke:#0d47a1
+    style leg_mappings fill:#5e35b1,stroke:#4a148c
+    style leg_precompute fill:#f57c00,stroke:#bf360c
+    style leg_finalization fill:#43a047,stroke:#1b5e20
+```
+
+```mermaid
+%%{init: {'themeVariables': {'fontSize': '18px'}}}%%
+flowchart LR
+
+    measures[**<u>measures</u>**]
+    global_parameters[**<u>global_parameters</u>**]
+    cost_treatment_factors[**<u>cost_treatment_factors</u>**]
+    program_value_streams[**<u>program_value_streams</u>**]
+    value_stream_groups[**<u>value_stream_groups</u>**]
+    load_shape_ts[**<u>load_shape_ts</u>**]
+    avoided_cost_ts[**<u>avoided_cost_ts</u>**]
     
-        NspmExcelFiles-->NspmCore-->NspmOutput
-    end
+    avoided_cost_subsets_by_id[**<u>avoided_cost_subsets_by_id</u>**]
+    commodity_load_shape_by_id[**<u>commodity_load_shape_by_id</u>**]
+    cost_components_by_id[**<u>cost_components_by_id</u>**]
 
-    subgraph Demo ["🧪 Demo"]
-        DemoInputFiles[/"Demo CSV/Excel Files"/]
-        DemoCore["🧠 Core"]
-        DemoOutput[/"Demo output CSV file"/]
-        style DemoInputFiles fill:#fff8e1,stroke:#f9a825,color:#f57f17,stroke-width:2px
-        style DemoOutput fill:#fff8e1,stroke:#f9a825,color:#f57f17,stroke-width:2px
-    
-        ReferenceNote-->DemoCore
-        DemoInputFiles-->DemoCore-->DemoOutput
-    end
+    avoided_cost_load_shape_combos[**<u>avoided_cost_load_shape_combos</u>**]
+    savings_factors[**<u>savings_factors</u>**]
 
-    subgraph App ["🌐 App"]
-        style App fill:#fce4ec,stroke:#c2185b,color:#880e4f,stroke-width:2px
-        AppCore["🧠 Core"]
-        AppNote["<sub><i>Streamlit UI for Visualization</i></sub>"]
+    final_value_calculations[**<u>final_value_calculations</u>**]
 
-        style AppNote fill:#fce4ec,stroke:#c2185b,color:#880e4f,stroke-width:2px
+measures-->avoided_cost_subsets_by_id
+avoided_cost_ts-->avoided_cost_subsets_by_id
+value_stream_groups-->avoided_cost_subsets_by_id
 
-        AppNote<-->AppCore
-        ReferenceNote-->AppCore
-    end
+measures-->commodity_load_shape_by_id
 
-    %% Optional Cross-Module Arrows (not showing data flow, just architecture)
-    classDef core fill:#e3f2fd,stroke:#1976d2,color:#0d47a1,stroke-width:1.5px;
+measures-->cost_components_by_id
+value_stream_groups-->cost_components_by_id
+program_value_streams-->cost_components_by_id
 
-    class RefCore,NspmCore,DemoCore,AppCore core
+avoided_cost_ts-->avoided_cost_load_shape_combos
+load_shape_ts-->avoided_cost_load_shape_combos
+value_stream_groups-->avoided_cost_load_shape_combos
+commodity_load_shape_by_id-->avoided_cost_load_shape_combos
+avoided_cost_subsets_by_id-->avoided_cost_load_shape_combos
 
+measures-->savings_factors
+global_parameters-->savings_factors
+
+global_parameters-->final_value_calculations
+value_stream_groups-->final_value_calculations
+program_value_streams-->final_value_calculations
+commodity_load_shape_by_id-->final_value_calculations
+avoided_cost_subsets_by_id-->final_value_calculations
+avoided_cost_load_shape_combos-->final_value_calculations
+cost_components_by_id-->final_value_calculations
+savings_factors-->final_value_calculations
+
+    %% Base
+    style measures fill:#1976d2,stroke:#0d47a1
+    style global_parameters fill:#1976d2,stroke:#0d47a1
+    style cost_treatment_factors fill:#1976d2,stroke:#0d47a1
+    style program_value_streams fill:#1976d2,stroke:#0d47a1
+    style value_stream_groups fill:#1976d2,stroke:#0d47a1
+    style load_shape_ts fill:#1976d2,stroke:#0d47a1
+    style avoided_cost_ts fill:#1976d2,stroke:#0d47a1
+    %% Mappings
+    style avoided_cost_subsets_by_id fill:#5e35b1,stroke:#4a148c
+    style commodity_load_shape_by_id fill:#5e35b1,stroke:#4a148c
+    style cost_components_by_id fill:#5e35b1,stroke:#4a148c
+    %% Precompute
+    style avoided_cost_load_shape_combos fill:#f57c00,stroke:#bf360c
+    style savings_factors fill:#f57c00,stroke:#bf360c
+    %% Finalization
+    style final_value_calculations fill:#43a047,stroke:#1b5e20
 ```
+**Node reference**
 
-# Set up
+| Table | Contents |
+|------|----------|
+| **measures** | Row-level inputs: unique ID, metadata, EUL, NTG, annual savings and costs, load shape assignments |
+| **global_parameters** | Dollar year, NPV parameters, symmetry treatment, line loss factors |
+| **cost_treatment_factors** | Establishes cost and benefit multipliers for specific test frameworks (TRC, UCT etc.) |
+| **program_value_streams** | Program-level costs and benefits by year |
+| **value_stream_groups** | Info to shepherd each value stream into a specific computational treatment |
+| **load_shape_ts** | Savings load shapes time series |
+| **avoided_cost_ts** | Avoided costs time series |
+| **avoided_cost_subsets_by_id** | Mapping between ID, avoided cost, and avoided cost subset |
+| **commodity_load_shape_by_id** | Mapping between ID, commodity, and load shape |
+| **cost_components_by_id** | Establishes costs and multiplicative factors by ID for row-level inputs and by program name for program-level inputs |
+| **avoided_cost_load_shape_combos** | Calculates avoided cost x savings load shape across the EUL for all necessary combinations of avoided cost, savings load shape and year |
+| **savings_factors** | Calculates discount and inflation factors across the full EUL for every row-level input. Applies those factors along with unit quantity, NTG, EUL, line losses as appropriate for every commodity |
+| **final_value_calculations** | Combines the precomputed values from _avoided_cost_load_shape_combos_, _savings_factors_, and _cost_components_by_id_, along with information from several other tables, into full time-series vectors of final net savings and value streams for benefits and costs |
 
-Open BCA can run locally. It uses [DuckDB](https://duckdb.org/) as a local database and [SQLMesh](https://sqlmesh.com/) to orchestrate the data-pipelines.
-
-⚠️ Some reference files require Git LFS to be installed first.
-```bash
-git lfs install
-# if the repo was already cloned, run the following command to download the LFS files
-git lfs pull
-```
-
-Using Docker:
-```
-make docker-build
-```
-
-Outside of Docker:
-
-You need to install the following dependencies:
-- Python 3.11 or higher
-- DuckDB CLI 1.2.2 or higher: MacOS: `brew install duckdb`
-
-Run the following command to install the Python dependencies:
-```bash
-make install
-```
 
 ## [Optional] Set up DBeaver to connect to the local DuckDB database
 If you want to use DBeaver to connect to the local DuckDB database, you can follow these steps:
@@ -114,262 +217,26 @@ If you want to use DBeaver to connect to the local DuckDB database, you can foll
 6. Click "Finish" to create the connection.
 7. You can now explore the database schema and run SQL queries against the OpenBCA tables and views.
 
-# Demo
+## Running OpenBCA
 
-The most straightforward way to run the OpenBCA logic is to use the `demo` sub-project. It uses a minimal set of CSV/Excel files to run the OpenBCA logic and generate the output in a local CSV file `output/measure_impacts.csv`.
-
+To run the OpenBCA, use the following commands:
+#### Launching the UI:
 ```bash
-make docker-run-demo
+make run-openbca
 ```
+Through the UI users can upload input files, launch the model, and view results.
+
+#### Running OpenBCA without the UI: 
 ```bash
-make run-demo
+make run-openbca-model
 ```
-
-# (Streamlit) App
-The `app` sub-project provides a Streamlit-powered UI to explore and visualize the BCA results. For now it only references the load-shapes and avoided costs from the `reference` sub-project. It populates a `measures` table from the UI forms, runs the OpenBCA logic by executing the `core` views in a local DuckDB, and render the results in the UI.
-
-To run the app, use the following command:
-```bash
-make docker-run-app
-```
-or 
-```bash
-make run-app
-```
-
-Then open your browser and navigate to `http://localhost:8501`.
-
-
-# Reference
-
-## California load shapes and value-streams
-
-```mermaid
-%%{ init: { "theme": "default", "themeVariables": { "fontSize": "14px" }, "flowchart": { "nodeSpacing": 30, "curve": "basis" } } }%%
-flowchart TD
-
-    %% === CALIFORNIA Subgraph ===
-    subgraph CALIFORNIA ["Reference"]
-        style CALIFORNIA fill:#F3E9DC
-
-        subgraph CALI_VS ["av_cost datasets"]
-            cal_gas_av_costs[["CPUC Gas Avoided Costs"]]:::fileref
-            cal_elec_av_costs[["CPUC Electric Avoided Costs"]]:::fileref
-            cal_avoided_cost_ts[(avoided_cost_ts)]:::interface
-
-            cal_gas_av_costs --> cal_avoided_cost_ts
-            cal_elec_av_costs --> cal_avoided_cost_ts
-        end
-
-        subgraph CALI_LS ["load_shape datasets"]
-            cal_therms_profile[[Gas DEER Therm Profile]]:::fileref
-            cal_therms_profile_unpivoted[(therms_profile_unpivoted)]:::intermediate
-            cal_elec_load_shape_unpivoted[(elec_load_shape_unpivoted)]:::intermediate
-            cal_hourly_electric_load[[Electricity DEER Load Shape Table]]:::fileref
-            cal_commodity_load_shape_ts[(commodity_load_shape_ts)]:::interface
-
-            cal_therms_profile --> cal_therms_profile_unpivoted --> cal_commodity_load_shape_ts
-            cal_hourly_electric_load --> cal_elec_load_shape_unpivoted --> cal_commodity_load_shape_ts
-        end
-    end
-
-    %% === CLASS DEFINITIONS ===
-    classDef input fill:#cce5ff,stroke:#3399ff,color:#003366,stroke-width:2px;
-    %%classDef intermediate 
-    classDef output fill:#d4edda,stroke:#28a745,color:#155724,stroke-width:2px;
-    classDef interface fill:#ffffff,stroke:#00acc1,color:#006064,stroke-dasharray: 4 2;
-    classDef fileref fill:#f0f0f0,stroke:#999999,color:#333,stroke-width:1px;
-    classDef user fill:#ffe0e0,stroke:#cc0000,color:#660000,stroke-width:2px;
-
-```
-
-TODO describe the process to import files from the CPUC website.
-
-# Core
-
-## Core inputs
-To run the OpenBCA calculation, we need the following inputs (they are all defined in the `base` layer of the `core` project `core/models/base`):
- - `measures`: the measure input data
- - `avoided_cost_ts`: The avoided cost timeseries
- - `commodity_load_shape_ts`: The commodity load shape timeseries
-
-That layer all combines the load shapes and avoided costs from 2 different sources:
- - `reference` : the reference datasets for avoided costs and load shapes (California)
- - `input` : the input datasets for measures, which can be provided by the user in CSV/Excel files or through a Streamlit app.
-
-```mermaid
-flowchart TD
+With this option users can launch the SQLmesh pipeline and generate the output database. This option still begins with the parsing of input files, which need to be stored in the `excel_input_parsing/input_templates` folder.
     
-%%{ init: {
-    "theme": "default",
-    "themeVariables": {
-        "fontSize": "14px"
-    },
-    "flowchart": {
-        "nodeSpacing": 35,
-        "curve": "basis"
-    }
-} }%%
 
-%% === Module Nodes ===
-subgraph Reference ["📚 Reference (CA Data)"]
-    style Reference fill:#e8f5e9,stroke:#388e3c,color:#1b5e20,stroke-width:2px
-    reference_avoided_costs[(🧾 Reference Avoided Costs)]
-    reference_load_shapes[(📈 Reference Load Shapes)]
-    style reference_avoided_costs fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
-    style reference_load_shapes fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
-end
-
-subgraph Demo ["🧪 Input"]
-    style Demo fill:#fff8e1,stroke:#f9a825,color:#f57f17,stroke-width:2px
-    input_avoided_costs[(🧾 Input Avoided Costs)]
-    input_load_shapes[(📈 Input Load Shapes)]
-    input_measures[(📦 Input Measures)]
-    style input_avoided_costs fill:#ffe082,stroke:#f57f17,color:#e65100
-    style input_load_shapes fill:#ffe082,stroke:#f57f17,color:#e65100
-    style input_measures fill:#ffe082,stroke:#f57f17,color:#e65100
-end
-
-subgraph Core ["🧠 Core"]
-    style Core fill:#e3f2fd,stroke:#1976d2,color:#0d47a1,stroke-width:2px
-    all_avoided_costs[(🧾 All Avoided Costs)]
-    all_load_shapes[(📈 All Load Shapes)]
-    measures[(📦 Measures)]
-    calculator["⚙️ Impact Calculator <br />(SQL Views)"]
-    measure_impacts[(📊 Calculated Measure impacts)]
-    style all_avoided_costs fill:#bbdefb,stroke:#1565c0,color:#0d47a1
-    style all_load_shapes fill:#bbdefb,stroke:#1565c0,color:#0d47a1
-    style measures fill:#bbdefb,stroke:#1565c0,color:#0d47a1
-    style calculator fill:#90caf9,stroke:#1565c0,color:#0d47a1
-    style measure_impacts fill:#b3e5fc,stroke:#0288d1,color:#01579b
-end
-
-reference_avoided_costs --> all_avoided_costs
-input_avoided_costs --> all_avoided_costs
-
-reference_load_shapes --> all_load_shapes
-input_load_shapes --> all_load_shapes
-
-input_measures --> measures
-
-all_avoided_costs --> calculator
-all_load_shapes --> calculator
-measures --> calculator
-calculator --> measure_impacts
-    
-    
-```
 ## Core calculation flow
 
 The flow describes how OpenBCA users provide measures, avoided costs, and commodity load shapes (`input`), which are then processed through a series of intermediate transformations—including cost discounting and commodity impact calculations—culminating in the generation of measure impacts used for program analysis.
 
-```mermaid
-%%{ init: { "theme": "default", "themeVariables": { "fontSize": "14px" }, "flowchart": { "nodeSpacing": 30, "curve": "basis" } } }%%
-flowchart TD
-
-    %% === OpenBCA Subgraph ===
-    subgraph OpenBCA ["OpenBCA Core"]
-        style OpenBCA fill:#e6f4ea
-
-        user(["👤 OpenBCA User"]):::user
-        measures(["measures"]):::input
-        measure_discount_rate_factor_ts[(measure_discount_rate_factor_ts)]:::intermediate
-        measure_commodity[(measure_commodity)]:::intermediate
-        measure_commodity_load_shape_ts[(measure_commodity_load_shape_ts)]:::intermediate
-        measure_commodity_impact_ts[(📈 measure_commodity_impact_ts)]:::output
-        measure_commodity_impacts(["📊 measure_commodity_impacts"]):::intermediate
-        measure_impacts(["📊 measure_impacts"]):::output
-        
-        avoided_cost_ts[(avoided_cost_ts)]:::input
-        commodity_load_shape_ts[(commodity_load_shape_ts)]:::input
-
-        user --> measures
-        user --> avoided_cost_ts
-        user --> commodity_load_shape_ts
-        measures --> measure_costs
-        measure_costs --> measure_discount_rate_factor_ts
-        measures --> measure_commodity
-        measure_commodity --> measure_commodity_load_shape_ts
-        measure_discount_rate_factor_ts --> measure_commodity_load_shape_ts
-        commodity_load_shape_ts --> measure_commodity_load_shape_ts
-        avoided_cost_ts --> measure_commodity_impact_ts
-        measure_commodity_load_shape_ts --> measure_commodity_impact_ts
-        measure_commodity_impact_ts --> measure_commodity_impacts
-%%        measure_costs --> measure_commodity_impacts
-        measure_commodity_impacts --> measure_impacts
-%%        measure_costs --> measure_impacts
-    end
-
-    %% === CLASS DEFINITIONS ===
-    classDef input fill:#cce5ff,stroke:#3399ff,color:#003366,stroke-width:2px;
-    %%classDef intermediate 
-    classDef output fill:#d4edda,stroke:#28a745,color:#155724,stroke-width:2px;
-    %%classDef interface fill:#ffffff,stroke:#00acc1,color:#006064,stroke-dasharray: 4 2;
-    classDef fileref fill:#f0f0f0,stroke:#999999,color:#333,stroke-width:1px;
-    classDef user fill:#ffe0e0,stroke:#cc0000,color:#660000,stroke-width:2px;
-
-```
-
-```mermaid
-%%{ init: { "theme": "default", "themeVariables": { "fontSize": "14px" }, "flowchart": { "nodeSpacing": 30, "curve": "basis" } } }%%
-flowchart TD
-    %% === LEGEND ===
-    subgraph LEGEND ["Legend"]
-        style LEGEND fill:#f9f9f9,stroke:#999
-        legend_user(["👤 User"]):::user
-        legend_file[[📄 Reference File / CSV]]:::fileref
-        legend_table(["Input Table"]):::input
-        legend_output(["Output Table"]):::output
-        legend_intermediate[(Intermediate Table)]:::intermediate
-        legend_interface[(Shared Interface)]:::interface
-    end
-    
-    %% === CLASS DEFINITIONS ===
-    classDef input fill:#cce5ff,stroke:#3399ff,color:#003366,stroke-width:2px;
-    %%classDef intermediate 
-    classDef output fill:#d4edda,stroke:#28a745,color:#155724,stroke-width:2px;
-    classDef interface fill:#ffffff,stroke:#00acc1,color:#006064,stroke-dasharray: 4 2;
-    classDef fileref fill:#f0f0f0,stroke:#999999,color:#333,stroke-width:1px;
-    classDef user fill:#ffe0e0,stroke:#cc0000,color:#660000,stroke-width:2px;    
-```
-
-
-## NSPM load shapes and value-streams
-
-```mermaid
-%%{ init: { "theme": "default", "themeVariables": { "fontSize": "14px" }, "flowchart": { "nodeSpacing": 30, "curve": "basis" } } }%%
-flowchart TD
-
-    %% === NSPM Subgraph ===
-    subgraph NSPM ["NSPM"]
-        style NSPM fill:#d0e0f3
-
-        subgraph NSPM_VS ["av_cost datasets"]
-            nspm_gas_marginal_cost[[gas_marginal_cost.csv]]:::fileref
-            nspm_elec_av_costs[[TODO]]:::fileref
-            nspm_avoided_cost_ts[(avoided_cost_ts)]:::interface
-
-            nspm_elec_av_costs --> nspm_avoided_cost_ts
-            nspm_gas_marginal_cost --> nspm_avoided_cost_ts
-        end
-
-        subgraph NSPM_LS ["load_shape datasets"]
-            nspm_hourly_electric_load[[TODO]]:::fileref
-            nspm_commodity_load_shape_ts[(commodity_load_shape_ts)]:::interface
-
-            nspm_hourly_electric_load --> nspm_commodity_load_shape_ts
-        end
-    end
-
-    %% === CLASS DEFINITIONS ===
-    classDef input fill:#cce5ff,stroke:#3399ff,color:#003366,stroke-width:2px;
-    %%classDef intermediate 
-    classDef output fill:#d4edda,stroke:#28a745,color:#155724,stroke-width:2px;
-    classDef interface fill:#ffffff,stroke:#00acc1,color:#006064,stroke-dasharray: 4 2;
-    classDef fileref fill:#f0f0f0,stroke:#999999,color:#333,stroke-width:1px;
-    classDef user fill:#ffe0e0,stroke:#cc0000,color:#660000,stroke-width:2px;
-
-```
 
 # Lineage
 
@@ -378,12 +245,6 @@ A flow-chart of the measure can be generated using the command:
 ```bash
 make generate-flow-diagram
 ```
-
-The column-level lineage is accessible through the SQLMesh ui:
-```bash
-make ui
-```
-<img width="1265" alt="image" src="https://github.com/user-attachments/assets/aa94224b-d4a0-4dce-b120-f16c4145337d" />
 
 
 # Continuous integration
