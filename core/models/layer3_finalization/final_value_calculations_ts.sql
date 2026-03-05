@@ -16,8 +16,6 @@ SELECT
 	, ac_ls.hour_of_day
 	, factors.annual_net_energy_savings * ac_ls.load_shape_value AS net_energy_savings
     , factors.energy_savings_factors_applied * ac_ls.avoided_cost_x_load_shape AS final_dollar_value
-	--, factors.discount_factor
-    --, factors.inflation_factor
 FROM 
     core_layer2_precompute.savings_factors factors
 JOIN core_layer1_mappings.commodity_load_shape_by_id cls ON 
@@ -114,8 +112,7 @@ JOIN openbca.core_layer0_base.value_stream_groups vsg ON
 	svs.commodity = vsg.commodity 
 WHERE 
 	svs.value_stream = 'Energy Generation (E)'
-	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
-	AND UPPER(vsg.commodity) = 'ELECTRIC'
+	AND vsg.value_stream_group = 'electric_%_adder'
 	AND include_in_test 
 
 UNION ALL
@@ -139,8 +136,7 @@ JOIN openbca.core_layer0_base.value_stream_groups vsg ON
 	svs.commodity = vsg.commodity 
 WHERE 
 	svs.value_stream = 'Fuel Supply and O&M (NG)'
-	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
-	AND UPPER(vsg.commodity) = 'NATURAL GAS'
+	AND vsg.value_stream_group = 'natural_gas_%_adder'
 	AND include_in_test 
 
 UNION ALL
@@ -164,8 +160,7 @@ JOIN openbca.core_layer0_base.value_stream_groups vsg ON
 	svs.commodity = vsg.commodity 
 WHERE 
 	svs.value_stream = 'Propane Supply'
-	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
-	AND UPPER(vsg.commodity) = 'PROPANE'
+	AND vsg.value_stream_group = 'propane_%_adder'
 	AND include_in_test 
 
 UNION ALL 
@@ -189,8 +184,7 @@ JOIN openbca.core_layer0_base.value_stream_groups vsg ON
 	svs.commodity = vsg.commodity 
 WHERE 
 	svs.value_stream = 'Oil Supply'
-	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
-	AND UPPER(vsg.commodity) = 'OIL'
+	AND vsg.value_stream_group = 'oil_%_adder'
 	AND include_in_test 
 
 UNION ALL 
@@ -214,8 +208,7 @@ JOIN openbca.core_layer0_base.value_stream_groups vsg ON
 	svs.commodity = vsg.commodity 
 WHERE 
 	svs.value_stream = 'Diesel Supply'
-	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
-	AND UPPER(vsg.commodity) = 'DIESEL'
+	AND vsg.value_stream_group = 'diesel_%_adder'
 	AND include_in_test 
 
 UNION ALL 
@@ -238,8 +231,7 @@ FROM
 	, openbca.core_layer0_base.value_stream_groups vsg  
 WHERE 
 	svs.value_stream IN ('Energy Generation (E)', 'Fuel Supply and O&M (NG)', 'Propane Supply', 'Oil Supply', 'Diesel Supply')
-	AND UPPER(vsg.calc_type) = 'ADDER (%)' 
-	AND UPPER(vsg.commodity) NOT IN ('ELECTRIC', 'NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL')
+	AND vsg.value_stream_group = 'all_fuels_%_adder'
 	AND include_in_test 
 GROUP BY 
 	svs.id 

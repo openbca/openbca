@@ -1,4 +1,4 @@
-# Open BCA
+# OpenBCA
 
 This library provides aggregators, program administrators, utilities, and regulators a means to configure and execute Jurisdiction-Specific Tests (JSTs) for demand side programs/portfolios in accordance to guidance in the National Standard Practice Manual. 
 
@@ -28,6 +28,21 @@ Users of the integrated pathway will need to input data as defined by the schema
 
 Generally speaking, the Integrated pathway is for expert users and will not be explicity supported by the development team.
 
+## Running OpenBCA
+
+To run the OpenBCA, use the following commands:
+#### Launching the UI:
+```bash
+make run-openbca
+```
+Through the UI users can upload input files, launch the model, and view results.
+
+#### Running OpenBCA without the UI: 
+```bash
+make run-openbca-model
+```
+With this option users can launch the SQLmesh pipeline and generate the output database. This option still begins with the parsing of input files, which need to be stored in the `excel_input_parsing/input_templates` folder.
+
 ## 🛠️ Key Dependencies
 
 The OpenBCA software heavily leverages: 
@@ -36,7 +51,7 @@ The OpenBCA software heavily leverages:
 - [Pandas ExcelFile](https://pandas.pydata.org/docs/reference/api/pandas.ExcelFile.html) for parsing data from Excel input templates.
 - [SQLmesh](https://sqlmesh.readthedocs.io/en/stable/) to orchestrate data and computational pipelines.
 - [DuckDB](https://duckdb.org/) for local database management and execution of SQL queries.
-- [Streamlit](https://streamlit.io/) for the user interface.
+- [Streamlit](https://streamlit.io/) for the base framework of the user interface.
 
 ## ⚙️ Project Architecture
 
@@ -51,7 +66,27 @@ The repository contains three main related systems housed in the following folde
 - **`user_interface/`**  
   This folder contains a Streamlit application that launches a web app. The web app contains a page that allows users to upload populated input templates and another page devoted to exploration of results.
 
+## BCA Basic Components
+Benefit-cost analysis for distributed energy resources is done using the following information and data:
+
+**Annual Savings** - The amount per year that an intervention saves. Savings are tied to specific **commodities**. An intervention can save across multiple commodities and can be negative. For instance, a heat pump electrification measure will decrease natural gas consumption (positive savings), increase electricity consumption (negative savings), and enhance societal resiliance and host-customer reliability. In this example "savings" are generated across four commodities: natural gas, electricity, societal resiliance, and host-customer reliability.
+
+**Avoided Costs** - Within each commodity, there may be one or more avoided costs. Each avoided cost represents a specific, quantifiable dollar value tied to an effect that can be isolated. For example, electricity savings may avoid energy procurement costs, GHG emissions, various capacity costs and more. The NSPM defines many common utility system and non-system avoided costs that should be accounted for in a JST. Avoided costs should represent **marginal** values. For instance, if a program saves 1 MWh, the avoided costs should reflect the dollar value from that specific MWh instead of the average of all electricity generated during the time the savings occured. Marginal values can be higher or lower than average values depending on the context. If a program saves a MWh during a peak period, then that savings will direclty reduce reliance on an expensive peaker plant. In contrast, if that MWh were saved during a period of renewable curtailment, the dollar value may be zero or even negative.
+
+**Savings Load Shapes** - Encode the distribution of savigns over time. The OpenBCA supports natural gas and electric savings load shapes of annual, monthly, daily, or hourly granularities. Other commodities are limited to annual values. The _maximum_ granularity of avoided cost profiles per commodity establishes the _minimum_ granularity that a savings load shape must meet. Savings load shapes can be entered as dimensioned or normalized values. If normalized the load shape acts to distribute annual savings across the year. If dimensioned, the load shape is expected to sum to an annual savings value and a value of 1 should be entered for the corresponding annual savings for that commodity.
+
+**Discount Rate and Cadence** - The calculation of benefits and costs is conducted via a net-present-value (NPV) computation over the lifecycle of impacts from an intervention. The annual discount rate determines the degree to which future benefits are eroded relative to the opportunity cost of the capital invested in the project. The discount cadence determines how many time periods will be included in the NPV calculation. Currently the OpenBCA supports annual and quarterly discounting.
+
+**Inflation Rate** - Users can choose whether to report results in real or nominal dollars. If real dollars are desired then the user can enter a base year and inflation rate to adjust dollars to the base year. The base year can be before, during, or after a program's impacts.
+
+**Cost Treatment** - Determines whether certain quantities are treated as costs or transfer payments within a JST. If the user selects "TRC" then incentives paid from utilities to customers are treated as transfer payments and are effectively eliminated from the calculation. If "UCT" is selected then incentives are treated as costs. Similarly, host customer tax incentives act to reduce total costs in a TRC framework, but are ignored in a PAC framework. In general, if host customer benefits are to be included in a test then it is recommended to use the TRC framework. If only the utility's perspective is the subject of a JST then the UCT framework is recommended and the user should take care to not include host customer benefits in the configuration of the JST.
+
+**Expected Useful Life (EUL)** - The number of years that a project is expected to deliver impacts.
+
+**Net-to-Gross (NTG)** - Intended to account for free ridership, this metric is used in some jurisdicitons to represent the fraction of program benefits and host customer costs that occured _because of the program_. NTG values typically range between 0 and 1 and 1 - NTG is interpreted as the fraction of program impacts tied to customers who would have undertaken the interventions even in the abscence of the program. NTG values above 1.0 are allowed as some jurisdictions will assume some benefits occur outside the program _but on account of the program_. This is referred to as "spillover" or "market effects."
+
 ## OpenBCA Process Flow
+This diagram shows the execution flow of the OpenBCA across three main phases: data input, computation, and user interface functionality
 ```mermaid
 %%{init: {'themeVariables': {'fontSize': '18px'}}}%%
 flowchart TD
@@ -111,6 +146,7 @@ flowchart TD
 ```
 
 ## OpenBCA Core Model
+This diagram shows the flow of the OpenBCA core model across its four phases:
 ```mermaid
 %%{init: {'themeVariables': {'fontSize': '11px'}}}%%
 flowchart LR
@@ -188,24 +224,58 @@ savings_factors-->final_value_calculations
     %% Finalization
     style final_value_calculations fill:#43a047,stroke:#1b5e20
 ```
-**Node reference**
+**Core Model Table Reference**
 
-| Table | Contents |
-|------|----------|
-| **measures** | Row-level inputs: unique ID, metadata, EUL, NTG, annual savings and costs, load shape assignments |
-| **global_parameters** | Dollar year, NPV parameters, symmetry treatment, line loss factors |
-| **cost_treatment_factors** | Establishes cost and benefit multipliers for specific test frameworks (TRC, UCT etc.) |
-| **program_value_streams** | Program-level costs and benefits by year |
-| **value_stream_groups** | Info to shepherd each value stream into a specific computational treatment |
-| **load_shape_ts** | Savings load shapes time series |
-| **avoided_cost_ts** | Avoided costs time series |
-| **avoided_cost_subsets_by_id** | Mapping between ID, avoided cost, and avoided cost subset |
-| **commodity_load_shape_by_id** | Mapping between ID, commodity, and load shape |
-| **cost_components_by_id** | Establishes costs and multiplicative factors by ID for row-level inputs and by program name for program-level inputs |
-| **avoided_cost_load_shape_combos** | Calculates avoided cost x savings load shape across the EUL for all necessary combinations of avoided cost, savings load shape and year |
-| **savings_factors** | Calculates discount and inflation factors across the full EUL for every row-level input. Applies those factors along with unit quantity, NTG, EUL, line losses as appropriate for every commodity |
-| **final_value_calculations** | Combines the precomputed values from _avoided_cost_load_shape_combos_, _savings_factors_, and _cost_components_by_id_, along with information from several other tables, into full time-series vectors of final net savings and value streams for benefits and costs |
+This table lists the tables generated during core model execution,* along with their key contents:
 
+Layer | Table | Contents |
+|--|------|----------|
+| **Base** | **measures** | Row-level inputs: unique ID, metadata, EUL, NTG, annual savings and costs, load shape assignments |
+| **Base** | **global_parameters** | Dollar year, NPV parameters, symmetry treatment, line loss factors |
+| **Base** | **cost_treatment_factors** | Establishes cost and benefit multipliers for specific test frameworks (TRC, UCT etc.) |
+| **Base** | **program_value_streams** | Program-level costs and benefits by year |
+| **Base** | **value_stream_groups** | Info to shepherd each value stream into a specific computational treatment |
+| **Base** | **load_shape_ts** | Savings load shapes time series |
+| **Base** | **avoided_cost_ts** | Avoided costs time series |
+| **Mapping** | **avoided_cost_subsets_by_id** | Mapping between ID, avoided cost, and avoided cost subset |
+| **Mapping** | **commodity_load_shape_by_id** | Mapping between ID, commodity, and load shape |
+| **Mapping** | **cost_components_by_id** | Establishes costs and multiplicative factors by ID for row-level inputs and by program name for program-level inputs |
+| **Precompute** | **avoided_cost_load_shape_combos** | Calculates avoided cost x savings load shape across the EUL for all necessary combinations of avoided cost, savings load shape and year |
+| **Precompute** | **savings_factors** | Calculates discount and inflation factors across the full EUL for every row-level input. Applies those factors along with unit quantity, NTG, EUL, line losses as appropriate for every commodity |
+| **Finalization** | **final_value_calculations** | Combines the precomputed values from _avoided_cost_load_shape_combos_, _savings_factors_, and _cost_components_by_id_, along with information from several other tables, into full time-series vectors of final net savings and value streams for benefits and costs |
+
+*Note that a few additional tables are generated as part of the Finalization step but are not listed here.
+
+## Value Stream Calculation
+
+There are ten computational pathways supported by the OpenBCA to properly handle different types of value streams. The flow diagram and equation reference below provide details on the logic and mathematics. 
+
+To determine which pathway a value stream will follow the OpenBCA first checks the calculation type. In the Standalone pathway this is a required field entered in the Configuration input template for each value stream. If the calculation type is some form of time series (including custom period or single value), then the commodity is referenced and the pathway is assigned as Electric, Natural Gas, or Annual accordingly.
+
+If the calculation type is Capacity then the corresponding pathway is assigned. 
+
+Finally, if the calculation type is % Adder, then Commodity is again checked and the assignment is made accordingly.
+
+![Value stream groups](readme_images/value_stream_groups.png)
+
+Equations for the calulcation of benefits and costs tied to each pathway are given below. 
+![Value Stream Equations](readme_images/equations.png)
+
+Variable | Definition |
+|--|------|
+| **NTG** | Net-to-Gross ratio|
+| **Y** | Year |
+| **SY** | Start Year - the first calendar year an intervention has an impact |
+| **SQ** | Start Quarter - the first quarter an intervention has an impact |
+| **DY** | Dollar Year - the year to pin the calculation of real dollars when adjusting for inflation |
+| **EUL** | Expected Useful Life (years) |
+| **Avoided Cost<sub>y,t</sub>** | Marginal avoided cost ($/commodity unit) for year y and time period t. For instance, $/kWh for hour 7354 of 2035 |
+| **Avoided Cost<sub>y</sub>** | Marginal avoided cost ($/commodity unit) for year y. For instance, $/kWh for 2035 |
+| **Annual Savings** | Annual savings (1.0 or commodity unit) for an intervention. For instance, kWh. If the load shape is dimensioned then Annual Savings should be set to 1.0 |
+| **Load Shpae<sub>t</sub>** | Load Shape (commodity unit or fraction) for time period t. For instance, $/kWh for hour 7354 of the year or 0.001 for hour 7354, which assigns 0.1% of the annual savings to that hour. |
+| **L<sub>E</sub>** | Line loss factor using the electric line loss rate |
+| **L<sub>G</sub>** | Line loss factor using the natural gas line loss rate |
+| **L<sub>P</sub>** | Line loss factor using the peak period electric line loss rate (used only in the Capacity pathway) |
 
 ## [Optional] Set up DBeaver to connect to the local DuckDB database
 If you want to use DBeaver to connect to the local DuckDB database, you can follow these steps:
@@ -216,37 +286,3 @@ If you want to use DBeaver to connect to the local DuckDB database, you can foll
 5. Click "Test Connection" to ensure the connection is successful.
 6. Click "Finish" to create the connection.
 7. You can now explore the database schema and run SQL queries against the OpenBCA tables and views.
-
-## Running OpenBCA
-
-To run the OpenBCA, use the following commands:
-#### Launching the UI:
-```bash
-make run-openbca
-```
-Through the UI users can upload input files, launch the model, and view results.
-
-#### Running OpenBCA without the UI: 
-```bash
-make run-openbca-model
-```
-With this option users can launch the SQLmesh pipeline and generate the output database. This option still begins with the parsing of input files, which need to be stored in the `excel_input_parsing/input_templates` folder.
-    
-
-## Core calculation flow
-
-The flow describes how OpenBCA users provide measures, avoided costs, and commodity load shapes (`input`), which are then processed through a series of intermediate transformations—including cost discounting and commodity impact calculations—culminating in the generation of measure impacts used for program analysis.
-
-
-# Lineage
-
-
-A flow-chart of the measure can be generated using the command:
-```bash
-make generate-flow-diagram
-```
-
-
-# Continuous integration
-
-The measure uses GitHub Actions to automatically run the measure and the unit tests in the `tests` folder.

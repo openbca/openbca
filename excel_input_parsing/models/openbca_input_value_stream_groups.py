@@ -128,8 +128,14 @@ def load_value_stream_groups_from_excel(
         elif calc_type == 'Adder (%)':
             if commodity == 'Electric':
                 return 'electric_%_adder'
-            if commodity == 'Natural Gas':
+            elif commodity == 'Natural Gas':
                 return 'natural_gas_%_adder'
+            elif commodity == 'Propane':
+                return 'propane_%_adder'
+            elif commodity == 'Oil':
+                return 'oil_%_adder'
+            elif commodity == 'Diesel':
+                return 'diesel_%_adder'
             else:
                 return 'all_fuels_%_adder'
 
