@@ -17,9 +17,9 @@ if __name__ == "__main__":
     
     # Get the path to the Streamlit app
     if getattr(sys, 'frozen', False):
-        app_script = Path(sys._MEIPASS) / "streamlit_test" / "Entrypoint.py"
+        app_script = Path(sys._MEIPASS) / "user_interface" / "Entrypoint.py"
     else:
-        app_script = Path(__file__).parent / "streamlit_test" / "Entrypoint.py"
+        app_script = Path(__file__).parent / "user_interface" / "Entrypoint.py"
     
     # Set up Streamlit CLI arguments with proper config
     sys.argv = [

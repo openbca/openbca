@@ -54,9 +54,9 @@ datas += [
 
 # Add streamlit test app files, including logos
 datas += [
-    ('streamlit_test/*.py', 'streamlit_test'),
-    ('streamlit_test/pages/*.py', 'streamlit_test/pages'),
-    ('streamlit_test/logos', 'streamlit_test/logos'),
+    ('user_interface/*.py', 'user_interface'),
+    ('user_interface/pages/*.py', 'user_interface/pages'),
+    ('user_interface/logos', 'user_interface/logos'),
 ]
 
 # Add model_runners module (required by streamlit app)
