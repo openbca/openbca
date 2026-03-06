@@ -17,6 +17,7 @@ from config.paths import (
     get_excel_input_parsing_project_dir,
     get_core_project_dir,
 )
+from config.env import setup_env_vars
 import model_runners
 from validation_functions import (
     validate_required_parameters,
@@ -68,6 +69,9 @@ with quit_col:
         os.kill(os.getpid(), signal.SIGTERM)
 st.markdown("###### The OpenBCA software executes Jurisdiction Specific Tests developed under National Standard Practice Manual guidance.")
 
+# Initialize DB/DBV so UI path display matches what SQLMesh uses at runtime.
+setup_env_vars()
+
 # Resolve paths using config module - works in both dev and PyInstaller modes
 REPO_ROOT = get_repo_root()
 INPUT_TEMPLATES_DIR = get_input_templates_dir()
@@ -79,6 +83,24 @@ DEFAULT_OUTPUT_DB = OUTPUT_DIR / "openbca.db"
 DEFAULT_OUTPUT_DB.parent.mkdir(parents=True, exist_ok=True)
 DEFAULT_VALIDATION_DB = OUTPUT_DIR / "openbca_input_validation.db"
 DEFAULT_VALIDATION_DB.parent.mkdir(parents=True, exist_ok=True)
+
+with st.expander("Runtime path diagnostics", expanded=False):
+    resolved_db = Path(os.environ.get("DB", str(DEFAULT_OUTPUT_DB))).expanduser()
+    resolved_dbv = Path(os.environ.get("DBV", str(DEFAULT_VALIDATION_DB))).expanduser()
+    st.code(
+        "\n".join(
+            [
+                f"sys.frozen={getattr(sys, 'frozen', False)}",
+                f"sys._MEIPASS={getattr(sys, '_MEIPASS', None)}",
+                f"REPO_ROOT={REPO_ROOT}",
+                f"DB={os.environ.get('DB')}",
+                f"DBV={os.environ.get('DBV')}",
+                f"resolved_db={resolved_db} (exists={resolved_db.exists()})",
+                f"resolved_dbv={resolved_dbv} (exists={resolved_dbv.exists()})",
+            ]
+        ),
+        language="text",
+    )
 
 program_input_file_name = "OpenBCA Program Input.xlsx"
 configuration_file_name = "OpenBCA Configuration.xlsm"

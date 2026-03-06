@@ -52,6 +52,7 @@ from config.paths import (
     # get_logos_dir,
     # get_logs_dir,
 )
+from config.env import setup_env_vars
 
 st.set_page_config(layout="wide")
 
@@ -95,6 +96,7 @@ with col5:
     )
 
 # Resolve paths relative to this file, not the current working directory.
+setup_env_vars()
 REPO_ROOT = get_repo_root()
 OUTPUT_DIR = get_output_dir()
 
