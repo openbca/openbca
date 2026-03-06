@@ -23,12 +23,6 @@ for package in package_list:
 # Add all sqlglot dialects explicitly
 hiddenimports += collect_submodules('sqlglot.dialects')
 
-# Add Excel template files
-datas += [
-    ('nspm/input_templates/OpenBCA Configuration.xlsm', 'nspm/input_templates'),
-    ('nspm/input_templates/OpenBCA Program Input.xlsx', 'nspm/input_templates'),
-]
-
 # Add Output directory for generated files
 datas += [
     ('output/.keepme', 'output'),
@@ -39,11 +33,11 @@ datas += [
     ('.env', '.'),
 ]
 
-# Add nspm sqlmesh files and additional helper modules
+# Add excel_input_parsing sqlmesh files and additional helper modules
 datas += [
-    ('nspm/models', 'nspm/models'),
-    ('nspm/config.yaml', 'nspm'),
-    ('nspm/*.py', 'nspm'),
+    ('excel_input_parsing/models', 'excel_input_parsing/models'),
+    ('excel_input_parsing/config.yaml', 'excel_input_parsing'),
+    ('excel_input_parsing/*.py', 'excel_input_parsing'),
 ]
 
 # Add core sqlmesh files

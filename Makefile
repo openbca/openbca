@@ -1,7 +1,7 @@
-DB?=output/openbca.db
-DBV?=output/openbca_input_validation.db
-export DB
-export DBV
+# DB?=output/openbca.db
+# DBV?=output/openbca_input_validation.db
+# export DB
+# export DBV
 
 install:
 	uv sync
@@ -41,7 +41,6 @@ run-openbca-model:
 test-parsing:
 	@echo "\nTesting parsing of Excel input templates."
 	cd excel_input_parsing && PYTHONPATH=.. uv run python test_parsing.py
-
 
 build-pyinstaller-package:
 	@echo "Building PyInstaller openbca-app..."
