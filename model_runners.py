@@ -1,10 +1,13 @@
 import argparse
 from shutil import rmtree
+import warnings
 
 from sqlmesh.core.context import Context
 
 from config.paths import get_excel_input_parsing_project_dir, get_core_project_dir, get_output_dir, get_logs_dir
 from config.env import setup_env_vars
+
+warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")  # Suppress openpyxl warnings about data validation and conditional formatting
 
 def run_openbca_excel_model() -> None:
     setup_env_vars()
