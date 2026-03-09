@@ -30,13 +30,15 @@ run-ca-gas-acc:
 run-input-transform-validations:
 	@echo "Running parsing scripts and validating input data..."
 # Note: we use a separate DuckDB instance and gateway for validation of initial parsing and ingestion steps
-	@uv run sqlmesh --gateway validations_duckdb -p excel_input_parsing -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
-	@uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DBV']); con.close();"
+# 	@uv run sqlmesh --gateway validations_duckdb -p excel_input_parsing -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
+	@uv run python model_runners.py input_transform_validations
+	@uv run python -c "import os,duckdb; from config.env import setup_env_vars; setup_env_vars(); con=duckdb.connect(os.environ['DBV']); con.close();"
 
 run-openbca-model:
-	uv run sqlmesh -p excel_input_parsing -p core plan --auto-apply --run --ignore-cron
+# 	uv run sqlmesh -p excel_input_parsing -p core plan --auto-apply --run --ignore-cron
+	@uv run python model_runners.py openbca_excel_model
 	@echo "Evaluating and writing output in output/results_summary_by_id.csv..."
-	@time uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id) TO 'output/results_summary_by_id.csv' (HEADER, DELIMITER ',');\"); con.close()"
+	@uv run python -c "import os,duckdb; from config.env import setup_env_vars; setup_env_vars(); con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM openbca.core_layer3_finalization.results_summary_by_id) TO 'output/results_summary_by_id.csv' (HEADER, DELIMITER ',');\"); con.close()"
 
 test-parsing:
 	@echo "\nTesting parsing of Excel input templates."
