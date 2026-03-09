@@ -1,3 +1,4 @@
+import argparse
 from shutil import rmtree
 
 from sqlmesh.core.context import Context
@@ -48,3 +49,20 @@ def clean_output_directory():
             item.unlink()
         elif item.is_dir():
             rmtree(item)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run model runners for OpenBCA.")
+    parser.add_argument(
+        "runner",
+        choices=["openbca_excel_model", "input_transform_validations", "clean_output"],
+        help="Specify which runner to execute.",
+    )
+    args = parser.parse_args()
+
+    if args.runner == "openbca_excel_model":
+        run_openbca_excel_model()
+    elif args.runner == "input_transform_validations":
+        run_input_transform_validations()
+    elif args.runner == "clean_output":
+        clean_output_directory()
