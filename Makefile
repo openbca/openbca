@@ -62,3 +62,24 @@ generate-flow-diagram:
 
 sqlmesh-ui-core:
 	uv run sqlmesh -p core ui
+
+# Generate styled HTML from README.md (open in browser and Print to PDF if needed).
+# Requires pandoc (e.g. brew install pandoc).
+readme-html:
+	@echo "Generating README.html..."
+	pandoc README.md -o README.html -s --css=readme-pdf.css
+	@echo "Done: README.html (open in a browser; use Print to save as PDF)"
+
+# Generate a styled PDF from README.md. Mermaid diagrams are rendered as images (via mermaid-cli or mermaid.ink).
+# Requires: pandoc (e.g. brew install pandoc) and WeasyPrint system libs (macOS: brew install pango cairo glib).
+# Optional: Node/npx for local Mermaid rendering; otherwise diagrams are fetched from mermaid.ink (network needed).
+# On macOS with Homebrew, DYLD_LIBRARY_PATH is set so WeasyPrint finds pango/cairo/glib.
+readme-pdf:
+	@echo "Generating README.pdf..."
+	uv sync --extra pdf
+	uv run python scripts/render_mermaid_for_pdf.py
+	pandoc README.pdf.md -o README.html -s --css=readme-pdf.css
+	DYLD_LIBRARY_PATH="/opt/homebrew/lib:$$DYLD_LIBRARY_PATH" uv run python -c "from weasyprint import HTML; HTML('README.html').write_pdf('README.pdf')"
+	@rm -f README.html README.pdf.md
+	@rm -rf readme_pdf_temp
+	@echo "Done: README.pdf"

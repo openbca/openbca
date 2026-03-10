@@ -16,3 +16,7 @@ build/
 
 __pycache__
 .DS_Store
+
+# Generated when building README.pdf (Mermaid pre-render)
+readme_pdf_temp/
+README.pdf.md

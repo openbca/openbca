@@ -14,7 +14,7 @@ FROM
 
 SELECT
     avoided_cost::VARCHAR AS avoided_cost,
-    avoided_cost_subset::VARCHAR AS avoided_cost_subset,
+    COALESCE(avoided_cost_subset, 'System-wide')::VARCHAR AS avoided_cost_subset,
     year::INTEGER AS year,
 
     COALESCE(

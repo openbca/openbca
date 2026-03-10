@@ -142,8 +142,8 @@ def load_value_stream_groups_from_excel(
         elif calc_type == 'Peak Capacity - Annual':
             return 'capacity'
 
-        elif calc_type == 'Single Value - First Year':
-            return '$_adder'
+        elif calc_type == 'Single Value - First Year': 
+            return 'annual'
 
         else:
             if commodity == 'Electric':

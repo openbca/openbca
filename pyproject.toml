@@ -27,6 +27,9 @@ dependencies = [
   "pyinstaller>=6.18.0",
 ]
 
+[project.optional-dependencies]
+pdf = ["weasyprint"]
+
 [tool.hatch.build.targets.wheel]
 include = ["config"]
 

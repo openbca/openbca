@@ -43,6 +43,8 @@ make run-openbca-model
 ```
 With this option users can launch the SQLmesh pipeline and generate the output database. This option still begins with the parsing of input files, which need to be stored in the `excel_input_parsing/input_templates` folder.
 
+In either of these options, the output database is stored in the `output/openbca.db` file.
+
 ## 🛠️ Key Dependencies
 
 The OpenBCA software heavily leverages: 
@@ -67,7 +69,7 @@ The repository contains three main related systems housed in the following folde
   This folder contains a Streamlit application that launches a web app. The web app contains a page that allows users to upload populated input templates and another page devoted to exploration of results.
 
 ## BCA Basic Components
-Benefit-cost analysis for distributed energy resources is done using the following information and data:
+Benefit-cost analysis for distributed energy resources is conducted using the following information and data:
 
 **Annual Savings** - The amount per year that an intervention saves. Savings are tied to specific **commodities**. An intervention can save across multiple commodities and can be negative. For instance, a heat pump electrification measure will decrease natural gas consumption (positive savings), increase electricity consumption (negative savings), and enhance societal resiliance and host-customer reliability. In this example "savings" are generated across four commodities: natural gas, electricity, societal resiliance, and host-customer reliability.
 
@@ -88,95 +90,93 @@ Benefit-cost analysis for distributed energy resources is done using the followi
 ## OpenBCA Process Flow
 This diagram shows the execution flow of the OpenBCA across three main phases: data input, computation, and user interface functionality
 ```mermaid
-%%{init: {'themeVariables': {'fontSize': '18px'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'primaryTextColor': '#000000', 'secondaryTextColor': '#000000', 'tertiaryTextColor': '#000000', 'primaryBorderColor': '#37474f', 'lineColor': '#37474f'}}}%%
 flowchart TD
 
-    subgraph Input_Templates["<span style='font-size:1.35em'>🔢 Input Templates</span>"]
-        A1[**Configuration**
+    subgraph Input_Templates["<span style='font-size:1.35em; color:#000000'>🔢 Input Templates</span>"]
+        A1["`**Configuration**
         -Calculation parameters
         -JST formulation
-        -Avoided cost time series
-        ]
-        +((**+**))
-        A2[**Program Input**
+        -Avoided cost time series`"]
+        +(["`**+**`"])
+        A2["`**Program Input**
         -Row-level inputs
         -Program-level inputs
-        -Savings load shapes]
+        -Savings load shapes`"]
         A1~~~+~~~A2
     end
 
-    subgraph OpenBCA_Core["<span style='font-size:1.35em'>🧮 OpenBCA Core</span>"]
-        B1[**Base**
-        Assemble Core Input Tables]
-        B2[**Mappings**
+    subgraph OpenBCA_Core["<span style='font-size:1.35em; color:#000000'>🧮 OpenBCA Core</span>"]
+        B1["`**Base**
+        Assemble Core Input Tables`"]
+        B2["`**Mappings**
         Establish combinations
         -ID+Avoided Cost Subset
-        -ID+Load Shape+Commodity]
-        B3[**Precompute**
+        -ID+Load Shape+Commodity`"]
+        B3["`**Precompute**
         -Avoided Cost x Load Shape
         -NPV time series
-        -Multiplicative factors
-        ]
-        B4[**Finalization**
+        -Multiplicative factors`"]
+        B4["`**Finalization**
         -Final time series savings, costs, and benefits
-        -Summary tables]
+        -Summary tables`"]
         B1 --> B2 --> B3 --> B4
     end
 
-    subgraph User_Interface["<span style='font-size:1.35em'>📽️ User Interface</span>"]
-        C1[**Upload & Run**
+    subgraph User_Interface["<span style='font-size:1.35em; color:#000000'>📽️ User Interface</span>"]
+        C1["`**Upload & Run**
         -Upload input templates
         -Validate input data
-        -Run OpenBCA model]
-        C2[**Explore Outputs**
+        -Run OpenBCA model`"]
+        C2["`**Explore Outputs**
         -Filter results
         -Visualizations
         -Tabular summaries
-        -Download]
+        -Download`"]
         C1 --> C2
     end
 
     Input_Templates--Input Parsing-->OpenBCA_Core
     OpenBCA_Core<-->User_Interface
 
-    %% Subgraph backgrounds: input = blue, core = violet, UI = green (darker fills)
-    style Input_Templates fill:#64b5f6,stroke:#1565c0,stroke-width:2px
-    style OpenBCA_Core fill:#9575cd,stroke:#7b1fa2,stroke-width:2px
-    style User_Interface fill:#81c784,stroke:#2e7d32,stroke-width:2px
+    %% Subgraph backgrounds: input = blue, core = violet, UI = green (lighter fills)
+    style Input_Templates fill:#bbdefb,stroke:#64b5f6,stroke-width:2px
+    style OpenBCA_Core fill:#e1bee7,stroke:#b39ddb,stroke-width:2px
+    style User_Interface fill:#c8e6c9,stroke:#81c784,stroke-width:2px
 ```
 
 ## OpenBCA Core Model
 This diagram shows the flow of the OpenBCA core model across its four phases:
 ```mermaid
-%%{init: {'themeVariables': {'fontSize': '11px'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '11px', 'primaryTextColor': '#000000', 'primaryBorderColor': '#37474f', 'lineColor': '#37474f'}}}%%
 flowchart LR
     leg_base[Base]~~~leg_mappings[Mappings]~~~leg_precompute[Precompute]~~~leg_finalization[Finalization]
-    style leg_base fill:#1976d2,stroke:#0d47a1
-    style leg_mappings fill:#5e35b1,stroke:#4a148c
-    style leg_precompute fill:#f57c00,stroke:#bf360c
-    style leg_finalization fill:#43a047,stroke:#1b5e20
+    style leg_base fill:#90caf9,stroke:#42a5f5
+    style leg_mappings fill:#b39ddb,stroke:#9575cd
+    style leg_precompute fill:#ffcc80,stroke:#ff9800
+    style leg_finalization fill:#a5d6a7,stroke:#66bb6a
 ```
 
 ```mermaid
-%%{init: {'themeVariables': {'fontSize': '18px'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'primaryTextColor': '#000000', 'secondaryTextColor': '#000000', 'tertiaryTextColor': '#000000', 'primaryBorderColor': '#37474f', 'lineColor': '#37474f'}}}%%
 flowchart LR
 
-    measures[**<u>measures</u>**]
-    global_parameters[**<u>global_parameters</u>**]
-    cost_treatment_factors[**<u>cost_treatment_factors</u>**]
-    program_value_streams[**<u>program_value_streams</u>**]
-    value_stream_groups[**<u>value_stream_groups</u>**]
-    load_shape_ts[**<u>load_shape_ts</u>**]
-    avoided_cost_ts[**<u>avoided_cost_ts</u>**]
+    measures["`**<u>measures</u>**`"]
+    global_parameters["`**<u>global_parameters</u>**`"]
+    cost_treatment_factors["`**<u>cost_treatment_factors</u>**`"]
+    program_value_streams["`**<u>program_value_streams</u>**`"]
+    value_stream_groups["`**<u>value_stream_groups</u>**`"]
+    load_shape_ts["`**<u>load_shape_ts</u>**`"]
+    avoided_cost_ts["`**<u>avoided_cost_ts</u>**`"]
     
-    avoided_cost_subsets_by_id[**<u>avoided_cost_subsets_by_id</u>**]
-    commodity_load_shape_by_id[**<u>commodity_load_shape_by_id</u>**]
-    cost_components_by_id[**<u>cost_components_by_id</u>**]
+    avoided_cost_subsets_by_id["`**<u>avoided_cost_subsets_by_id</u>**`"]
+    commodity_load_shape_by_id["`**<u>commodity_load_shape_by_id</u>**`"]
+    cost_components_by_id["`**<u>cost_components_by_id</u>**`"]
 
-    avoided_cost_load_shape_combos[**<u>avoided_cost_load_shape_combos</u>**]
-    savings_factors[**<u>savings_factors</u>**]
+    avoided_cost_load_shape_combos["`**<u>avoided_cost_load_shape_combos</u>**`"]
+    savings_factors["`**<u>savings_factors</u>**`"]
 
-    final_value_calculations[**<u>final_value_calculations</u>**]
+    final_value_calculations["`**<u>final_value_calculations</u>**`"]
 
 measures-->avoided_cost_subsets_by_id
 avoided_cost_ts-->avoided_cost_subsets_by_id
@@ -207,22 +207,22 @@ cost_components_by_id-->final_value_calculations
 savings_factors-->final_value_calculations
 
     %% Base
-    style measures fill:#1976d2,stroke:#0d47a1
-    style global_parameters fill:#1976d2,stroke:#0d47a1
-    style cost_treatment_factors fill:#1976d2,stroke:#0d47a1
-    style program_value_streams fill:#1976d2,stroke:#0d47a1
-    style value_stream_groups fill:#1976d2,stroke:#0d47a1
-    style load_shape_ts fill:#1976d2,stroke:#0d47a1
-    style avoided_cost_ts fill:#1976d2,stroke:#0d47a1
+    style measures fill:#90caf9,stroke:#42a5f5
+    style global_parameters fill:#90caf9,stroke:#42a5f5
+    style cost_treatment_factors fill:#90caf9,stroke:#42a5f5
+    style program_value_streams fill:#90caf9,stroke:#42a5f5
+    style value_stream_groups fill:#90caf9,stroke:#42a5f5
+    style load_shape_ts fill:#90caf9,stroke:#42a5f5
+    style avoided_cost_ts fill:#90caf9,stroke:#42a5f5
     %% Mappings
-    style avoided_cost_subsets_by_id fill:#5e35b1,stroke:#4a148c
-    style commodity_load_shape_by_id fill:#5e35b1,stroke:#4a148c
-    style cost_components_by_id fill:#5e35b1,stroke:#4a148c
+    style avoided_cost_subsets_by_id fill:#b39ddb,stroke:#9575cd
+    style commodity_load_shape_by_id fill:#b39ddb,stroke:#9575cd
+    style cost_components_by_id fill:#b39ddb,stroke:#9575cd
     %% Precompute
-    style avoided_cost_load_shape_combos fill:#f57c00,stroke:#bf360c
-    style savings_factors fill:#f57c00,stroke:#bf360c
+    style avoided_cost_load_shape_combos fill:#ffcc80,stroke:#ff9800
+    style savings_factors fill:#ffcc80,stroke:#ff9800
     %% Finalization
-    style final_value_calculations fill:#43a047,stroke:#1b5e20
+    style final_value_calculations fill:#a5d6a7,stroke:#66bb6a
 ```
 **Core Model Table Reference**
 
@@ -262,27 +262,138 @@ Equations for the calulcation of benefits and costs tied to each pathway are giv
 ![Value Stream Equations](readme_images/equations.png)
 
 Variable | Definition |
-|--|------|
+|----|------|
 | **NTG** | Net-to-Gross ratio|
 | **Y** | Year |
 | **SY** | Start Year - the first calendar year an intervention has an impact |
 | **SQ** | Start Quarter - the first quarter an intervention has an impact |
 | **DY** | Dollar Year - the year to pin the calculation of real dollars when adjusting for inflation |
 | **EUL** | Expected Useful Life (years) |
-| **Avoided Cost<sub>y,t</sub>** | Marginal avoided cost ($/commodity unit) for year y and time period t. For instance, $/kWh for hour 7354 of 2035 |
-| **Avoided Cost<sub>y</sub>** | Marginal avoided cost ($/commodity unit) for year y. For instance, $/kWh for 2035 |
+| **N** | The number of temporal increments in a year for a particular value stream. For example N = 12 for monthly data. |
+| **Avoided Cost<sub>y,t</sub>** | Marginal avoided cost (\$/commodity unit) for year y and time period t. For instance, $/kWh for hour 7354 of 2035 |
+| **Avoided Cost<sub>y</sub>** | Marginal avoided cost (\$/commodity unit) for year y. For instance, \$/kWh for 2035 |
 | **Annual Savings** | Annual savings (1.0 or commodity unit) for an intervention. For instance, kWh. If the load shape is dimensioned then Annual Savings should be set to 1.0 |
-| **Load Shpae<sub>t</sub>** | Load Shape (commodity unit or fraction) for time period t. For instance, $/kWh for hour 7354 of the year or 0.001 for hour 7354, which assigns 0.1% of the annual savings to that hour. |
+| **Load Shpae<sub>t</sub>** | Load Shape (commodity unit or fraction) for time period t. For instance, \$/kWh for hour 7354 of the year or 0.001 for hour 7354, which assigns 0.1% of the annual savings to that hour. |
 | **L<sub>E</sub>** | Line loss factor using the electric line loss rate |
 | **L<sub>G</sub>** | Line loss factor using the natural gas line loss rate |
 | **L<sub>P</sub>** | Line loss factor using the peak period electric line loss rate (used only in the Capacity pathway) |
 
+### % Adders
+Several of the value stream groups are % Adders. These value streams are intended to provide users mechanisms to acknowledge and include benefits from value streams that have not yet been properly modeled. For example, consider a jurisdiction that establishes enhancing energy system resilience as a main objective of its demand side portfolio. However, modeling yielding detailed avoided cost data may be a future endeavor. Instead of leaving the value stream out, parties could agree that a 5% adder should be included until more definitive modeling outputs are available.
+
+It is important to note that for each % Adder value stream, there is a more fundamenal value stream upon which the % Adder calculation is based. The table below makes explicit the % Adder value streams and the associated value stream(s) that serve as the basis for calculation.
+
+% Adder Value Stream Group| Basis Value Stream |
+|---|------|
+| **Electric** | Energy |
+| **Natural Gas** | Fuel Cost and O&M |
+| **Propane** | Propane Supply |
+| **Diesel** | Diesel Supply |
+| **Oil** | Oil Supply |
+| **All Fuels** | Energy + Fuel Cost and O&M + Propane Supply + Diesel Supply + Oil Supply |
+
+### Avoided Cost Subsets
+For some or many value streams, avoided costs may be different depending on region, population, or other factors. For instance, if a utility's grid has a segment with more frequent and expensive periods of constraint, then several value streams would be more accurately calculated if: 
+
+1. Avoided cost data were grouped into "constrained" and "non-constrained" subsets. 
+2. Project tracking indicated in which of these regions an intervention occured.
+
+With its Avoided Cost Subset feature, the OpenBCA enables users to enter distinct avoided cost data by divisions they define. 
+
+This functionality operates as follows:
+
+For any value stream with defined subsets, distinct avoided cost data can be tied to the specific subset (see the _avoided_cost_ts_ table spec below). Then, the user can assign any project to a subset via the _measures_ table.
+
+Not all avoided costs need to be assigned to a subset. For example, a user may have different subsets for avoided gnergy costs but only system-wide values for avoided RPS compliance costs. In this case, the user should enter only "System-wide" avoided cost data for the latter. The OpenBCA will automatically probe for and assign projects to specific subsets for the avoided costs that have those subsets, and to a default "System-wide" subset for the remaining avoided costs. 
+
+## Data Granularity
+
+Given different temporal granularity in avoided cost and savings data - both between jurisdictions and among different value streams even within a single jurisdiction - the OpenBCA input templates and model have been designed to handle natural gas and electric data of the following intervals:
+
+- Hourly
+- Daily
+- Monthly
+- Yearly
+
+Other commodities (delivered fuels, host-customer benefits, costs, and custom commodities) must be yearly inputs.
+
+Within the natural gas and electric commodities, individual avoided cost streams may have different granularities. For example, a jurisdiction may have hourly marginal electric avoided costs compiled for energy procurement, montly for GHG emissions, and annual for RPS compliance.
+
+The OpenBCA handles each case, retaining the granularity of the original avoided cost data throughout. 
+
+However, the OpenBCA will not convert lower-granularity savings data to match higher granularity avoided cost data. Therefore, the highest granularity avoided cost stream will determine the savings load shape granularity expected by the software. In other words, the OpenBCA will fail if, for example, hourly avoided cost data are provided for one or more value streams, but monthly savings load shapes are input.
+
+## Input Schema and Requirements
+
+<table>
+<tr>
+<td><strong>measures</strong><br/><img src="readme_images/input_schema/openbca_input_schema_measures.png" alt="measures" style="max-width: 100%; height: auto;"/></td>
+<td><strong>program_value_streams</strong><br/><img src="readme_images/input_schema/openbca_input_program_value_streams.png" alt="program_value_streams" style="max-width: 100%; height: auto;"/></td>
+<td><strong>global_parameters</strong><br/><img src="readme_images/input_schema/openbca_input_schema_global_parameters.png" alt="global_parameters" style="max-width: 100%; height: auto;"/></td>
+</tr>
+<tr>
+<td><strong>value_stream_groups</strong><br/><img src="readme_images/input_schema/openbca_input_schema_value_stream_groups.png" alt="value_stream_groups" style="max-width: 100%; height: auto;"/></td>
+<td><strong>avoided_costs_ts</strong><br/><img src="readme_images/input_schema/openbca_input_schema_avoided_costs_ts.png" alt="avoided_costs_ts" style="max-width: 100%; height: auto;"/></td>
+<td><strong>load_shapes_ts</strong><br/><img src="readme_images/input_schema/openbca_input_schema_load_shapes_ts.png" alt="load_shapes_ts" style="max-width: 100%; height: auto;"/></td>
+</tr>
+</table>
+
+This table details requirements for columns in the OpenBCA schema. Not all columns are inclused as many do not have specific requirements beyond data type. 
+
+Table | Column | Requirements |
+|--|------|----------|
+| **measures** | **id** | required field - must be unique |
+| **measures** | **avoided_cost_subset** | must be null or an exact match to an avoided avoided_cost_subset in the avoided_costs_ts table |
+| **measures** | **start_year** | required field |
+| **measures** | **start_quarter** | required field - can set to 1 if all value streams are annual |
+| **measures** | **unit_quantity** | required field |
+| **measures** | **estimated_useful_life** | required field |
+| **measures** | **ntg** | required field |
+| **measures** | **electric_savings_load_shape** | must match a load shape provided in the load_shapes_ts table for the ELECTRIC commodity |
+| **measures** | **natural_gas_savings_load_shape** | must match a load shape provided in the load_shapes_ts table for the NATURAL GAS commodity |
+| **program_value_streams** | **program_name** | recommend matchihng to the program_name field of the measures table |
+| **global_parameters** | **inflation_rate** | requited field - should be set to 0 if nominal dollar outputs are desired |
+| **global_parameters** | **dollar_year** | required field - can be set to any integer if using nominal outputs |
+| **global_parameters** | **discount_rate** | required field unless discount_rate is entered for all rows in the measures table (the measaures discount_rate will be used wherever populated) |
+| **global_parameters** | **discount_cadence** | required field - accepted values are 1 for annual discounting or 4 for quarterly discounting |
+| **global_parameters** | **electric_line_loss** | required field if electric value streams are included |
+| **global_parameters** | **peak_capacity_line_loss** | required field if peak capacity value streams are included |
+| **global_parameters** | **natural_gas_line_loss** | required field if natural gas value streams are included |
+| **global_parameters** | **cost_treatment** | required field - accepted values include 'UCT', 'TRC', and 'CA TRC' |
+| **value_stream_groups** | **avoided_cost** | required field |
+| **value_stream_groups** | **commodity** | required field |
+| **value_stream_groups** | **include_in_test** | required field |
+| **value_stream_groups** | **calc_type** | required field - accepted values include 'electric', 'natural_gas', 'annual', 'capacity', 'electric_%\_adder', 'natural_gas_%\_adder', 'propane_%\_adder', 'diesel_%\_adder', 'oil_%\_adder', 'all_fuels_%_adder'|
+| **value_stream_groups** | **pct_adder** | required field for any % adder value streams|
+| **value_stream_groups** | **value_stream_group** | required field |
+| **avoided_costs_ts** | **avoided_cost** | required field |
+| **avoided_costs_ts** | **year** | required field |
+| **avoided_costs_ts** | **month** | required field if corresponding avoided_cost temporal granularity is monthly |
+| **avoided_costs_ts** | **day_of_year** | required field if corresponding avoided_cost temporal granularity is daily |
+| **avoided_costs_ts** | **hour_of_day** | required field if corresponding avoided_cost temporal granularity is hourly |
+| **avoided_costs_ts** | **avoided_cost_value** | required field |
+| **load_shapes_ts** | **commodity** | required field |
+| **load_shapes_ts** | **month** | required field if corresponding load_shape temporal granularity is hourly |
+| **load_shapes_ts** | **day_of_year** | required field if corresponding load_shape temporal granularity is daily |
+| **load_shapes_ts** | **hour_of_day** | required field if corresponding load_shape temporal granularity is hourly |
+| **load_shapes_ts** | **load_shape** | required field |
+| **load_shapes_ts** | **load_shape_value** | required field |
+
 ## [Optional] Set up DBeaver to connect to the local DuckDB database
 If you want to use DBeaver to connect to the local DuckDB database, you can follow these steps:
+
 1. Install DBeaver from [dbeaver.io](https://dbeaver.io/download/).
+
 2. Open DBeaver and create a new connection.
+
 3. Select "DuckDB" as the database type.
+
 4. In the connection settings, set the database path to `<project base full path>/open-bca/output/openbca.db`. Note you need to first run the `make run-demo` command to create the database file.
+
 5. Click "Test Connection" to ensure the connection is successful.
+
 6. Click "Finish" to create the connection.
+
 7. You can now explore the database schema and run SQL queries against the OpenBCA tables and views.
+
+
