@@ -397,3 +397,15 @@ If you want to use DBeaver to connect to the local DuckDB database, you can foll
 7. You can now explore the database schema and run SQL queries against the OpenBCA tables and views.
 
 
+## Packaging the OpenBCA App
+If you want to use OpenBCA as a "double-click" executable, you can run `make build-pyinstaller-package` in your terminal. This will package the OpenBCA app into a single directory located at dist/openbca-app. 
+
+Inside the dist/openbca-app directory, there will be an "_internal file" and an executable named "openbca-app". OpenBCA can be run simply by double-clicking the openbca-app executable, which should open a browser window automatically.
+
+Packaging the OpenBCA app allows for easy distribution between machines without the need to clone the code repository. The openbca-app folder can be zipped and transferred to another machine. Both the "_internal" folder and "openbca-app" are required to ensure proper functionality. **Applications built this way will only work on machines with the same operating system the app was built on**, meaning an application built on Windows will only work on Windows machines (not Macs).
+
+If double-clicking does not work, you can run `make run-pyinstaller-package` in the terminal to launch openbca.
+
+Please note that you must click the "Exit OpenBCA" button on the webpage in order to properly shut down the application. If you do not do so, you will have to manually kill the application through task manager (or its equivalent on non-windows platforms).
+
+This packaging is done through PyInstaller, with the specified openbca-app.spec file.
