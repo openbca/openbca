@@ -30,6 +30,7 @@ Generally speaking, the Integrated pathway is for expert users and will not be e
 
 ## Prerequisite Installations
 The OpenBCA requires the following packages to be installed on your local machine:
+
 - git ([mac](https://git-scm.com/install/mac) or [windows](https://git-scm.com/install/windows))
 - uv [mac](https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_1) or [windows](https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_2)
 - [make](https://gnuwin32.sourceforge.net/packages/make.htm) (Note this is included as standard on Mac machines)
@@ -162,7 +163,7 @@ flowchart TD
    style User_Interface fill:#c8e6c9,stroke:#81c784,stroke-width:2px
 ```
 
-## OpenBCA Core Model
+## 🧠 OpenBCA Core Model
 This diagram shows the flow of the OpenBCA core model across its four phases:
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'fontSize': '11px', 'primaryTextColor': '#000000', 'primaryBorderColor': '#37474f', 'lineColor': '#37474f'}}}%%
