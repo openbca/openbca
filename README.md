@@ -85,7 +85,7 @@ Benefit-cost analysis for distributed energy resources is conducted using the fo
 
 **Expected Useful Life (EUL)** - The number of years that a project is expected to deliver impacts.
 
-**Net-to-Gross (NTG)** - Intended to account for free ridership, this metric is used in some jurisdicitons to represent the fraction of program benefits and host customer costs that occured _because of the program_. NTG values typically range between 0 and 1 and 1 - NTG is interpreted as the fraction of program impacts tied to customers who would have undertaken the interventions even in the abscence of the program. NTG values above 1.0 are allowed as some jurisdictions will assume some benefits occur outside the program _but on account of the program_. This is referred to as "spillover" or "market effects."
+**Net-to-Gross (NTG)** - Intended to account for free ridership, this metric is used in some jurisdicitons to represent the fraction of program benefits and host customer costs that occured _because of the program_. NTG values typically range between 0 and 1 and 1 - NTG is interpreted as freeridership, the fraction of program impacts tied to customers who would have undertaken the interventions even in the abscence of the program. NTG values above 1.0 are allowed as some jurisdictions will assume some benefits occur outside the program _but on account of the program_. This is referred to as "spillover" or "market effects."
 
 ## OpenBCA Process Flow
 This diagram shows the execution flow of the OpenBCA across three main phases: data input, computation, and user interface functionality
@@ -323,6 +323,26 @@ The OpenBCA handles each case, retaining the granularity of the original avoided
 
 However, the OpenBCA will not convert lower-granularity savings data to match higher granularity avoided cost data. Therefore, the highest granularity avoided cost stream will determine the savings load shape granularity expected by the software. In other words, the OpenBCA will fail if, for example, hourly avoided cost data are provided for one or more value streams, but monthly savings load shapes are input.
 
+## Alignment of Load Shapes and Avoided Costs
+
+The OpenBCA allows users to enter savings load shapes for one year time periods, amounting to 8760 hourly data points, 365 daily data points, 12 monthly data points, or 1 annual data point. The savings load shape is expected to persist across the full Expected Useful Life (EUL) of the intervention. 
+
+However, because energy system and non-system marginal avoided costs are expected to evolve over time, distinct avoided cost data must be entered for each year of the EUL.
+
+With only one year of data, the savings load shapes will inherently dictate what day of week corresponds to the days throughout the year - and each year the avoided cost data should align with the resulting calendar. 
+
+In addition to these considerations, we note that **currently leap years and daylight savings time are not supported.**
+
+Therefore, it is the user's responsibility to:
+
+- Understand what day of week corresponds to Jan 1 for load shape data.
+- Ensure that all load shapes share the same Jan 1 day of week.
+- Align _all years_ of avoided cost data with the load shape data.
+- Properly handle avoided cost data to eliminate leap days. (This may be best accomplished by converting Feb. 29 to Mar. 1 and dropping Dec. 31.)
+- Ensure all load shape and avoided cost data are in standard time.
+
+
+
 ## Input Schema and Requirements
 
 <table>
@@ -395,5 +415,3 @@ If you want to use DBeaver to connect to the local DuckDB database, you can foll
 6. Click "Finish" to create the connection.
 
 7. You can now explore the database schema and run SQL queries against the OpenBCA tables and views.
-
-
