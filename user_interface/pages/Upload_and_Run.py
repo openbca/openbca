@@ -329,7 +329,8 @@ if db_handling in ["Overwrite existing output database", "Backup existing output
     with col2:
         if st.session_state.model_run_status == "success":
             st.success("OpenBCA model completed successfully.")
-            st.page_link("pages/Insights_and_Analysis.py", label="Go to **Insights and Analysis**", icon="🔍")
+            PAGES_DIR = get_streamlit_app_dir() / "pages"
+            st.page_link(str(PAGES_DIR / "Insights_and_Analysis.py"), label="Go to **Insights and Analysis**", icon="🔍")
 
         elif st.session_state.model_run_status == "error" and st.session_state.model_run_error:
             st.error(st.session_state.model_run_error)
