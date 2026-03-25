@@ -45,8 +45,33 @@ test-parsing:
 	cd excel_input_parsing && PYTHONPATH=.. uv run python test_parsing.py
 
 build-pyinstaller-package:
-	@echo "Building PyInstaller openbca-app..."
-	uv run pyinstaller openbca-app.spec --clean --noconfirm
+	@echo "Building openbca-app with streamlit-desktop-app..."
+	uv run streamlit-desktop-app build user_interface/Entrypoint.py \
+		--name desktop-openbca \
+		--pyinstaller-options \
+			--onedir \
+			--noconfirm \
+			--add-data excel_input_parsing:excel_input_parsing \
+			--add-data core/models:core/models \
+			--add-data core/config.yaml:core \
+			--add-data user_interface:user_interface \
+			--add-data model_runners.py:. \
+			--add-data output/.keepme:output \
+			--add-data .env:. \
+			--hidden-import model_runners \
+			--hidden-import config.env \
+			--hidden-import config.paths \
+			--hidden-import validation_functions \
+			--hidden-import helper_functions \
+			--hidden-import figures \
+			--hidden-import sql_queries \
+			--collect-all sqlmesh \
+			--collect-all sqlglot \
+			--collect-submodules sqlglot.dialects \
+			--collect-all duckdb \
+			--collect-all openpyxl
+# also create symlinks from dist/desktop-openbca/_internal/[input/output] to dist/desktop-openbca/[input/output] for easier access to these folders in the packaged app
+# may need to be relative symlinks
 
 # Note: this assumes the package has already been built with the above command, and will fail if it has not been built yet
 run-pyinstaller-package:
