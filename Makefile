@@ -47,7 +47,7 @@ test-parsing:
 build-pyinstaller-package:
 	@echo "Building openbca-app with streamlit-desktop-app..."
 	uv run streamlit-desktop-app build user_interface/Entrypoint.py \
-		--name desktop-openbca \
+		--name openbca-app \
 		--pyinstaller-options \
 			--onedir \
 			--noconfirm \
@@ -70,7 +70,7 @@ build-pyinstaller-package:
 			--collect-submodules sqlglot.dialects \
 			--collect-all duckdb \
 			--collect-all openpyxl
-# also create symlinks from dist/desktop-openbca/_internal/[input/output] to dist/desktop-openbca/[input/output] for easier access to these folders in the packaged app
+# also create symlinks from dist/openbca-app/_internal/[input/output] to dist/openbca-app/[input/output] for easier access to these folders in the packaged app
 # may need to be relative symlinks
 
 # Note: this assumes the package has already been built with the above command, and will fail if it has not been built yet
