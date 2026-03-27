@@ -1,8 +1,14 @@
+import sys
+
 import streamlit as st
 from config.paths import get_streamlit_app_dir
 
+
 UI_DIR = get_streamlit_app_dir()
 PAGES_DIR = UI_DIR / "pages"
+
+if str(UI_DIR) not in sys.path:
+    sys.path.insert(0, str(UI_DIR))
 
 st.set_page_config(layout="wide")
 
