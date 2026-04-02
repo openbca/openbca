@@ -42,35 +42,35 @@ def load_load_shapes_from_excel(
     pivoting to long format.
     """
     file_path = get_input_templates_dir() / input_file
-    xls = pd.ExcelFile(file_path)
     all_frames = []
-    for sheet in xls.sheet_names:
+    with pd.ExcelFile(file_path, engine="calamine") as xls:
+        for sheet in xls.sheet_names:
 
-        if sheet in skip_sheets:
-            continue
-        
-        df = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=skiprows)
-        df = df.dropna(how="all").dropna(axis=1, how="all")
-        if df.empty:
-            continue
+            if sheet in skip_sheets:
+                continue
+            
+            df = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=skiprows, engine="calamine")
+            df = df.dropna(how="all").dropna(axis=1, how="all")
+            if df.empty:
+                continue
 
-        # --- Handle headers ---
-        headers = df.iloc[0].astype(str)
-        cleaned_headers = []
-        for col in headers:
-            col_stripped = str(col).strip()
-            if col_stripped.lower() in {"month", "day", "hour of year"}:
-                cleaned_headers.append(col_stripped.lower().replace(" ", "_"))
-            else:
-                cleaned_headers.append(col_stripped)  # keep original
-        df.columns = cleaned_headers
-        df = df[1:]  # drop header row
+            # --- Handle headers ---
+            headers = df.iloc[0].astype(str)
+            cleaned_headers = []
+            for col in headers:
+                col_stripped = str(col).strip()
+                if col_stripped.lower() in {"month", "day", "hour of year"}:
+                    cleaned_headers.append(col_stripped.lower().replace(" ", "_"))
+                else:
+                    cleaned_headers.append(col_stripped)  # keep original
+            df.columns = cleaned_headers
+            df = df[1:]  # drop header row
 
-        # Add commodity (trim "Loadshape Mapping")
-        commodity_name = sheet.replace(" Load Shapes", "").strip()
-        df["commodity"] = commodity_name
+            # Add commodity (trim "Loadshape Mapping")
+            commodity_name = sheet.replace(" Load Shapes", "").strip()
+            df["commodity"] = commodity_name
 
-        all_frames.append(df)
+            all_frames.append(df)
 
     if not all_frames:
         return pd.DataFrame()
