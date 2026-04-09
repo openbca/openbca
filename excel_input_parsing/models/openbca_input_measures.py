@@ -14,7 +14,8 @@ file_path = get_input_templates_dir() / input_file
 skiprows = 3
 
 # Read sheet; use cleaned headers so MEASURES_SCHEMA_COLUMN_ORDER matches df.columns after clean_header()
-custom_headers = [clean_header(c) for c in pd.read_excel(file_path, sheet_name=sheet_name, skiprows=skiprows, nrows=1).columns[2:7]]
+with pd.ExcelFile(file_path, engine="calamine") as xls:
+    custom_headers = [clean_header(c) for c in pd.read_excel(xls, sheet_name=sheet_name, skiprows=skiprows, nrows=1, engine="calamine").columns[2:7]]
 
 # Column order must match the model schema below and the final returned dataframe.
 MEASURES_SCHEMA_COLUMN_ORDER = [
@@ -153,7 +154,7 @@ def load_measure_inputs_from_excel(
     file_path = get_input_templates_dir() / input_file
 
     # Read sheet
-    df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=skiprows)
+    df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=skiprows, engine="calamine")
 
     # Apply header cleaning
     df.columns = [clean_header(c) for c in df.columns]
@@ -189,14 +190,15 @@ def load_measure_inputs_from_excel(
         Generate dataframe to classify value stream grouping from the Configuration Data sheet in the OpenBCA CONFIG file.
         '''
         file_path_config = get_input_templates_dir() / 'OpenBCA Configuration.xlsm'
-        xls_config = pd.ExcelFile(file_path_config)
+        xls_config = pd.ExcelFile(file_path_config, engine="calamine")
         
         custom_avoided_cost_names_df = pd.read_excel(
             xls_config, 
             sheet_name='Configuration Data', 
             header=0, 
             skiprows=3, 
-            usecols='C:D').tail(5)
+            usecols='C:D', 
+            engine="calamine").tail(5)
 
         #value_stream_names = custom_avoided_cost_names_df[value_stream_col_name].to_list()
         custom_avoided_cost_names_df['Commodity'] = custom_avoided_cost_names_df['Commodity'].astype(str)

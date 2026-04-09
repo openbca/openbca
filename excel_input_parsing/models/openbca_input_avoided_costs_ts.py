@@ -43,7 +43,7 @@ def load_avoided_costs_from_excel(
     Load and consolidate timeseries data from an Excel workbook, enforce schema, and pivot to long format.
     """
     file_path = get_input_templates_dir() / input_file
-    xls = pd.ExcelFile(file_path)
+    xls = pd.ExcelFile(file_path, engine="calamine")
 
     def custom_period_to_hour_of_year_map():
 
@@ -51,7 +51,8 @@ def load_avoided_costs_from_excel(
             xls, 
             sheet_name='Common Data', 
             usecols='C:Z', 
-            skiprows=29
+            skiprows=29,
+            engine="calamine",
             ).reset_index().rename({'index':'month'}, axis=1)
 
         custom_period_df['month'] = custom_period_df['month'] + 1
@@ -83,10 +84,10 @@ def load_avoided_costs_from_excel(
             continue
 
         # --- Find "Calculation Type" from row 2 ---
-        avoided_cost = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=1, nrows=1, usecols='A').values[0][0]
+        avoided_cost = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=1, nrows=1, usecols='A', engine="calamine").values[0][0]
 
         # --- Load actual data starting at skiprows ---
-        df = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=skiprows)
+        df = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=skiprows, engine="calamine")
         df = df.dropna(how="all").dropna(axis=1, how="all")
             
         if df.empty:

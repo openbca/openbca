@@ -97,14 +97,16 @@ def load_value_stream_groups_from_excel(
     Generate dataframe to classify value stream grouping from the Configuration Data sheet in the OpenBCA CONFIG file.
     '''
     file_path = get_input_templates_dir() / input_file
-    xls = pd.ExcelFile(file_path)
+    xls = pd.ExcelFile(file_path, engine="calamine")
     
     value_stream_groups_df = pd.read_excel(
         xls, 
         sheet_name='Configuration Data', 
         header=0, 
         skiprows=3, 
-        usecols='C:I')[[
+        usecols='C:I',
+        engine="calamine",
+        )[[
             'Value Stream',
             'Commodity',
             'Include in Test',

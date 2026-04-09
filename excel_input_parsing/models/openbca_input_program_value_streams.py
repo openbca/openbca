@@ -31,13 +31,14 @@ def load_program_value_streams_from_excel(
     Generate dataframe to scrape program-level value streams grouping from the Program Inputs sheet in the OpenBCA Program Input.xlsx file.
     '''
     file_path =  get_input_templates_dir() / input_file
-    xls = pd.ExcelFile(file_path)
+    xls = pd.ExcelFile(file_path, engine="calamine")
     
     program_value_streams_df = pd.read_excel(
         xls, 
         sheet_name='Program Inputs', 
         header=0, 
-        skiprows=2, 
+        skiprows=2,
+        engine="calamine", 
         )
 
     program_value_streams_df.columns = [clean_header(c) for c in program_value_streams_df.columns]

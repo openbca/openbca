@@ -39,14 +39,15 @@ def compile_global_parameters_from_excel(
     Generate dataframe to store global parameters from the Common Data sheet in the OpenBCA CONFIG file.
     '''
     file_path = get_input_templates_dir() / input_file
-    xls = pd.ExcelFile(file_path)
+    xls = pd.ExcelFile(file_path, engine="calamine")
 
     real_nominal_df = pd.read_excel(
         xls, 
         sheet_name='Common Data', 
         header=0, 
         skiprows=lambda x: x != real_nominal_row, 
-        usecols='B,C').T.reset_index()
+        usecols='B,C',
+        engine="calamine").T.reset_index()
 
     real_nominal_df.columns = ['real_inputs']
     real_nominal_df.drop([0], inplace=True)
@@ -57,7 +58,8 @@ def compile_global_parameters_from_excel(
         sheet_name='Common Data', 
         header=0, 
         skiprows=lambda x: x != inflation_rate_row, 
-        usecols='B,D').T.reset_index()
+        usecols='B,D',
+        engine="calamine").T.reset_index()
 
     inflation_rate_df.columns = ['inflation_rate']
     inflation_rate_df.drop([0], inplace=True)
@@ -67,7 +69,8 @@ def compile_global_parameters_from_excel(
         sheet_name='Common Data', 
         header=0, 
         skiprows=lambda x: x != dollar_year_row, 
-        usecols='B,D').T.reset_index()
+        usecols='B,D',
+        engine="calamine").T.reset_index()
 
     dollar_year_df.columns = ['dollar_year']
     dollar_year_df.drop([0], inplace=True)
@@ -77,7 +80,8 @@ def compile_global_parameters_from_excel(
         sheet_name='Common Data', 
         header=0, 
         skiprows=lambda x: x != discount_rate_row, 
-        usecols='B,D').T.reset_index()
+        usecols='B,D',
+        engine="calamine").T.reset_index()
 
     discount_rate_df.columns = ['discount_rate']
     discount_rate_df.drop([0], inplace=True)
@@ -87,7 +91,8 @@ def compile_global_parameters_from_excel(
         sheet_name='Common Data', 
         header=0, 
         skiprows=lambda x: x != discount_cadence_row, 
-        usecols='B,C').T.reset_index()
+        usecols='B,C',
+        engine="calamine").T.reset_index()
 
     discount_cadence_dict = {'Annual': 1, 'Quarterly': 4}
 
@@ -100,7 +105,8 @@ def compile_global_parameters_from_excel(
         sheet_name='Common Data', 
         header=0, 
         skiprows=lambda x: x not in line_losses_rows, 
-        usecols='D').T.reset_index()
+        usecols='D',
+        engine="calamine").T.reset_index()
 
     line_losses_df.columns = ['electric_line_loss', 'peak_capacity_line_loss', 'natural_gas_line_loss']
 
@@ -109,7 +115,8 @@ def compile_global_parameters_from_excel(
         sheet_name='Common Data', 
         header=0, 
         skiprows=lambda x: x != cost_treatment_row, 
-        usecols='B,C').T.reset_index()
+        usecols='B,C',
+        engine="calamine").T.reset_index()
 
     cost_treatment_df.columns = ['cost_treatment']
     cost_treatment_df.drop([0], inplace=True)
