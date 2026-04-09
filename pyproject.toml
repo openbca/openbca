@@ -25,6 +25,7 @@ dependencies = [
   "tabulate>=0.9.0",
   "xlwings",
   "pyinstaller>=6.18.0",
+  "streamlit-desktop-app>=0.3.4",
 ]
 
 [project.optional-dependencies]
