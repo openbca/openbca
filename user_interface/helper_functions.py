@@ -18,6 +18,7 @@ def space_and_title(text: str) -> str:
         " Dollar Per Unit Year", '',).replace(
         " Dollar Per Unit", '').replace(
         " Dollar Per Year", '').replace(
+        " Dollar", '').replace(
         "Vs", "vs")
 
 

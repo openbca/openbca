@@ -210,8 +210,11 @@ else:
             col4.metric(label="JST Ratio", value=f"{jst_ratio:.2f}", border=False)
 
             st.divider()
+
             
-            ###Analyis  
+#############################   Portfolio Analysis   #####################################
+               
+
             col1, col2 = st.columns(spec=[0.55, 0.45], gap="medium", border=False)
             
             with col1: 
@@ -240,11 +243,10 @@ else:
                     index = 0, 
                     )
 
-                max_waterfall_steps = 20
+                max_waterfall_steps = 16
                 waterfall_column = reconstruct_column_name(waterfall_filter)
 
                 waterfall_results_initial_df = con.execute(generate_waterfall_query(where_sql, waterfall_column)).df().sort_values(by='final_dollar_value', key=abs, ascending=False)
-                #waterfall_results_initial_df[waterfall_column] = waterfall_results_initial_df[waterfall_column].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
                 waterfall_results_total_df = pd.DataFrame([['total', waterfall_results_initial_df['final_dollar_value'].sum()]], columns=[waterfall_column, 'final_dollar_value'])
                 
                 waterfall_results_other_df = pd.DataFrame([], columns=[waterfall_column, 'final_dollar_value'])
@@ -255,11 +257,14 @@ else:
                     waterfall_results_initial_df.head(max_waterfall_steps),
                     waterfall_results_total_df
                 ]
+
                 if len(waterfall_results_other_df) > 0:
                     concat_parts.insert(1, waterfall_results_other_df)
+                
                 waterfall_results_df = pd.concat(concat_parts)
                 
                 waterfall_results_df['total'] = waterfall_results_df[waterfall_column].apply(lambda x: True if x == 'total' else False)
+                waterfall_results_df[waterfall_column] = waterfall_results_df[waterfall_column].apply(lambda x: x.replace('_dollar', ''))
                 waterfall_results_df, waterfall_unit_labels = determine_dollar_magnitude(waterfall_results_df, y_col='final_dollar_value')
                 
                 num_bars = len(waterfall_results_df)
@@ -375,9 +380,9 @@ else:
                         label_size = 10,
                         figsize = (8, 6),
                         title = f"{space_and_title(benefits_vs_costs_or_jst_ratio)} by {catalog_by_filter}",
-                        xlims = [axis_min, axis_max],
+                        xlims = [axis_min, axis_max] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else None,
                         xlabel = f"{'Costs' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'Net Benefits'} {benefit_cost_scatter_unit_labels[0]}",
-                        ylims = [axis_min, axis_max],
+                        ylims = [axis_min, axis_max] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else None,
                         ylabel = f"{'Benefits' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'JST Ratio'} {benefit_cost_scatter_unit_labels[1] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else ''}",
                         legend = True,
                         legend_labels = sorted(list(benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
@@ -391,7 +396,10 @@ else:
                     benefit_cost_scatter_df[reconstruct_column_name(catalog_by_filter)] = benefit_cost_scatter_df[reconstruct_column_name(catalog_by_filter)].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
 
                     st.dataframe(
-                        benefit_cost_scatter_df[['id', reconstruct_column_name(catalog_by_filter), 'total_costs', 'total_benefits', 'net_benefits', 'jst_ratio']], 
+                        benefit_cost_scatter_df[[
+                            'id', reconstruct_column_name(catalog_by_filter), 'total_costs', 'total_benefits', 'net_benefits', 'jst_ratio'
+                            ]].sort_values(
+                                by='net_benefits' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'jst_ratio', ascending=False), 
                         width='stretch', 
                         hide_index=True,
                         column_config={
@@ -418,7 +426,10 @@ else:
                     )
 
             st.divider()
-            # Benefits and Costs Analysis
+
+
+#############################   Benefits Analysis   #####################################
+
 
             header_col1, header_col2 = st.columns(spec=[0.55, 0.45], gap="medium", border=False)
             with header_col1:
@@ -481,11 +492,12 @@ else:
                     temporal_aggregation_filter = reconstruct_column_name(temporal_aggregation_filter)
                         
                     null_aggregation_benefits_df = con.execute(generate_null_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter)).df()
+                    lower_granularity_value_streams = null_aggregation_benefits_df.query("value_stream != 'total'")['value_stream'].tolist()
                     if len(null_aggregation_benefits_df) > 0:
-                        null_aggregation_benefits = null_aggregation_benefits_df['final_dollar_value'].values[0]
+                        null_aggregation_benefits = null_aggregation_benefits_df.query("value_stream == 'total'")['final_dollar_value'].values[0]
                         subcol2.write(f"")
                         with subcol2.container(border=True):
-                            st.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help="Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here.")
+                            st.markdown(f"###### Lower granularity benefits = **${null_aggregation_benefits:,.0f}**", help=f"Benefits that accrue from value streams with lower temporal granularity than displayed in the figure. For example, if monthly benefits are shown, then value streams that can only be quantified at an annual level are accounted for here. In the current selection, these value streams include: {', '.join(lower_granularity_value_streams)}.")
 
                 # Use widget key "isolate_peak" for current value (updated at run start); fallback to isolate_peak_filter
                 isolate_peak_active = (
@@ -600,6 +612,12 @@ else:
                         )   
 
                 else:
+                    savings_label = ''
+                    if commodity_filter.upper() == 'ELECTRIC':
+                        savings_label = ' (kWh)'
+                    elif commodity_filter.upper() in ['NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL']:
+                        savings_label = ' (MMBtu)'
+
                     st.dataframe(
                     temporal_aggregation_results_df[[temporal_aggregation_filter,'final_dollar_value_original', 'net_lifecycle_energy_savings_original']],
                     width='stretch',
@@ -613,8 +631,8 @@ else:
                             label="Benefits ($)",
                             format="dollar",
                         ),
-                    'net_lifecycle_energy_savings_original': st.column_config.NumberColumn(
-                        label=f'Benefits{temporal_aggregation_results_unit_labels[0]}',
+                        'net_lifecycle_energy_savings_original': st.column_config.NumberColumn(
+                        label=f'Savings{savings_label}',
                         format="%.2f",
                         )},
                     )
@@ -700,7 +718,10 @@ else:
                     st.divider()
                 pie_fig_section(isolate_peak=False, peak_months=[], peak_hours=[])
 
-    ### Comparative Analysis
+
+#############################   Comparative Analysis   #####################################
+
+
         category_filters = con.execute(
             generate_multiple_options_probe_query(
                 where_sql, column_names=[filter for filter in filters if filter != 'id']+['commodity']
@@ -819,7 +840,10 @@ else:
         
         st.divider()
 
-        #Costs
+
+#############################   Costs Analysis   #####################################
+
+
         st.markdown("#### Costs")
         st.markdown("##### See Results by Impact Category and Value Stream")
         

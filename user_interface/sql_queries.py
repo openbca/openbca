@@ -168,7 +168,24 @@ def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, te
 def generate_null_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter):
     null_aggregation_benefits_query = f"""
         SELECT 
-        sum(final_dollar_value) AS final_dollar_value
+        value_stream
+        , sum(final_dollar_value) AS final_dollar_value
+        FROM 
+        openbca.core_layer3_finalization.final_value_calculations_ts fvc 
+        JOIN openbca.core_layer0_base.measures m ON 
+        fvc.id = m.id
+        {where_sql} 
+        AND commodity = '{commodity_filter}'
+        AND {temporal_aggregation_filter} IS NULL
+        GROUP BY
+        value_stream
+        HAVING SUM(final_dollar_value) IS NOT NULL
+
+        UNION ALL  
+
+        SELECT 
+        'total' as value_stream
+        , sum(final_dollar_value) AS final_dollar_value
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fvc 
         JOIN openbca.core_layer0_base.measures m ON 

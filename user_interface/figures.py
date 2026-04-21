@@ -84,7 +84,8 @@ replace_elements = {
     " Dollar Per Year": '',
     "Rps": "RPS",
     "Nei":"NEI",
-    "Ng":"NG"
+    "Ng":"NG",
+    " Dollar": ""
     }
 
 

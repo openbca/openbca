@@ -148,6 +148,9 @@ with col1:
         if file_submitted and uploaded_files is not None:
             for uploaded_file in uploaded_files:
                 file_name = Path(uploaded_file.name).name
+                if file_name not in [program_input_file_name, configuration_file_name]:
+                    st.error(f"File {file_name} is not a valid input file. Valid file names include {program_input_file_name} and {configuration_file_name}.", icon="🚨")
+                    continue
                 file_path = INPUT_TEMPLATES_DIR / file_name
                 with file_path.open("wb") as f:
                     f.write(uploaded_file.getbuffer())

@@ -198,7 +198,7 @@ def load_measure_inputs_from_excel(
             header=0, 
             skiprows=3, 
             usecols='C:D', 
-            engine="calamine").tail(5)
+            engine="calamine").tail(10).head(5)
 
         #value_stream_names = custom_avoided_cost_names_df[value_stream_col_name].to_list()
         custom_avoided_cost_names_df['Commodity'] = custom_avoided_cost_names_df['Commodity'].astype(str)
