@@ -387,7 +387,7 @@ Table | Column | Requirements |
 | **measures** | **start_quarter** | required field - can set to 1 if all value streams are annual |
 | **measures** | **unit_quantity** | required field |
 | **measures** | **estimated_useful_life** | required field |
-| **measures** | **ntg** | required field |
+| **measures** | **net_to_gross_ratio** | required field |
 | **measures** | **electric_savings_load_shape** | must match a load shape provided in the load_shapes_ts table for the ELECTRIC commodity |
 | **measures** | **natural_gas_savings_load_shape** | must match a load shape provided in the load_shapes_ts table for the NATURAL GAS commodity |
 | **program_value_streams** | **program_name** | recommend matchihng to the program_name field of the measures table |

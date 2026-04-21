@@ -787,13 +787,13 @@ def numeric_bar_fig(
         )
 
         if pin_yaxis_zeros:
-            a = ax.get_ylim()[1]
-            b = ax.get_ylim()[0]
-            c = max(df[y2_col]) * 1.05
+            a = ax.get_ylim()[1] # max value of y axis
+            b = ax.get_ylim()[0] # min value of y axis
+            c = max(df[y2_col]) * 1.05 # max value of y2 data buffered by 5%
             if c > 0:
-                ax1.set_ylim(c * (1 - (a - b) / a), c)
+                ax1.set_ylim(c * (1 - (a - b) / a), c) # set y2 axis limits in case of positive maxy2 data
             else:
-                c = min(df[y2_col]) * 1.05
+                c = min(df[y2_col]) * 1.05 # set y2 axis limits in case of negative max y2 data
                 ax1.set_ylim(c, a)
 
         ax1.legend(
@@ -819,6 +819,7 @@ def scatter_fig(
     marker: str = markers_open[0],
     marker_color: str = colors[3],
     color_by_col: str = None,
+    include_45_degree_line: bool = False,
     label_points: bool = False,
     labels: list = None,
     label_size: int = 10,
@@ -849,6 +850,7 @@ def scatter_fig(
             to be used to color the data points. If this keyword is passed, then
             the marker_color keyword can be a dict that maps category names to colors.
             If marker_color is not a dict, it will be ignored in this context.
+        include_45_degree_line (bool): Whether to plot a 45 degree line.
         label_points (bool): Whether to label data points.
         labels (list): List of labels for each data point if label_points is True.
         label_size (int): Font size of labels.
@@ -914,6 +916,9 @@ def scatter_fig(
 
         if include_line:
             ax.plot(x, y, color=marker_color)
+
+    if include_45_degree_line:
+        ax.plot([min(xmin, ymin), max(xmax, ymax)], [min(xmin, ymin), max(xmax, ymax)], linestyle="--", color="dimgray")
 
     # Horizontal dashed line at y=0
     ax.axhline(0, linestyle="--", color="dimgray")

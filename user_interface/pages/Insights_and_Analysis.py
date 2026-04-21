@@ -28,7 +28,6 @@ from sql_queries import (
 from figures import (
     replace_multiple_string_elements,
     waterfall_multitier_fig, 
-    hour_of_day_ls_fig, 
     numeric_bar_fig, 
     categorical_bar_fig,
     scatter_fig,
@@ -342,79 +341,50 @@ else:
                     cat_col = reconstruct_column_name(catalog_by_filter)
                     benefit_cost_scatter_df[cat_col] = benefit_cost_scatter_df[cat_col].fillna("None")
 
+                benefit_cost_scatter_df, benefit_cost_scatter_unit_labels, benefit_cost_scatter_scale_exponent = determine_dollar_magnitude(
+                    benefit_cost_scatter_df, 
+                        x_col=scatter_x_col, 
+                        y_col=scatter_y_col,
+                        return_scale_exponent=True
+                        )
+
                 if waterfall_scatter_fig_or_table == 'Figures':            
                     min_scatter_val = benefit_cost_scatter_df[[scatter_x_col, scatter_y_col]].min().min()
                     max_scatter_val = benefit_cost_scatter_df[[scatter_x_col, scatter_y_col]].max().max()
                     scatter_range = max_scatter_val - min_scatter_val
-                    initial_padding = 0.05
-                    axis_min = min_scatter_val - initial_padding * scatter_range
-                    axis_max = max_scatter_val + initial_padding * scatter_range
+                    padding = 0.05
+                    axis_min = min_scatter_val - padding * scatter_range
+                    axis_max = max_scatter_val + padding * scatter_range
 
-                    x_min_scatter_val = benefit_cost_scatter_df[scatter_x_col].min()
-                    x_max_scatter_val = benefit_cost_scatter_df[scatter_x_col].max()
-                    y_min_scatter_val = benefit_cost_scatter_df[scatter_y_col].min()
-                    y_max_scatter_val = benefit_cost_scatter_df[scatter_y_col].max()
-
-                    zoom_padding = 0.005
-                    safe_range = np.nan_to_num(scatter_range, nan=0.0)
-                    x_min = np.nan_to_num(x_min_scatter_val, nan=0.0) + safe_range * zoom_padding
-                    x_max = np.nan_to_num(x_max_scatter_val, nan=0.0) - safe_range * zoom_padding
-                    y_min = np.nan_to_num(y_min_scatter_val, nan=0.0) + safe_range * zoom_padding
-                    y_max = np.nan_to_num(y_max_scatter_val, nan=0.0) - safe_range * zoom_padding
-
-                    zoom = st.session_state.get("benefit_cost_zoom", 0.0)
-
-                    plot_x_axis_min = min(axis_min*(1 - zoom), x_max)
-                    plot_x_axis_max = max(axis_max*(1 - zoom), x_min)
-                    plot_y_axis_min = min(axis_min*(1 - zoom), y_max)
-                    plot_y_axis_max = max(axis_max*(1 - zoom), y_min)
-
-                    plot_benefit_cost_scatter_df, plot_benefit_cost_scatter_unit_labels, plot_benefit_cost_scatter_scale_exponent = determine_dollar_magnitude(
-                        benefit_cost_scatter_df.query(
-                            f"{plot_x_axis_min} <= {scatter_x_col} <= {plot_x_axis_max} and {plot_y_axis_min} <= {scatter_y_col} <= {plot_y_axis_max}"), 
-                            x_col=scatter_x_col, 
-                            y_col=scatter_y_col,
-                            return_scale_exponent=True
-                            )
-
+                    # Dynamic marker size based on number of data points
                     min_marker_size = 100
                     max_marker_size = 300 
-                    marker_size = max(min_marker_size, min(max_marker_size, min_marker_size + 10*(max_marker_size - min_marker_size) / len(plot_benefit_cost_scatter_df)))
+                    marker_size = max(min_marker_size, min(max_marker_size, min_marker_size + 10*(max_marker_size - min_marker_size) / len(benefit_cost_scatter_df)))
 
                     benefit_cost_scatter_fig = scatter_fig(
-                        df = plot_benefit_cost_scatter_df,
+                        df = benefit_cost_scatter_df,
                         xy_cols_dict = {
                             scatter_x_col:{'uncertainty_col':None, 'label': f'{scatter_x_col} ($)'},
                             scatter_y_col:{'uncertainty_col':None, 'label': f'{scatter_y_col} ($)'}
                             },
                         marker_size = marker_size,
+                        include_45_degree_line = True if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else False,
                         color_by_col = reconstruct_column_name(catalog_by_filter),
                         label_points = False,
-                        labels = plot_benefit_cost_scatter_df['id'].tolist(),
+                        labels = benefit_cost_scatter_df['id'].tolist(),
                         label_size = 10,
                         figsize = (8, 6),
                         title = f"{space_and_title(benefits_vs_costs_or_jst_ratio)} by {catalog_by_filter}",
-                        xlims = [plot_x_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_x_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                        xlabel = f"{'Costs' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'Net Benefits'} {plot_benefit_cost_scatter_unit_labels[0]}",
-                        ylims = [plot_y_axis_min/10**plot_benefit_cost_scatter_scale_exponent, plot_y_axis_max/10**plot_benefit_cost_scatter_scale_exponent],
-                        ylabel = f"{'Benefits' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'JST Ratio'} {plot_benefit_cost_scatter_unit_labels[1] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else ''}",
+                        xlims = [axis_min, axis_max],
+                        xlabel = f"{'Costs' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'Net Benefits'} {benefit_cost_scatter_unit_labels[0]}",
+                        ylims = [axis_min, axis_max],
+                        ylabel = f"{'Benefits' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'JST Ratio'} {benefit_cost_scatter_unit_labels[1] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else ''}",
                         legend = True,
-                        legend_labels = sorted(list(plot_benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
+                        legend_labels = sorted(list(benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
                         legend_loc = 'best' 
                     )
 
                     st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
-
-                    spacer_col, zoom_col = st.columns(spec=[0.1, 0.9], gap="small", border=False)
-                    with zoom_col:
-                        st.slider(
-                            "Zoom:",
-                            min_value=0.0,
-                            max_value=0.999,
-                            value=zoom,
-                            step=0.001,
-                            key="benefit_cost_zoom",
-                        )
 
                 else:
                     benefit_cost_scatter_df.sort_values(by=[reconstruct_column_name(catalog_by_filter), 'total_benefits'], ascending=[True, False], inplace=True)
@@ -566,7 +536,7 @@ else:
                 temporal_aggregation_value_stream_results_df['value_stream'] = temporal_aggregation_value_stream_results_df['value_stream'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
 
                 value_streams = sorted(temporal_aggregation_value_stream_results_df['value_stream'].unique().tolist())
-                
+                value_streams_filter = []
                 if len(value_streams) > 1:
                     value_streams_filter = st.session_state.get("value_streams_filter", [])
 
@@ -621,12 +591,13 @@ else:
 
                     st.pyplot(temporal_aggregation_bar_fig, clear_figure=True)
 
-                    st.multiselect(
-                        label = f"**Show Specific Value Streams:**",
-                        options = value_streams,
-                        key = "value_streams_filter",
-                        default = []
-                    )   
+                    if len(value_streams) > 1:
+                        st.multiselect(
+                            label = f"**Show Specific Value Streams:**",
+                            options = value_streams,
+                            key = "value_streams_filter",
+                            default = []
+                        )   
 
                 else:
                     st.dataframe(

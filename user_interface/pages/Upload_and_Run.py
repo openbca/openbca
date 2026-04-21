@@ -102,7 +102,7 @@ with st.expander("Runtime path diagnostics", expanded=False):
         language="text",
     )
 
-program_input_file_name = "OpenBCA Program Input.xlsx"
+program_input_file_name = "OpenBCA Program Input.xlsm"
 configuration_file_name = "OpenBCA Configuration.xlsm"
 
 # Check if input files and output database already exist in the input templates directory.
@@ -135,7 +135,7 @@ with col1:
         uploaded_files = st.file_uploader(
             "Upload Program Input and Configuration files:",
             accept_multiple_files=True,
-            type=['xlsm', 'xlsx'],
+            type=['xlsm'],
             help=f"Upload {program_input_file_name} and {configuration_file_name} files. Multiple files can be uploaded at once.",
             key='file_uploader'
             )
@@ -143,7 +143,7 @@ with col1:
         if st.session_state.display_file_overwrite_warning:
             st.warning("New uploads will overwrite existing files.", icon="⚠️")
 
-        file_submitted = st.form_submit_button("Upload selected files", on_click=set_file_overwrite_warning_true)
+        file_submitted = st.form_submit_button("Upload selected files", on_click=set_file_overwrite_warning_true, type="primary")
 
         if file_submitted and uploaded_files is not None:
             for uploaded_file in uploaded_files:

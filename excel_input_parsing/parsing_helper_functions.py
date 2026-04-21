@@ -18,6 +18,9 @@ def clean_header(col: str) -> str:
     # Replace $ with _dollar_
     col = col.replace("$", "_dollar_")
 
+    # Delete adj._gross_ 
+    col = col.replace("adj._gross_", "")
+
     # Collapse multiple underscores
     col = re.sub(r"__+", "_", col)
 

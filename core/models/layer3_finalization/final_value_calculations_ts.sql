@@ -14,8 +14,14 @@ SELECT
     , ac_ls.day_of_year 
     , ac_ls.hour_of_year
 	, ac_ls.hour_of_day
-	, factors.annual_net_energy_savings * ac_ls.load_shape_value AS net_energy_savings
-    , factors.energy_savings_factors_applied * ac_ls.avoided_cost_x_load_shape AS final_dollar_value
+	, CASE
+		WHEN ac_ls.coincident_peak_capacity_calc THEN 0	
+		ELSE factors.annual_net_energy_savings * ac_ls.load_shape_value 
+		END AS net_energy_savings
+	, CASE 
+		WHEN ac_ls.coincident_peak_capacity_calc THEN factors.coincident_peak_savings_factors_applied * ac_ls.avoided_cost_x_load_shape
+		ELSE factors.energy_savings_factors_applied * ac_ls.avoided_cost_x_load_shape
+		END AS final_dollar_value
 FROM 
     core_layer2_precompute.savings_factors factors
 JOIN core_layer1_mappings.commodity_load_shape_by_id cls ON 

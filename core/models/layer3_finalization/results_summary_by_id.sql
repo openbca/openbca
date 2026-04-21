@@ -12,7 +12,7 @@ WITH lifecycle_savings_calc AS (
 		, m.program_name::VARCHAR AS program_name
 		, m.avoided_cost_subset::VARCHAR AS avoided_cost_subset
 		, m.start_year::INTEGER AS start_year
-		, m.ntg::FLOAT AS ntg
+		, m.net_to_gross_ratio::FLOAT AS net_to_gross_ratio
 		, m.estimated_useful_life::INTEGER AS estimated_useful_life
 		, m.unit_quantity::INTEGER AS unit_quantity
 		, cls.commodity::VARCHAR AS commodity
@@ -40,7 +40,7 @@ WITH lifecycle_savings_calc AS (
 			, program_name
 			, avoided_cost_subset
 			, start_year
-			, ntg 
+			, net_to_gross_ratio 
 			, estimated_useful_life
 			, unit_quantity 
 			, CASE 

@@ -7,7 +7,7 @@ MODEL(
     SELECT
         id
         , k.commodity
-        , energy_savings_by_commodity[k.commodity] * unit_quantity * ntg AS total_net_annual_energy_savings
+        , energy_savings_by_commodity[k.commodity] * unit_quantity * net_to_gross_ratio AS total_net_annual_energy_savings
         , CASE 
         WHEN commodity = 'ELECTRIC' THEN electric_savings_load_shape
         WHEN commodity = 'NATURAL GAS' THEN natural_gas_savings_load_shape 

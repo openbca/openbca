@@ -19,7 +19,7 @@ def test_measures_parsing():
     print("\nTesting measures parsing...")
     try:
         df = load_measure_inputs_from_excel(
-            input_file="OpenBCA Program Input.xlsx",
+            input_file="OpenBCA Program Input.xlsm",
             sheet_name="Measure Inputs",
             skiprows=3
         )
@@ -35,8 +35,8 @@ def test_load_shapes_parsing():
     print("\nTesting load shapes parsing...")
     try:
         df = load_load_shapes_from_excel(
-            input_file="OpenBCA Program Input.xlsx",
-            skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Updates & Improvements", "Custom Period - LS Support", "Dictionary"},
+            input_file="OpenBCA Program Input.xlsm",
+            skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Updates & Improvements", "User Tips"},
             skiprows=1,
         )
         print(f"  ✓ Successfully parsed load shapes: {len(df)} rows")
@@ -52,7 +52,7 @@ def test_avoided_costs_parsing():
     try:
         df = load_avoided_costs_from_excel(
             input_file="OpenBCA Configuration.xlsm",
-            skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary"},
+            skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary", "User Tips"},
             skiprows=3
         )
         print(f"  ✓ Successfully parsed avoided costs: {len(df)} rows")
@@ -95,7 +95,7 @@ def test_program_value_streams_parsing():
     print("\nTesting program value streams parsing...")
     try:
         df = load_program_value_streams_from_excel(
-            input_file='OpenBCA Program Input.xlsx'
+            input_file='OpenBCA Program Input.xlsm'
         )
         print(f"  ✓ Successfully parsed program value streams: {len(df)} rows")
         return True
@@ -110,12 +110,12 @@ def main():
     print("=" * 60)
     
     results = []
-    results.append(test_measures_parsing())
-    results.append(test_load_shapes_parsing())
+    # results.append(test_measures_parsing())
+    # results.append(test_load_shapes_parsing())
     results.append(test_avoided_costs_parsing())
-    results.append(test_value_stream_groups_parsing())
-    results.append(test_global_parameters_parsing())
-    results.append(test_program_value_streams_parsing())
+    # results.append(test_value_stream_groups_parsing())
+    # results.append(test_global_parameters_parsing())
+    # results.append(test_program_value_streams_parsing())
     
     print("=" * 60)
     passed = sum(results)

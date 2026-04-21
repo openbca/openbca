@@ -8,7 +8,7 @@ WITH costs_by_id_commodity AS (
     SELECT 
         m.id  
         , m.start_year
-        , m.ntg
+        , m.net_to_gross_ratio
         , vsg.commodity
         , k.avoided_cost
         , unit_quantity * costs_by_type[k.avoided_cost] AS cost_value
@@ -27,7 +27,7 @@ UNION ALL
 SELECT 
 	p.program_name AS id 
 	, p.program_year AS start_year  
-	, 1.0 AS ntg
+	, 1.0 AS net_to_gross_ratio
     , vsg.commodity
     , p.avoided_cost AS avoided_cost
     , p.avoided_cost_value AS cost_value
@@ -46,8 +46,8 @@ SELECT
     WHEN factor = '0' THEN 0
     WHEN factor = '1' THEN 1
     WHEN factor = '-1' THEN -1
-    WHEN factor = 'ntg' THEN ntg 
-    WHEN factor = '1-ntg' THEN 1 - ntg 
+    WHEN factor = 'net_to_gross_ratio' THEN net_to_gross_ratio 
+    WHEN factor = '1-net_to_gross_ratio' THEN 1 - net_to_gross_ratio 
     END AS cost_treatment_factor 
 FROM 
     costs_by_id_commodity c 

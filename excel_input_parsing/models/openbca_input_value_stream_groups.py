@@ -39,15 +39,15 @@ config_cost_name_commodity_map_dict = {
     'Utility Financial Incentives': 'UTILITY INCENTIVE',
     'Host Customer Incremental Cost': 'MEASURE COST',
     'Host Customer Transaction Cost': 'MEASURE COST',
-    'Host Customer Interconn Cost': 'MEASURE COST',
+    'Host Customer Interconnection Cost': 'MEASURE COST',
     'Host Customer Tax Incentives': 'TAX INCENTIVE',
     'Program Level Benefits': 'NON-SYSTEM',
 }
 
 config_measure_cost_fields_map_dict = {
     'Utility Program Admin Costs': [
-            'administration_costs_upfront_dollar',
-            'administration_costs_annual_dollar_per_year',
+            'admin_cost_upfront_dollar',
+            'admin_cost_annual_dollar_per_year',
             'program_admin_costs_dollar_per_year'
         ],
     'Utility Financial Incentives': [
@@ -57,14 +57,14 @@ config_measure_cost_fields_map_dict = {
             #'program_performance_incentive_govt_to_utility_dollar_per_year'
         ],
     'Host Customer Incremental Cost': [
-            'incremental_costs_upfront_dollar',
-            'incremental_costs_annual_dollar_per_year'
+            'incremental_cost_upfront_dollar',
+            'incremental_cost_annual_dollar_per_year'
         ],
     'Host Customer Transaction Cost': [
-        'host_customer_transaction_costs_dollar'
+        'host_customer_transaction_cost_dollar'
     ],        
-    'Host Customer Interconn Cost': [
-        'host_customer_interconnection_costs_dollar'
+    'Host Customer Interconnection Cost': [
+        'host_customer_interconnection_cost_dollar'
     ],
     'Host Customer Tax Incentives': [
             'host_customer_tax_incentive_upfront_dollar',
@@ -81,14 +81,24 @@ config_measure_cost_fields_map_dict = {
 #program_federal_incentive_dollar_per_year
 
 repeating_annual_costs = [
-    'administration_costs_annual_dollar_per_year',
+    'admin_cost_annual_dollar_per_year',
     'program_admin_costs_dollar_per_year', 
     'utility_incentive_annual_dollar_per_year',
-    'incremental_costs_annual_dollar_per_year',
+    'incremental_cost_annual_dollar_per_year',
     'program_incentive_utility_to_customer_dollar_per_year',
     'program_performance_incentive_govt_to_utility_dollar_per_year',
     'program_federal_incentive_dollar_per_year'
     ]
+
+_VALUE_STREAM_GROUP_COLS = [
+    'avoided_cost',
+    'commodity',
+    'include_in_test',
+    'calc_type',
+    'pct_adder',
+    'value_stream_group',
+]
+
 
 def load_value_stream_groups_from_excel(
     input_file: str,
@@ -121,6 +131,9 @@ def load_value_stream_groups_from_excel(
         value_stream_groups_df[col] = value_stream_groups_df[col].apply(lambda x: x.strip() if isinstance(x, str) else x)
             
     value_stream_groups_df['include_in_test'] = value_stream_groups_df['include_in_test'].apply(lambda x: True if x == 'Yes' else False)
+    value_stream_groups_df['pct_adder'] = pd.to_numeric(
+        value_stream_groups_df['pct_adder'], errors='coerce'
+    ).astype('Float64')
 
     def assign_value_stream_group(calc_type, commodity):
         
@@ -181,22 +194,29 @@ def load_value_stream_groups_from_excel(
                     config_cost_name_commodity_map_dict[field], 
                     include_in_test, 
                     'Time Series - Annual' if col in repeating_annual_costs else 'Single Value - First Year', 
-                    None, 
+                    pd.NA, 
                     'annual' if col in repeating_annual_costs else 'first_year'
                 ]], 
-                columns = [
-                    'avoided_cost',
-                    'commodity',
-                    'include_in_test',
-                    'calc_type',
-                    'pct_adder',
-                    'value_stream_group'
-                ]
-                )
+                columns=_VALUE_STREAM_GROUP_COLS,
+            )
             value_stream_groups_costs_dfs.append(df)
 
-    value_stream_groups_costs_df = pd.concat(value_stream_groups_costs_dfs)
+    cost_blocks = [d for d in value_stream_groups_costs_dfs if not d.empty]
+    if not cost_blocks:
+        return value_stream_groups_df
 
-    value_stream_groups_df = pd.concat([value_stream_groups_df, value_stream_groups_costs_df])
+    value_stream_groups_costs_df = pd.concat(cost_blocks, ignore_index=True)
+
+    for col in _VALUE_STREAM_GROUP_COLS:
+        if col in value_stream_groups_costs_df.columns and col in value_stream_groups_df.columns:
+            value_stream_groups_costs_df[col] = value_stream_groups_costs_df[col].astype(
+                value_stream_groups_df[col].dtype,
+                copy=False,
+            )
+
+    value_stream_groups_df = pd.concat(
+        [value_stream_groups_df, value_stream_groups_costs_df],
+        ignore_index=True,
+    )
 
     return value_stream_groups_df

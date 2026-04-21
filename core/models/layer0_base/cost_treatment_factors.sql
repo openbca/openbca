@@ -17,19 +17,19 @@ FROM (
 
         ('UTILITY INCENTIVE', 'UCT', '1'),
         ('UTILITY INCENTIVE', 'TRC', '0'),
-        ('UTILITY INCENTIVE', 'CA TRC', '1-ntg'),
+        ('UTILITY INCENTIVE', 'CA TRC', '1-net_to_gross_ratio'),
         ('UTILITY INCENTIVE', 'PCT', '-1'),
         ('UTILITY INCENTIVE', 'RIM', '1'),
 
         ('MEASURE COST', 'UCT', '0'),
-        ('MEASURE COST', 'TRC', 'ntg'),
-        ('MEASURE COST', 'CA TRC', 'ntg'),
+        ('MEASURE COST', 'TRC', 'net_to_gross_ratio'),
+        ('MEASURE COST', 'CA TRC', 'net_to_gross_ratio'),
         ('MEASURE COST', 'PCT', '1'),
         ('MEASURE COST', 'RIM', '0'),
 
         ('TAX INCENTIVE', 'UCT', '0'),
         ('TAX INCENTIVE', 'TRC', '-1'),
-        ('TAX INCENTIVE', 'CA TRC', '1-ntg'),
+        ('TAX INCENTIVE', 'CA TRC', '1-net_to_gross_ratio'),
         ('TAX INCENTIVE', 'PCT', '-1'),
         ('TAX INCENTIVE', 'RIM', '0'),
 

@@ -21,14 +21,14 @@ ID_COLUMNS = ['program_name', 'year']
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_program_value_streams_from_excel(
-        input_file='OpenBCA Program Input.xlsx'
+        input_file='OpenBCA Program Input.xlsm'
     )
 
 def load_program_value_streams_from_excel(
     input_file: str,
 ) -> pd.DataFrame:
     '''
-    Generate dataframe to scrape program-level value streams grouping from the Program Inputs sheet in the OpenBCA Program Input.xlsx file.
+    Generate dataframe to scrape program-level value streams grouping from the Program Inputs sheet in the OpenBCA Program Input.xlsm file.
     '''
     file_path =  get_input_templates_dir() / input_file
     xls = pd.ExcelFile(file_path, engine="calamine")
@@ -46,17 +46,17 @@ def load_program_value_streams_from_excel(
     program_value_streams_df = program_value_streams_df[[
         'program_name', 
         'program_year',
-        'program_admin_costs_dollar_per_year',
-        'program_incentive_utility_to_customer_dollar_per_year',
-        'program_performance_incentive_govt_to_utility_dollar_per_year',
-        'program_federal_incentive_dollar_per_year'
+        'program_admin_costs_dollar',
+        'program_utility_incentive_dollar',
+        'program_performance_incentive_to_utility_dollar',
+        'program_federal_incentive_dollar'
         ]].melt(
         id_vars=['program_name', 'program_year'],
         value_vars=[        
-            'program_admin_costs_dollar_per_year',
-            'program_incentive_utility_to_customer_dollar_per_year',
-            'program_performance_incentive_govt_to_utility_dollar_per_year',
-            'program_federal_incentive_dollar_per_year'
+            'program_admin_costs_dollar',
+            'program_utility_incentive_dollar',
+            'program_performance_incentive_to_utility_dollar',
+            'program_federal_incentive_dollar'
             ],
         var_name="avoided_cost",
         value_name="avoided_cost_value"

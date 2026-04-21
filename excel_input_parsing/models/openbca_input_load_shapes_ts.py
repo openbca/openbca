@@ -27,8 +27,8 @@ ID_COLUMNS = [
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_load_shapes_from_excel(
-        input_file="OpenBCA Program Input.xlsx",
-        skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Dictionary", "Updates & Improvements"},
+        input_file="OpenBCA Program Input.xlsm",
+        skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Dictionary", "Updates & Improvements", "User Tips"},
         skiprows=1,
     )
 
@@ -97,13 +97,4 @@ def load_load_shapes_from_excel(
     # Adjust hour_of_year from 1 - 8760 to 0 - 8759
     long_df['hour_of_year'] = long_df['hour_of_year'] - 1
 
-    # print(long_df.columns)
-
-    # for col in ['load_shape_value']:
-    #     print(col)
-    #     print(long_df[col].values)
-    #     print('Add tool tips' in long_df[col].values)
-        # if 'Add tool tips' in long_df[col].values:
-        #     print(col)
-        #     print(long_df.query(f"{col} == 'Add tool tips'"))
     return long_df

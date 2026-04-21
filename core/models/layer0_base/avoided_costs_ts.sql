@@ -95,16 +95,16 @@ FROM
     min_max_year
 	CROSS JOIN UNNEST(
         [			
-            'administration_costs_upfront_dollar',
-            'administration_costs_annual_dollar_per_year',
-            'program_admin_costs_dollar_per_year',
+            'admin_cost_upfront_dollar',
+            'admin_cost_annual_dollar_per_year',
+            'program_admin_cost_dollar_per_year',
             'utility_incentive_upfront_dollar',
             'utility_incentive_annual_dollar_per_year',
             'program_incentive_utility_to_customer_dollar_per_year',
-            'incremental_costs_upfront_dollar',
-            'incremental_costs_annual_dollar_per_year',
-            'host_customer_transaction_costs_dollar',
-            'host_customer_interconnection_costs_dollar',
+            'incremental_cost_upfront_dollar',
+            'incremental_cost_annual_dollar_per_year',
+            'host_customer_transaction_cost_dollar',
+            'host_customer_interconnection_cost_dollar',
             'host_customer_tax_incentive_upfront_dollar',
             'program_performance_incentive_govt_to_utility_dollar_per_year',
             'program_federal_incentive_dollar_per_year'

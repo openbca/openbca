@@ -30,7 +30,7 @@ ID_COLUMNS = [
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_avoided_costs_from_excel(
         input_file="OpenBCA Configuration.xlsm",
-        skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary"},
+        skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary", "User Tips"},
         skiprows=3
     )
 
