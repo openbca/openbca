@@ -2,6 +2,7 @@ import argparse
 from shutil import rmtree
 import warnings
 
+from sqlmesh.core.console import set_console, TerminalConsole
 from sqlmesh.core.context import Context
 
 from config.paths import get_excel_input_parsing_project_dir, get_core_project_dir, get_output_dir, get_logs_dir
@@ -11,13 +12,13 @@ warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")  # Su
 
 def run_openbca_excel_model() -> None:
     setup_env_vars()
+    set_console(TerminalConsole())
 
     ctx = Context(
             paths=[get_excel_input_parsing_project_dir(), get_core_project_dir()],
     )
     try:
-        plan = ctx.plan(run=True, ignore_cron=True)
-        ctx.apply(plan)
+        ctx.plan(run=True, ignore_cron=True, auto_apply=True)
     finally:
         ctx.close()
 
@@ -27,6 +28,7 @@ def run_input_transform_validations() -> None:
 # Note: we use a separate DuckDB instance and gateway for validation of initial parsing and ingestion steps
 	# @uv run sqlmesh --gateway validations_duckdb -p excel_input_parsing -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
     setup_env_vars()
+    set_console(TerminalConsole())
 
     ctx = Context(
             paths=[get_excel_input_parsing_project_dir(), get_core_project_dir()],
@@ -34,10 +36,10 @@ def run_input_transform_validations() -> None:
     )
     
     try:
-        plan = ctx.plan(
+        ctx.plan(
             select_models=["openbca_input.*", "core_layer0_base.*", "core_validations.*"], 
+            auto_apply=True,
         )
-        ctx.apply(plan)
     finally:
         ctx.close()
 
