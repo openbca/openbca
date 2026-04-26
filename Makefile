@@ -51,6 +51,7 @@ build-pyinstaller-package:
 		--pyinstaller-options \
 			--onedir \
 			--noconfirm \
+			--noconsole \
 			--add-data excel_input_parsing:excel_input_parsing \
 			--add-data core/models:core/models \
 			--add-data core/config.yaml:core \
