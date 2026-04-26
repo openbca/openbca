@@ -84,7 +84,10 @@ def load_avoided_costs_from_excel(
             continue
 
         # --- Find "Calculation Type" from row 2 ---
-        avoided_cost = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=1, nrows=1, usecols='A', engine="calamine").values[0][0]
+        # avoided_cost = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=1, nrows=1, usecols='A', engine="calamine").values[0][0]
+        # this is just extracting the name of the calc, which is the same as the sheet name...
+        # no need to load the entire sheet via read_excel, just use the sheet name
+        avoided_cost = str(sheet)
 
         # --- Load actual data starting at skiprows ---
         df = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=skiprows, engine="calamine")
