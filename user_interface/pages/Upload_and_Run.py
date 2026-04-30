@@ -1,21 +1,24 @@
 import streamlit as st
 import os
 import signal
-import subprocess
+import queue
 import shutil
 import sys
+import threading
+import traceback
 from pathlib import Path
 from datetime import datetime
+from collections.abc import Callable
 import duckdb
 import base64
+
+from sqlmesh.core.console import CaptureTerminalConsole, TerminalConsole, get_console, set_console
 
 from config.paths import (
     get_repo_root,
     get_input_templates_dir,
     get_output_dir,
     get_streamlit_app_dir,
-    get_excel_input_parsing_project_dir,
-    get_core_project_dir,
 )
 from config.env import setup_env_vars
 import model_runners
@@ -123,6 +126,81 @@ if st.session_state.output_db_exists_initial:
 if 'display_file_overwrite_warning' not in st.session_state:
     st.session_state.display_file_overwrite_warning = True if st.session_state.input_files_exist_initial else False
 
+
+class TeeCaptureTerminalConsole(CaptureTerminalConsole):
+    def __init__(self, on_output: Callable[[str], None] | None = None, **kwargs):
+        super().__init__(**kwargs)
+        self._on_output = on_output
+
+    def _print(self, value, **kwargs) -> None:
+        with self.console.capture() as capture:
+            self.console.print(value, **kwargs)
+
+        rendered = capture.get()
+        self._captured_outputs.append(rendered)
+        if self._on_output and rendered:
+            self._on_output(rendered)
+
+        TerminalConsole._print(self, value, **kwargs)
+
+
+def run_with_live_sqlmesh_output(
+    runner: Callable[[], None],
+    output_placeholder,
+) -> tuple[str, str, str]:
+    output_queue: queue.Queue[str | None] = queue.Queue()
+    captured_chunks: list[str] = []
+    previous_console = get_console()
+    live_console = TeeCaptureTerminalConsole(on_output=output_queue.put)
+    worker_exception: BaseException | None = None
+    worker_traceback = ""
+
+    def target() -> None:
+        nonlocal worker_exception, worker_traceback
+
+        try:
+            set_console(live_console)
+            runner()
+        except Exception as exc:
+            worker_exception = exc
+            worker_traceback = traceback.format_exc()
+        finally:
+            set_console(previous_console)
+            output_queue.put(None)
+
+    worker = threading.Thread(target=target, daemon=True)
+    worker.start()
+
+    while worker.is_alive() or not output_queue.empty():
+        try:
+            chunk = output_queue.get(timeout=0.1)
+        except queue.Empty:
+            continue
+
+        if chunk is None:
+            continue
+
+        captured_chunks.append(chunk)
+        output_placeholder.code("".join(captured_chunks), language="text")
+
+    worker.join()
+
+    out = live_console.consume_captured_output()
+    warn = live_console.consume_captured_warnings()
+    err = live_console.consume_captured_errors()
+
+    combined_output = "".join(captured_chunks) or out
+    if combined_output:
+        output_placeholder.code(combined_output, language="text")
+
+    if worker_exception is not None:
+        if worker_traceback and worker_traceback not in err:
+            err = f"{err}\n{worker_traceback}".strip()
+        raise worker_exception
+
+    return out, warn, err
+
+
 def set_file_overwrite_warning_true():
     st.session_state.display_file_overwrite_warning = True
 
@@ -175,9 +253,18 @@ with col2:
                 if validation_db_exists_initial:
                     validation_db_path.unlink()
 
+                validation_output_placeholder = st.empty()
                 with st.spinner("Running input parsing and validations... this can take a bit.", show_time=True):
                     try:
-                        model_runners.run_input_transform_validations()
+                        _out, warn, err = run_with_live_sqlmesh_output(
+                            model_runners.run_input_transform_validations,
+                            validation_output_placeholder,
+                        )
+
+                        if warn:
+                            st.warning(warn)
+                        if err:
+                            st.error(err)
 
                     except FileNotFoundError as e:
                         st.error(f"Failed to run command: {e}")
@@ -245,7 +332,7 @@ if db_exists:
                     summary_results_df.to_csv(output_file_path, index=False)
                     st.success(f"Summary results saved to {output_file_path}")
 
-        except Exception as e:
+        except Exception:
             # If there's an error (e.g., table doesn't exist yet), just skip showing the button
             pass
 
@@ -310,10 +397,20 @@ if db_handling in ["Overwrite existing output database", "Backup existing output
                     st.stop()
 
         with col2:
+            model_output_placeholder = st.empty()
             with st.spinner("Running OpenBCA Model... this can take a bit.", show_time=True):
 
                 try:
-                    model_runners.run_openbca_excel_model()
+                    _out, warn, err = run_with_live_sqlmesh_output(
+                        model_runners.run_openbca_excel_model,
+                        model_output_placeholder,
+                    )
+
+                    if warn:
+                        st.warning(warn)
+                    if err:
+                        st.error(err)
+
                     st.session_state.model_run_status = "success"
                     st.session_state.model_run_error = None
                     st.balloons()

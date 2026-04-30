@@ -2,7 +2,7 @@ import argparse
 from shutil import rmtree
 import warnings
 
-from sqlmesh.core.console import set_console, TerminalConsole
+from sqlmesh.core.console import set_console, get_console, TerminalConsole, CaptureTerminalConsole
 from sqlmesh.core.context import Context
 
 from config.paths import get_excel_input_parsing_project_dir, get_core_project_dir, get_output_dir, get_logs_dir
@@ -12,7 +12,6 @@ warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")  # Su
 
 def run_openbca_excel_model() -> None:
     setup_env_vars()
-    set_console(TerminalConsole())
 
     ctx = Context(
             paths=[get_excel_input_parsing_project_dir(), get_core_project_dir()],
@@ -28,7 +27,6 @@ def run_input_transform_validations() -> None:
 # Note: we use a separate DuckDB instance and gateway for validation of initial parsing and ingestion steps
 	# @uv run sqlmesh --gateway validations_duckdb -p excel_input_parsing -p core plan --select-model openbca_input.* --select-model core_layer0_base.* --select-model core_validations.* --auto-apply
     setup_env_vars()
-    set_console(TerminalConsole())
 
     ctx = Context(
             paths=[get_excel_input_parsing_project_dir(), get_core_project_dir()],
@@ -64,6 +62,10 @@ if __name__ == "__main__":
         help="Specify which runner to execute.",
     )
     args = parser.parse_args()
+    
+    # for cli runs, set terminal output
+    term_console = TerminalConsole()
+    set_console(term_console)
 
     if args.runner == "openbca_excel_model":
         run_openbca_excel_model()
