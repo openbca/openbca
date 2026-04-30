@@ -60,7 +60,7 @@ def generate_benefit_cost_scatter_query(where_sql, catalog_by_filter):
     benefit_cost_scatter_query = f"""
         SELECT 
         id
-        , {catalog_by_filter}
+        {', ' if len(catalog_by_filter) > 0 else ''}{catalog_by_filter}
         , ifnull(total_benefits, 0) AS total_benefits
         , -ifnull(total_costs, 0) AS total_costs
         , total_net_benefits AS net_benefits

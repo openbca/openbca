@@ -1,5 +1,4 @@
 from typing import Any
-from pandas.core.dtypes.cast import CategoricalDtype
 import streamlit as st 
 import os
 import signal
@@ -131,7 +130,9 @@ else:
                 filters.append(col)
         
         num_filters = len(filters)
+        num_filters_excluding_id = len([f for f in filters if f != 'id'])
 
+        where_sql = "WHERE 1=1"
         if num_filters == 0:
             pass
         else:
@@ -151,7 +152,6 @@ else:
                         sql += f" AND m.{other} IN ({snippet})"
                 return sql
 
-            where_sql = "WHERE 1=1"
             filters_dict = {}
             filters_options_dict = {}
             with st.container(border=True):
@@ -188,7 +188,6 @@ else:
                                 where_snippet = ", ".join(["'{}'".format(value) for value in filters_dict[category]])
                                 where_sql += f" AND m.{category} IN ({where_snippet})"
 
-        
         active_filter_str = f"Active filters: {', '.join([space_and_title(word.split('.')[1]) for word in where_sql.split(' ') if word.startswith('m.')])}"
         if active_filter_str != 'Active filters: ':
             st.warning(active_filter_str)
@@ -319,7 +318,7 @@ else:
             # Benefit and Cost Scatter Plot
             with col2:
                 catalog_by_filter = ''
-                if num_filters > 0:
+                if num_filters_excluding_id > 0: 
                     catalog_by_filter = st.radio(
                         "**Create Categories From**", 
                         options = [space_and_title(filter) for filter in filters if filter != 'id'], 
@@ -327,12 +326,22 @@ else:
                         horizontal = True,
                     )
 
-                benefits_vs_costs_or_jst_ratio = st.segmented_control(
-                    label = "**Plot**", 
-                    options = ['Benefits vs Costs', 'JST Ratio vs Net Benefits'], 
-                    default='Benefits vs Costs',
-                    key = "benefits_vs_costs_or_jst"
-                    ) 
+                filter_col1, filter_col2 = st.columns(spec=[0.7, 0.3], gap="small", border=False)
+                
+                with filter_col1:
+                    benefits_vs_costs_or_jst_ratio = st.segmented_control(
+                        label = "**Plot**", 
+                        options = ['Benefits vs Costs', 'JST Ratio vs Net Benefits'], 
+                        default='Benefits vs Costs',
+                        key = "benefits_vs_costs_or_jst"
+                        ) 
+
+                with filter_col2:
+                    show_id_labels = st.checkbox(
+                            label = "**Show ID Labels**",
+                            value = False,
+                            key = "show_id_labels",
+                        )
 
                 if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs':
                     scatter_x_col = 'total_costs'
@@ -342,7 +351,7 @@ else:
                     scatter_y_col = 'jst_ratio'
 
                 benefit_cost_scatter_df = con.execute(generate_benefit_cost_scatter_query(where_sql, reconstruct_column_name(catalog_by_filter))).df()
-                if num_filters > 0:
+                if num_filters_excluding_id > 0:
                     cat_col = reconstruct_column_name(catalog_by_filter)
                     benefit_cost_scatter_df[cat_col] = benefit_cost_scatter_df[cat_col].fillna("None")
 
@@ -353,11 +362,25 @@ else:
                         return_scale_exponent=True
                         )
 
-                if waterfall_scatter_fig_or_table == 'Figures':            
+                if waterfall_scatter_fig_or_table == 'Figures':       
+
+                    padding = 0.08    
+                    min_x_scatter_val = min(0, benefit_cost_scatter_df[scatter_x_col].min())     
+                    max_x_scatter_val = max(0, benefit_cost_scatter_df[scatter_x_col].max())
+                    min_y_scatter_val = min(0, benefit_cost_scatter_df[scatter_y_col].min())
+                    max_y_scatter_val = max(0, benefit_cost_scatter_df[scatter_y_col].max())
+
+                    x_scatter_range = max_x_scatter_val - min_x_scatter_val
+                    y_scatter_range = max_y_scatter_val - min_y_scatter_val
+                    
+                    x_scatter_min = min_x_scatter_val - padding * x_scatter_range
+                    x_scatter_max = max_x_scatter_val + padding * x_scatter_range
+                    y_scatter_min = min_y_scatter_val - padding * y_scatter_range
+                    y_scatter_max = max_y_scatter_val + padding * y_scatter_range                    
+
                     min_scatter_val = benefit_cost_scatter_df[[scatter_x_col, scatter_y_col]].min().min()
                     max_scatter_val = benefit_cost_scatter_df[[scatter_x_col, scatter_y_col]].max().max()
                     scatter_range = max_scatter_val - min_scatter_val
-                    padding = 0.05
                     axis_min = min_scatter_val - padding * scatter_range
                     axis_max = max_scatter_val + padding * scatter_range
 
@@ -365,6 +388,20 @@ else:
                     min_marker_size = 100
                     max_marker_size = 300 
                     marker_size = max(min_marker_size, min(max_marker_size, min_marker_size + 10*(max_marker_size - min_marker_size) / len(benefit_cost_scatter_df)))
+
+                    def _numeric_string_labeling(value: str):
+                        try:
+                            v = float(value)
+                            if v.is_integer():
+                                return int(v)
+                            else:
+                                return v
+                        except:
+                            return value
+
+                    label_list =[str(value) for value in sorted([_numeric_string_labeling(value) for value in benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique()])] if len(catalog_by_filter) > 0 else None
+
+                    #st.write(sorted([_numeric_string_labeling(value) for value in benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique()]) if len(catalog_by_filter) > 0 else None)
 
                     benefit_cost_scatter_fig = scatter_fig(
                         df = benefit_cost_scatter_df,
@@ -374,18 +411,18 @@ else:
                             },
                         marker_size = marker_size,
                         include_45_degree_line = True if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else False,
-                        color_by_col = reconstruct_column_name(catalog_by_filter),
-                        label_points = False,
+                        color_by_col = None if len(catalog_by_filter) == 0 else reconstruct_column_name(catalog_by_filter),
+                        label_points = True if show_id_labels else False,
                         labels = benefit_cost_scatter_df['id'].tolist(),
                         label_size = 10,
                         figsize = (8, 6),
-                        title = f"{space_and_title(benefits_vs_costs_or_jst_ratio)} by {catalog_by_filter}",
-                        xlims = [axis_min, axis_max] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else None,
+                        title = f"{space_and_title(benefits_vs_costs_or_jst_ratio)}{' by ' if len(catalog_by_filter) > 0 else ''}{catalog_by_filter}",
+                        xlims = [axis_min, axis_max] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else [x_scatter_min, x_scatter_max],
                         xlabel = f"{'Costs' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'Net Benefits'} {benefit_cost_scatter_unit_labels[0]}",
-                        ylims = [axis_min, axis_max] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else None,
+                        ylims = [axis_min, axis_max] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else [y_scatter_min, y_scatter_max],
                         ylabel = f"{'Benefits' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'JST Ratio'} {benefit_cost_scatter_unit_labels[1] if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else ''}",
                         legend = True,
-                        legend_labels = sorted(list(benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
+                        legend_labels = None if len(catalog_by_filter) == 0 else sorted(list(benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique())),
                         legend_loc = 'best' 
                     )
 
