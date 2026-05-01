@@ -429,19 +429,23 @@ else:
                     st.pyplot(benefit_cost_scatter_fig, clear_figure=True)
 
                 else:
-                    benefit_cost_scatter_df.sort_values(by=[reconstruct_column_name(catalog_by_filter), 'total_benefits'], ascending=[True, False], inplace=True)
-                    benefit_cost_scatter_df[reconstruct_column_name(catalog_by_filter)] = benefit_cost_scatter_df[reconstruct_column_name(catalog_by_filter)].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+                    sort_col = 'id'
+                    if len(catalog_by_filter) > 0:
+                        sort_col = reconstruct_column_name(catalog_by_filter)
+
+                    benefit_cost_scatter_df.sort_values(by=[sort_col, 'total_benefits'], ascending=[True, False], inplace=True)
+                    benefit_cost_scatter_df[sort_col] = benefit_cost_scatter_df[sort_col].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
 
                     st.dataframe(
-                        benefit_cost_scatter_df[[
-                            'id', reconstruct_column_name(catalog_by_filter), 'total_costs', 'total_benefits', 'net_benefits', 'jst_ratio'
-                            ]].sort_values(
+                        benefit_cost_scatter_df[list(set([
+                            'id', sort_col, 'total_costs', 'total_benefits', 'net_benefits', 'jst_ratio'
+                            ]))].sort_values(
                                 by='net_benefits' if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 'jst_ratio', ascending=False), 
                         width='stretch', 
                         hide_index=True,
                         column_config={
-                            reconstruct_column_name(catalog_by_filter): st.column_config.TextColumn(
-                                label=space_and_title(reconstruct_column_name(catalog_by_filter)),
+                            sort_col: st.column_config.TextColumn(
+                                label=space_and_title(sort_col),
                             ),
                             'total_costs': st.column_config.NumberColumn(
                                 label="Costs ($)",
