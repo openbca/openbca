@@ -27,6 +27,8 @@ dependencies = [
   "pyinstaller>=6.18.0",
   "streamlit-desktop-app>=0.3.4",
   "python-calamine>=0.6.2",
+  "fastapi>=0.115.0",
+  "uvicorn[standard]",
 ]
 
 [project.optional-dependencies]
