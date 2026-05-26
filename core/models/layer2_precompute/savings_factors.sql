@@ -79,7 +79,7 @@ WITH discount_rates AS (
 
 SELECT  
     m.id
-    , k.commodity AS commodity
+    , k.impact_category AS impact_category
     , year 
     , quarter
     , discount_factor
@@ -89,29 +89,29 @@ SELECT
     ) AS inflation_factor
     , net_to_gross_ratio  
     , unit_quantity
-    , energy_savings_by_commodity[k.commodity] * unit_quantity * net_to_gross_ratio AS annual_net_energy_savings
+    , energy_savings_by_impact_category[k.impact_category] * unit_quantity * net_to_gross_ratio AS annual_net_energy_savings
     , CASE 
-    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN 1/(1-electric_line_loss)  
-    WHEN UPPER(k.commodity) = 'NATURAL GAS' THEN 1/(1-natural_gas_line_loss)
+    WHEN UPPER(k.impact_category) = 'ELECTRIC' THEN 1/(1-electric_line_loss)  
+    WHEN UPPER(k.impact_category) = 'NATURAL GAS' THEN 1/(1-natural_gas_line_loss)
     ELSE 1.0 
     END AS line_loss_factor
     , CASE 
-    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN 1/(1-peak_capacity_line_loss)  
+    WHEN UPPER(k.impact_category) = 'ELECTRIC' THEN 1/(1-peak_capacity_line_loss)  
     END AS peak_capacity_line_loss_factor
     , CASE 
-    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN energy_savings_by_commodity[k.commodity] * unit_quantity * net_to_gross_ratio * discount_factor  / ((1-electric_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))  
-    WHEN UPPER(k.commodity) = 'NATURAL GAS' THEN energy_savings_by_commodity[k.commodity] * unit_quantity * net_to_gross_ratio * discount_factor / ((1-natural_gas_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))
-    ELSE energy_savings_by_commodity[k.commodity] * unit_quantity * net_to_gross_ratio * discount_factor / (POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))
+    WHEN UPPER(k.impact_category) = 'ELECTRIC' THEN energy_savings_by_impact_category[k.impact_category] * unit_quantity * net_to_gross_ratio * discount_factor  / ((1-electric_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))  
+    WHEN UPPER(k.impact_category) = 'NATURAL GAS' THEN energy_savings_by_impact_category[k.impact_category] * unit_quantity * net_to_gross_ratio * discount_factor / ((1-natural_gas_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))
+    ELSE energy_savings_by_impact_category[k.impact_category] * unit_quantity * net_to_gross_ratio * discount_factor / (POW(1.0 + gp.inflation_rate, (year - gp.dollar_year)))
     END AS energy_savings_factors_applied
     , CASE 
-    WHEN UPPER(k.commodity) = 'ELECTRIC' THEN coincident_peak_savings_kw * unit_quantity * net_to_gross_ratio * discount_factor / ((1-peak_capacity_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year))) 
+    WHEN UPPER(k.impact_category) = 'ELECTRIC' THEN coincident_peak_savings_kw * unit_quantity * net_to_gross_ratio * discount_factor / ((1-peak_capacity_line_loss) * POW(1.0 + gp.inflation_rate, (year - gp.dollar_year))) 
     ELSE NULL 
     END AS coincident_peak_savings_factors_applied
 FROM 
     measure_discount_rate_factor_ts d
 JOIN core_layer0_base.measures m ON 
     m.id = d.id
-CROSS JOIN UNNEST(map_keys(m.energy_savings_by_commodity)) AS k(commodity)
+CROSS JOIN UNNEST(map_keys(m.energy_savings_by_impact_category)) AS k(impact_category)
 , core_layer0_base.global_parameters gp
 WHERE 
     annual_net_energy_savings IS NOT NULL 
@@ -120,7 +120,7 @@ UNION ALL
 
 SELECT 
     m.id
-    , k.commodity
+    , k.impact_category
     , year 
     , quarter
     , discount_factor
@@ -139,5 +139,5 @@ FROM
     measure_discount_rate_factor_ts d
 JOIN core_layer0_base.measures m ON 
     m.id = d.id
-CROSS JOIN UNNEST(cost_commodities) AS k(commodity)
+CROSS JOIN UNNEST(cost_commodities) AS k(impact_category)
 , core_layer0_base.global_parameters gp

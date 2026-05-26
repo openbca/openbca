@@ -72,37 +72,37 @@ def generate_benefit_cost_scatter_query(where_sql, catalog_by_filter):
     return benefit_cost_scatter_query
 
 
-def generate_benefits_commodity_options_query(where_sql):   
-    benefits_commodity_options_query = f"""
+def generate_benefits_impact_category_options_query(where_sql):   
+    benefits_impact_category_options_query = f"""
         SELECT 
-        DISTINCT commodity 
+        DISTINCT impact_category 
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fvc
         FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
-        AND commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
+        AND impact_category NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
         ORDER BY 
-        commodity
+        impact_category
         """
-    return benefits_commodity_options_query
+    return benefits_impact_category_options_query
     
 
-def generate_populated_temporal_cols_query(where_sql, commodity_filter, col):
+def generate_populated_temporal_cols_query(where_sql, impact_category_filter, col):
     populated_temporal_cols_query = f"""
         SELECT 
-        commodity 
+        impact_category 
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts 
         WHERE 
-        commodity = '{commodity_filter}'
+        impact_category = '{impact_category_filter}'
         AND {col} IS NOT NULL
         LIMIT 1
     """
     return populated_temporal_cols_query
 
 
-def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter, peak_months:list[int] = [], group_by_value_stream: bool = False):
+def generate_temporal_aggregation_benefits_query(where_sql, impact_category_filter, temporal_aggregation_filter, peak_months:list[int] = [], group_by_value_stream: bool = False):
     
     peak_months_where_sql = ''
     if len(peak_months) > 0:
@@ -120,7 +120,7 @@ def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, te
         fvc.id = m.id
         {where_sql} 
         {peak_months_where_sql}
-        AND commodity = '{commodity_filter}'
+        AND impact_category = '{impact_category_filter}'
         GROUP BY 
         {temporal_aggregation_filter}
         {', value_stream' if group_by_value_stream else ''}
@@ -138,7 +138,7 @@ def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, te
         fsc.id = m.id
         {where_sql} 
         {peak_months_where_sql}
-        AND commodity = '{commodity_filter}'
+        AND impact_category = '{impact_category_filter}'
         GROUP BY 
         {temporal_aggregation_filter}
         , value_stream
@@ -165,7 +165,7 @@ def generate_temporal_aggregation_benefits_query(where_sql, commodity_filter, te
     return temporal_aggregation_query
 
 
-def generate_null_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter):
+def generate_null_aggregation_benefits_query(where_sql, impact_category_filter, temporal_aggregation_filter):
     null_aggregation_benefits_query = f"""
         SELECT 
         value_stream
@@ -175,7 +175,7 @@ def generate_null_aggregation_benefits_query(where_sql, commodity_filter, tempor
         JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
-        AND commodity = '{commodity_filter}'
+        AND impact_category = '{impact_category_filter}'
         AND {temporal_aggregation_filter} IS NULL
         GROUP BY
         value_stream
@@ -191,14 +191,14 @@ def generate_null_aggregation_benefits_query(where_sql, commodity_filter, tempor
         JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
-        AND commodity = '{commodity_filter}'
+        AND impact_category = '{impact_category_filter}'
         AND {temporal_aggregation_filter} IS NULL
         HAVING SUM(final_dollar_value) IS NOT NULL
     """
     return null_aggregation_benefits_query
 
 
-def generate_value_stream_benefits_query(where_sql, commodity_filter, peak_months:list[int] = [], peak_hours:list[int] = []):
+def generate_value_stream_benefits_query(where_sql, impact_category_filter, peak_months:list[int] = [], peak_hours:list[int] = []):
     
     peak_months_where_sql = ''
     if len(peak_months) > 0:
@@ -219,7 +219,7 @@ def generate_value_stream_benefits_query(where_sql, commodity_filter, peak_month
         {where_sql} 
         {peak_months_where_sql}
         {peak_hours_where_sql}
-        AND commodity = '{commodity_filter}'
+        AND impact_category = '{impact_category_filter}'
         GROUP BY 
         value_stream
         ORDER BY 
@@ -256,22 +256,22 @@ def generate_multiple_options_probe_query(where_sql, column_names:list[str]):
     return multiple_options_probe_query
 
 
-def generate_costs_commodity_query(where_sql):
-    costs_commodity_query = f"""
+def generate_costs_impact_category_query(where_sql):
+    costs_impact_category_query = f"""
         SELECT 
-        commodity
+        impact_category
         , -sum(final_dollar_value) AS final_dollar_value
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fvc 
         FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
-        AND commodity IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
+        AND impact_category IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
         GROUP BY 
-        commodity
+        impact_category
         HAVING ABS(final_dollar_value) > 0
     """
-    return costs_commodity_query
+    return costs_impact_category_query
 
 
 def generate_costs_value_stream_query(where_sql):
@@ -284,7 +284,7 @@ def generate_costs_value_stream_query(where_sql):
         FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
-        AND commodity IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
+        AND impact_category IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
         GROUP BY 
         value_stream            
         HAVING ABS(final_dollar_value) > 0
@@ -309,7 +309,7 @@ def generate_categorical_summary_query(where_sql, category_filter, grouping_filt
         {category_filter_coalesce} AS {category_filter}
         {f", {grouping_filter_coalesce} AS {grouping_filter}" if grouping_filter is not None else ''}
         , SUM(ifnull(final_dollar_value, 0)) AS final_dollar_value
-        , -SUM(CASE WHEN commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN ifnull(final_dollar_value, 0) END) / SUM(CASE WHEN commodity IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN ifnull(final_dollar_value, 0) END) AS jst_ratio
+        , -SUM(CASE WHEN impact_category NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN ifnull(final_dollar_value, 0) END) / SUM(CASE WHEN impact_category IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN ifnull(final_dollar_value, 0) END) AS jst_ratio
         FROM 
         openbca.core_layer3_finalization.final_value_calculations_ts fvc 
         FULL OUTER JOIN openbca.core_layer0_base.measures m ON 

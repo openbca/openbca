@@ -5,19 +5,19 @@ MODEL(
 
 SELECT 
 	cls.id 
-	, cls.commodity 
+	, cls.impact_category 
 	, ls.month 
 	--, ls.day_of_year
 	--, ls.hour_of_year
 	, ls.hour_of_day
 	, SUM(ls.load_shape_value * total_net_annual_energy_savings) AS total_net_annual_energy_savings
 FROM 
-	openbca.core_layer1_mappings.commodity_load_shape_by_id cls
+	openbca.core_layer1_mappings.impact_category_load_shape_by_id cls
 JOIN openbca.core_layer0_base.load_shapes_ts ls ON 
-	cls.commodity = ls.commodity 
+	cls.impact_category = ls.impact_category 
 	AND cls.load_shape  = ls.load_shape 
 GROUP BY 
 	cls.id 
-	, cls.commodity 
+	, cls.impact_category 
 	, ls.month 
 	, ls.hour_of_day

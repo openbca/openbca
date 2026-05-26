@@ -6,7 +6,7 @@ MODEL(
 WITH load_shapes_in_use AS (
 	SELECT 
 		DISTINCT
-		'ELECTRIC' AS commodity
+		'ELECTRIC' AS impact_category
 		, electric_savings_load_shape AS load_shape
 	FROM 
 		openbca_input.measures
@@ -15,7 +15,7 @@ WITH load_shapes_in_use AS (
 	
 	SELECT 
 		DISTINCT
-		'NATURAL GAS' AS commodity
+		'NATURAL GAS' AS impact_category
 		, natural_gas_savings_load_shape AS load_shape
 	FROM 
 		openbca_input.measures
@@ -24,7 +24,7 @@ WITH load_shapes_in_use AS (
 
 , load_shape_counts AS (
 SELECT
-	'ELECTRIC' AS commodity
+	'ELECTRIC' AS impact_category
     , load_shape
     , COUNT(DISTINCT hour_of_year) AS count_hour_of_year
     , COUNT(DISTINCT day_of_year) AS count_day_of_year
@@ -34,12 +34,12 @@ FROM
 GROUP BY
 	load_shape
 WHERE 
-	load_shape IN (SELECT load_shape FROM load_shapes_in_use WHERE commodity = 'ELECTRIC')
+	load_shape IN (SELECT load_shape FROM load_shapes_in_use WHERE impact_category = 'ELECTRIC')
 	
 UNION ALL 
 
 SELECT
-	'NATURAL GAS' AS commodity
+	'NATURAL GAS' AS impact_category
     , load_shape
     , COUNT(DISTINCT hour_of_year) AS count_hour_of_year
     , COUNT(DISTINCT day_of_year) AS count_day_of_year
@@ -49,13 +49,13 @@ FROM
 GROUP BY
 	load_shape
 WHERE 
-	load_shape IN (SELECT load_shape FROM load_shapes_in_use WHERE commodity = 'NATURAL GAS')
+	load_shape IN (SELECT load_shape FROM load_shapes_in_use WHERE impact_category = 'NATURAL GAS')
 )
 
 
 , avoided_cost_counts AS (
 SELECT 
-	UPPER(vsg.commodity) AS commodity
+	UPPER(vsg.impact_category) AS impact_category
 	, ac.avoided_cost 
 	, COUNT(DISTINCT hour_of_year) AS count_hour_of_year
 	, COUNT(DISTINCT day_of_year) AS count_day_of_year
@@ -65,16 +65,16 @@ FROM
 JOIN openbca_input.value_stream_groups vsg ON 
 	ac.avoided_cost = vsg.avoided_cost 
 WHERE  
-	UPPER(vsg.commodity) IN ('ELECTRIC', 'NATURAL GAS')
+	UPPER(vsg.impact_category) IN ('ELECTRIC', 'NATURAL GAS')
 	AND vsg.include_in_test 
 GROUP BY
 	ac.avoided_cost 
-	, vsg.commodity
+	, vsg.impact_category
 )
 
 
 SELECT 
-	ac.commodity
+	ac.impact_category
 	, ac.avoided_cost
 	, ls.load_shape
 	, GREATEST(ls.count_hour_of_year, ls.count_day_of_year, ls.count_month) AS load_shape_granularity
@@ -88,4 +88,4 @@ SELECT
 FROM 
 	load_shape_counts ls  
 JOIN avoided_cost_counts ac ON 
-	ls.commodity = ac.commodity
+	ls.impact_category = ac.impact_category

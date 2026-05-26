@@ -15,7 +15,7 @@ WITH lifecycle_savings_calc AS (
 		, m.net_to_gross_ratio::FLOAT AS net_to_gross_ratio
 		, m.estimated_useful_life::INTEGER AS estimated_useful_life
 		, m.unit_quantity::INTEGER AS unit_quantity
-		, cls.commodity::VARCHAR AS commodity
+		, cls.impact_category::VARCHAR AS impact_category
 		, m.label_1::VARCHAR AS label_1
 		, m.label_2::VARCHAR AS label_2
 		, m.label_3::VARCHAR AS label_3
@@ -23,11 +23,11 @@ WITH lifecycle_savings_calc AS (
 		, m.label_5::VARCHAR AS label_5
 		, cls.total_net_annual_energy_savings * m.estimated_useful_life AS total_net_lifecycle_energy_savings
 	FROM
-		core_layer1_mappings.commodity_load_shape_by_id cls 
+		core_layer1_mappings.impact_category_load_shape_by_id cls 
 	JOIN core_layer0_base.measures m ON 
 		cls.id = m.id
 	WHERE 
-		cls.commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
+		cls.impact_category NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
 )
 
 , lifecycle_savings AS (
@@ -44,10 +44,10 @@ WITH lifecycle_savings_calc AS (
 			, estimated_useful_life
 			, unit_quantity 
 			, CASE 
-			WHEN commodity = 'ELECTRIC' THEN commodity || ' Lifecycle kWh Savings'
-			WHEN commodity IN ('NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL') THEN commodity || ' Lifecycle MMBtu Savings'
-			ELSE commodity || ' Lifecycle Savings'
-			END AS commodity
+			WHEN impact_category = 'ELECTRIC' THEN impact_category || ' Lifecycle kWh Savings'
+			WHEN impact_category IN ('NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL', 'WOOD') THEN impact_category || ' Lifecycle MMBtu Savings'
+			ELSE impact_category || ' Lifecycle Savings'
+			END AS impact_category
 			, label_1
 			, label_2
 			, label_3
@@ -58,7 +58,7 @@ WITH lifecycle_savings_calc AS (
 			lifecycle_savings_calc
 	)
 	ON 
-		commodity
+		impact_category
 	USING 
 		SUM(total_net_lifecycle_energy_savings)
 )
@@ -87,26 +87,26 @@ WITH lifecycle_savings_calc AS (
 		SUM(final_dollar_value)
 )
 
-, commodity_value_calc AS (
+, impact_category_value_calc AS (
 	SELECT 
 		id
-		, commodity
+		, impact_category
 		, final_dollar_value
 	FROM  
 		core_layer3_finalization.final_value_calculations_ts
 )
 
-, commodity_values AS (
+, impact_category_values AS (
 	PIVOT (
 		SELECT 
 			id
-			, commodity || ' Total ($)' AS commodity
+			, impact_category || ' Total ($)' AS impact_category
 			, final_dollar_value
 		FROM 
-			commodity_value_calc
+			impact_category_value_calc
 	)
 	ON
-		commodity
+		impact_category
 	USING 
 		SUM(final_dollar_value)
 )
@@ -115,8 +115,8 @@ WITH lifecycle_savings_calc AS (
 	SELECT 
 		id
 		, MIN(year) AS start_year
-		, SUM(CASE WHEN commodity IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN final_dollar_value END) AS total_costs
-		, SUM(CASE WHEN commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN final_dollar_value END) AS total_benefits
+		, SUM(CASE WHEN impact_category IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN final_dollar_value END) AS total_costs
+		, SUM(CASE WHEN impact_category NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE') THEN final_dollar_value END) AS total_benefits
 		, SUM(final_dollar_value) AS total_net_benefits
 	FROM  
 		core_layer3_finalization.final_value_calculations_ts
@@ -136,7 +136,7 @@ SELECT
 	, vs.* EXCEPT(id)
 FROM
 	total_values tv 
-FULL OUTER JOIN commodity_values cv ON
+FULL OUTER JOIN impact_category_values cv ON
 	tv.id = cv.id
 FULL OUTER JOIN value_stream_values vs ON  
 	tv.id = vs.id

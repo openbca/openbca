@@ -23,7 +23,7 @@ WITH measure_electric_load_shapes AS (
     FROM  
         openbca_input.load_shapes_ts  
     WHERE
-        UPPER(commodity) = 'ELECTRIC'
+        UPPER(impact_category) = 'ELECTRIC'
 )
 
 , load_shape_natural_gas_load_shapes AS (
@@ -32,12 +32,12 @@ WITH measure_electric_load_shapes AS (
     FROM  
         openbca_input.load_shapes_ts  
     WHERE
-        UPPER(commodity) = 'NATURAL GAS'
+        UPPER(impact_category) = 'NATURAL GAS'
 )
 
 SELECT 
     DISTINCT
-    'ELECTRIC' AS commodity
+    'ELECTRIC' AS impact_category
     , load_shape
 FROM 
     measure_electric_load_shapes
@@ -48,7 +48,7 @@ UNION ALL
 
 SELECT 
     DISTINCT 
-    'NATURAL GAS' AS commodity
+    'NATURAL GAS' AS impact_category
     , load_shape
 FROM 
     measure_natural_gas_load_shapes

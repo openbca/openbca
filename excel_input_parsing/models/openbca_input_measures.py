@@ -34,6 +34,8 @@ MEASURES_SCHEMA_COLUMN_ORDER = [
     "net_to_gross_ratio",
     "admin_cost_upfront_dollar",
     "admin_cost_annual_dollar_per_year",
+    "utility_direct_investment_in_ders_dollar",
+    "credit_and_collection_cost_dollar",
     "utility_incentive_upfront_dollar",
     "utility_incentive_annual_dollar_per_year",
     "incremental_cost_upfront_dollar",
@@ -51,24 +53,22 @@ MEASURES_SCHEMA_COLUMN_ORDER = [
     "annual_diesel_savings_mmbtu",
     "host_customer_non_energy_impacts_dollar",
     "host_customer_non_energy_impacts_low_income_dollar",
-    "change_in_host_customer_risk",
-    "change_in_host_customer_reliability",
     "change_in_host_customer_resilience",
     "change_in_societal_resilience",
     "custom_1_value_stream_name",
-    "custom_1_value_stream_commodity",
+    "custom_1_value_stream_impact_category",
     "custom_1_annual_savings",
     "custom_2_value_stream_name",
-    "custom_2_value_stream_commodity",
+    "custom_2_value_stream_impact_category",
     "custom_2_annual_savings",
     "custom_3_value_stream_name",
-    "custom_3_value_stream_commodity",
+    "custom_3_value_stream_impact_category",
     "custom_3_annual_savings",
     "custom_4_value_stream_name",
-    "custom_4_value_stream_commodity",
+    "custom_4_value_stream_impact_category",
     "custom_4_annual_savings",
     "custom_5_value_stream_name",
-    "custom_5_value_stream_commodity",
+    "custom_5_value_stream_impact_category",
     "custom_5_annual_savings",
 ] + custom_headers
 
@@ -88,6 +88,8 @@ columns={
     "net_to_gross_ratio": "float",
     "admin_cost_upfront_dollar": "float",
     "admin_cost_annual_dollar_per_year": "float",
+    "utility_direct_investment_in_ders_dollar": "float",
+    "credit_and_collection_cost_dollar": "float",
     "utility_incentive_upfront_dollar": "float",
     "utility_incentive_annual_dollar_per_year": "float",
     "incremental_cost_upfront_dollar": "float",
@@ -105,24 +107,22 @@ columns={
     "annual_diesel_savings_mmbtu": "float",
     "host_customer_non_energy_impacts_dollar": "float",
     "host_customer_non_energy_impacts_low_income_dollar": "float",
-    "change_in_host_customer_risk": "float",
-    "change_in_host_customer_reliability": "float",
     "change_in_host_customer_resilience": "float",
     "change_in_societal_resilience": "float",
     "custom_1_value_stream_name": "string",
-    "custom_1_value_stream_commodity": "string",
+    "custom_1_value_stream_impact_category": "string",
     "custom_1_annual_savings": "float", 
     "custom_2_value_stream_name": "string",
-    "custom_2_value_stream_commodity": "string",
+    "custom_2_value_stream_impact_category": "string",
     "custom_2_annual_savings": "float", 
     "custom_3_value_stream_name": "string",
-    "custom_3_value_stream_commodity": "string",
+    "custom_3_value_stream_impact_category": "string",
     "custom_3_annual_savings": "float", 
     "custom_4_value_stream_name": "string",
-    "custom_4_value_stream_commodity": "string",
+    "custom_4_value_stream_impact_category": "string",
     "custom_4_annual_savings": "float", 
     "custom_5_value_stream_name": "string",
-    "custom_5_value_stream_commodity": "string",
+    "custom_5_value_stream_impact_category": "string",
     "custom_5_annual_savings": "float", 
 } 
 
@@ -201,18 +201,18 @@ def load_measure_inputs_from_excel(
             engine="calamine").tail(10).head(5)
 
         #value_stream_names = custom_avoided_cost_names_df[value_stream_col_name].to_list()
-        custom_avoided_cost_names_df['Commodity'] = custom_avoided_cost_names_df['Commodity'].astype(str)
+        custom_avoided_cost_names_df['Impact Category'] = custom_avoided_cost_names_df['Impact Category'].astype(str)
 
-        value_stream_names_commodity_dict = dict(zip(custom_avoided_cost_names_df['Value Stream'], custom_avoided_cost_names_df['Commodity']))
+        value_stream_names_impact_category_dict = dict(zip(custom_avoided_cost_names_df['Value Stream'], custom_avoided_cost_names_df['Impact Category']))
 
-        for i, (name, commodity) in enumerate(value_stream_names_commodity_dict.items()):
+        for i, (name, impact_category) in enumerate(value_stream_names_impact_category_dict.items()):
             df[f"custom_{i+1}_value_stream_name"] = name
             
-            if commodity.upper() in ['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'OIL', 'NON-SYSTEM', 'ALL FUELS', 'NAN']:
-                df[f"custom_{i+1}_value_stream_commodity"] = f"STANDARD_{i+1}"
+            if impact_category.upper() in ['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'OIL', 'WOOD','NON-SYSTEM', 'ALL FUELS', 'NAN']:
+                df[f"custom_{i+1}_value_stream_impact_category"] = f"STANDARD_{i+1}"
                 df[f"custom_{i+1}_annual_savings"] = None
             else:
-                df[f"custom_{i+1}_value_stream_commodity"] = commodity.upper()
+                df[f"custom_{i+1}_value_stream_impact_category"] = impact_category.upper()
 
         return df
     

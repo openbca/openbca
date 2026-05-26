@@ -6,7 +6,7 @@ MODEL(
 WITH standard_value_stream_hourly AS (
 SELECT 
     factors.id
-    , factors.commodity 
+    , factors.impact_category 
     , acs.avoided_cost AS value_stream 
     , ac_ls.year
     , COALESCE(ac_ls.quarter, acs.start_quarter) AS quarter
@@ -24,12 +24,12 @@ SELECT
 		END AS final_dollar_value
 FROM 
     core_layer2_precompute.savings_factors factors
-JOIN core_layer1_mappings.commodity_load_shape_by_id cls ON 
+JOIN core_layer1_mappings.impact_category_load_shape_by_id cls ON 
     factors.id = cls.id 
-    AND factors.commodity = cls.commodity
+    AND factors.impact_category = cls.impact_category
 JOIN core_layer1_mappings.avoided_cost_subsets_by_id acs ON 
     factors.id = acs.id
-    AND factors.commodity = acs.commodity
+    AND factors.impact_category = acs.impact_category
 JOIN core_layer2_precompute.avoided_cost_load_shape_combos ac_ls ON  
     factors.year = ac_ls.year 
     AND factors.quarter = COALESCE(ac_ls.quarter, acs.start_quarter)   
@@ -41,7 +41,7 @@ JOIN core_layer2_precompute.avoided_cost_load_shape_combos ac_ls ON
 , standard_value_streams AS (  
 	SELECT 
 		id
-		, commodity
+		, impact_category
 		, value_stream
 		, year
 		, quarter
@@ -53,7 +53,7 @@ JOIN core_layer2_precompute.avoided_cost_load_shape_combos ac_ls ON
 		standard_value_stream_hourly
 	GROUP BY 
 		id
-		, commodity
+		, impact_category
 		, value_stream
 		, year
 		, quarter
@@ -67,14 +67,14 @@ SELECT
 FROM 
     standard_value_streams 
 WHERE
-	commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
+	impact_category NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
 
 UNION ALL  
 
 -- Measure-level cost components
 SELECT 
 	svs.id  
-	, svs.commodity
+	, svs.impact_category
 	, c.avoided_cost as value_stream
 	, svs.year
 	, svs.quarter
@@ -102,7 +102,7 @@ UNION ALL
 -- Electric adders
 SELECT 
 	svs.id 
-	, vsg.commodity 
+	, vsg.impact_category 
 	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
@@ -115,7 +115,7 @@ SELECT
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
-	svs.commodity = vsg.commodity 
+	svs.impact_category = vsg.impact_category 
 WHERE 
 	svs.value_stream = 'Energy Generation (E)'
 	AND vsg.value_stream_group = 'electric_%_adder'
@@ -126,7 +126,7 @@ UNION ALL
 -- Natural Gas adders
 SELECT 
 	svs.id 
-	, vsg.commodity 
+	, vsg.impact_category 
 	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
@@ -139,7 +139,7 @@ SELECT
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
-	svs.commodity = vsg.commodity 
+	svs.impact_category = vsg.impact_category 
 WHERE 
 	svs.value_stream = 'Fuel Supply and O&M (NG)'
 	AND vsg.value_stream_group = 'natural_gas_%_adder'
@@ -150,7 +150,7 @@ UNION ALL
 -- Propane adders
 SELECT 
 	svs.id 
-	, vsg.commodity 
+	, vsg.impact_category 
 	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
@@ -163,7 +163,7 @@ SELECT
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
-	svs.commodity = vsg.commodity 
+	svs.impact_category = vsg.impact_category 
 WHERE 
 	svs.value_stream = 'Propane Supply'
 	AND vsg.value_stream_group = 'propane_%_adder'
@@ -174,7 +174,7 @@ UNION ALL
 -- Oil adders
 SELECT 
 	svs.id 
-	, vsg.commodity 
+	, vsg.impact_category 
 	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
@@ -187,7 +187,7 @@ SELECT
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
-	svs.commodity = vsg.commodity 
+	svs.impact_category = vsg.impact_category 
 WHERE 
 	svs.value_stream = 'Oil Supply'
 	AND vsg.value_stream_group = 'oil_%_adder'
@@ -198,7 +198,7 @@ UNION ALL
 -- Diesel adders
 SELECT 
 	svs.id 
-	, vsg.commodity 
+	, vsg.impact_category 
 	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, svs.quarter
@@ -211,7 +211,7 @@ SELECT
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
-	svs.commodity = vsg.commodity 
+	svs.impact_category = vsg.impact_category 
 WHERE 
 	svs.value_stream = 'Diesel Supply'
 	AND vsg.value_stream_group = 'diesel_%_adder'
@@ -219,10 +219,34 @@ WHERE
 
 UNION ALL 
 
+-- Wood adders
+SELECT 
+	svs.id 
+	, vsg.impact_category 
+	, vsg.avoided_cost AS value_stream 
+	, svs.year 
+	, svs.quarter
+	, svs.month  
+	--, svs.day_of_year 
+	--, svs.hour_of_year 
+	, svs.hour_of_day
+	, svs.net_energy_savings
+	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
+FROM 
+	standard_value_streams svs
+JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
+	svs.impact_category = vsg.impact_category 
+WHERE 
+	svs.value_stream = 'Wood Supply'
+	AND vsg.value_stream_group = 'wood_%_adder'
+	AND include_in_test 
+
+UNION ALL 
+
 -- All fuels adders 
 SELECT 
 	svs.id 
-	, vsg.commodity 
+	, vsg.impact_category 
 	, vsg.avoided_cost AS value_stream 
 	, svs.year 
 	, NULL AS quarter
@@ -236,12 +260,12 @@ FROM
 	standard_value_streams svs
 	, openbca.core_layer0_base.value_stream_groups vsg  
 WHERE 
-	svs.value_stream IN ('Energy Generation (E)', 'Fuel Supply and O&M (NG)', 'Propane Supply', 'Oil Supply', 'Diesel Supply')
+	svs.value_stream IN ('Energy Generation (E)', 'Fuel Supply and O&M (NG)', 'Propane Supply', 'Oil Supply', 'Diesel Supply', 'Wood Supply')
 	AND vsg.value_stream_group = 'all_fuels_%_adder'
 	AND include_in_test 
 GROUP BY 
 	svs.id 
-	, vsg.commodity 
+	, vsg.impact_category 
 	, vsg.avoided_cost 
 	, svs.year 
 	, vsg.pct_adder 
@@ -251,7 +275,7 @@ UNION ALL
 -- Program-level benefits 
 SELECT 
 	p.program_name AS id 
-	, vsg.commodity 
+	, vsg.impact_category 
 	, p.avoided_cost AS value_stream 
 	, p.program_year AS year  
 	, NULL AS quarter
@@ -266,14 +290,14 @@ JOIN core_layer0_base.value_stream_groups vsg ON
  	p.avoided_cost = vsg.avoided_cost
 	, openbca.core_layer0_base.global_parameters gp
 WHERE 
-	vsg.commodity NOT IN ['ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE']
+	vsg.impact_category NOT IN ['ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE']
 
 UNION ALL
 
 -- Program-level costs 
 SELECT 
 	c.id 
-	, c.commodity 
+	, c.impact_category 
 	, c.avoided_cost AS value_stream 
 	, c.start_year AS year  
 	, NULL AS quarter

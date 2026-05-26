@@ -8,29 +8,41 @@ from typing import Optional
 from helper_functions import space_and_title
 
 
-def get_colors():
+def get_colors(altair_style: bool = False):
     """Get a list of colors to use in making plots
 
     Returns:
         list: A list of matplotlib color specifiers
     """
-    return [
-        "royalblue",
-        "green",
-        "firebrick",
-        "dimgray",
-        "olive",
-        "#DB3E3B",
-        "#23ce6b",
-        "#389BFB",
-        "#AA4FD0",
-        "#FBB943",
-        "#D64F2B",
-        "#A62C4A",
-        "navy",
-        "black",
-        "#087BEC",
-        "cornflowerblue",
+    if altair_style:
+        return [
+            '#1f77b4',
+            '#ff7f0e',
+            '#2ca02c',
+            '#d62728',
+            '#9467bd',
+            '#8c563b',
+            '#7f7f7f',
+            '#bcbd22'
+        ]
+    else:
+        return [
+            "royalblue",
+            "green",
+            "firebrick",
+            "dimgray",
+            "olive",
+            "#DB3E3B",
+            "#23ce6b",
+            "#389BFB",
+            "#AA4FD0",
+            "#FBB943",
+            "#D64F2B",
+            "#A62C4A",
+            "navy",
+            "black",
+            "#087BEC",
+            "cornflowerblue",
     ]
 
 
@@ -63,7 +75,7 @@ def get_hatches():
 
 
 # Get colors, markers, and linestyles to use throughout
-colors = get_colors()
+colors = get_colors(altair_style=True)
 markers_open = get_markers()[0]
 markers_closed = get_markers()[1]
 linestyles = ["-", "--", ":", "-."]
@@ -365,8 +377,11 @@ def waterfall_multitier_fig(
             stacked_df[col],
             bottom=stacked_df["lead_cumsum"],
             color=[
-                "cornflowerblue" if x >= 0 else "lightcoral" for x in stacked_df[col]
+                colors[0] if x >= 0 else colors[3] for x in stacked_df[col]
             ],
+            # color=[
+            #     "cornflowerblue" if x >= 0 else "lightcoral" for x in stacked_df[col]
+            # ],
             zorder=3
         )
 
@@ -374,6 +389,7 @@ def waterfall_multitier_fig(
             axs[i].bar(
                 totals_dfs[i][category],
                 totals_dfs[i][col],
+                #color=colors[2],
                 color="green", 
                 alpha=0.65, 
                 zorder=3
@@ -989,7 +1005,7 @@ def categorical_bar_fig(
     y2_col: str = None,
     min_y2_counts: Optional[int] = None,  # None = no filter (show negative y2); int = keep only rows with y2 >= value
     pin_yaxis_zeros: bool = False,  # Whether to force the y1 and y2 axes to share 0
-    single_bar_color="dimgray",
+    single_bar_color: str = colors[0],
     horizontal: bool = False,  # Whether to plot a horizontal bar chart
     space_fraction: float = 0.65,
     sort_by: list = None,

@@ -4,7 +4,7 @@ import pandas as pd
 
 from config.paths import get_input_templates_dir
 
-ID_COLUMNS = ['avoided_cost', 'commodity', 'include_in_test', 'calc_type', 'pct_adder', 'value_stream_group']
+ID_COLUMNS = ['avoided_cost', 'impact_category', 'include_in_test', 'calc_type', 'pct_adder', 'value_stream_group']
 
 @model(
     name='openbca_input.value_stream_groups', 
@@ -12,7 +12,7 @@ ID_COLUMNS = ['avoided_cost', 'commodity', 'include_in_test', 'calc_type', 'pct_
     grain=ID_COLUMNS,
     columns={
         'avoided_cost': 'string',
-        'commodity': 'string',
+        'impact_category': 'string',
         'include_in_test': 'boolean',
         'calc_type': 'string',
         'pct_adder': 'float',
@@ -26,16 +26,16 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     )
 
 non_system_commodities = [
-    'Host Customer Risk', 
-    'Host Customer Reliability',
     'Host Customer Resilience',
     'Host Customer NEIs',
     'Host Customer NEIs - LI',
-    'Societal Resilience'
+    'Societal Resilience',
+    'Utility Credit & Collection',
     ]
 
-config_cost_name_commodity_map_dict = {
+config_cost_name_impact_category_map_dict = {
     'Utility Program Admin Costs': 'ADMIN',
+    'Utility Direct Investment in DERs': 'ADMIN',
     'Utility Financial Incentives': 'UTILITY INCENTIVE',
     'Host Customer Incremental Cost': 'MEASURE COST',
     'Host Customer Transaction Cost': 'MEASURE COST',
@@ -48,13 +48,15 @@ config_measure_cost_fields_map_dict = {
     'Utility Program Admin Costs': [
             'admin_cost_upfront_dollar',
             'admin_cost_annual_dollar_per_year',
-            'program_admin_costs_dollar_per_year'
+            'program_admin_costs_dollar_per_year',
+        ],
+    'Utility Direct Investment in DERs': [
+            'utility_direct_investment_in_ders_dollar',
         ],
     'Utility Financial Incentives': [
             'utility_incentive_upfront_dollar',
             'utility_incentive_annual_dollar_per_year',
             'program_incentive_utility_to_customer_dollar_per_year',
-            #'program_performance_incentive_govt_to_utility_dollar_per_year'
         ],
     'Host Customer Incremental Cost': [
             'incremental_cost_upfront_dollar',
@@ -68,17 +70,12 @@ config_measure_cost_fields_map_dict = {
     ],
     'Host Customer Tax Incentives': [
             'host_customer_tax_incentive_upfront_dollar',
-            #'program_federal_incentive_dollar_per_year'
         ],
     'Program Level Benefits': [
         'program_performance_incentive_govt_to_utility_dollar_per_year',
         'program_federal_incentive_dollar_per_year'
     ]
 }
-
-# Utility Performance Incentive
-#program_performance_incentive_govt_to_utility_dollar_per_year
-#program_federal_incentive_dollar_per_year
 
 repeating_annual_costs = [
     'admin_cost_annual_dollar_per_year',
@@ -92,7 +89,7 @@ repeating_annual_costs = [
 
 _VALUE_STREAM_GROUP_COLS = [
     'avoided_cost',
-    'commodity',
+    'impact_category',
     'include_in_test',
     'calc_type',
     'pct_adder',
@@ -118,13 +115,13 @@ def load_value_stream_groups_from_excel(
         engine="calamine",
         )[[
             'Value Stream',
-            'Commodity',
+            'Impact Category',
             'Include in Test',
             'Data Granularity / Calculation Type',
             'Adder (%)'
             ]]   
 
-    column_headers = ['avoided_cost', 'commodity', 'include_in_test', 'calc_type', 'pct_adder']
+    column_headers = ['avoided_cost', 'impact_category', 'include_in_test', 'calc_type', 'pct_adder']
     value_stream_groups_df.columns = column_headers
 
     for col in column_headers:
@@ -135,22 +132,24 @@ def load_value_stream_groups_from_excel(
         value_stream_groups_df['pct_adder'], errors='coerce'
     ).astype('Float64')
 
-    def assign_value_stream_group(calc_type, commodity):
+    def assign_value_stream_group(calc_type, impact_category):
         
         if calc_type == None:
             return None
 
         elif calc_type == 'Adder (%)':
-            if commodity == 'Electric':
+            if impact_category == 'Electric':
                 return 'electric_%_adder'
-            elif commodity == 'Natural Gas':
+            elif impact_category == 'Natural Gas':
                 return 'natural_gas_%_adder'
-            elif commodity == 'Propane':
+            elif impact_category == 'Propane':
                 return 'propane_%_adder'
-            elif commodity == 'Oil':
+            elif impact_category == 'Oil':
                 return 'oil_%_adder'
-            elif commodity == 'Diesel':
+            elif impact_category == 'Diesel':
                 return 'diesel_%_adder'
+            elif impact_category == 'Wood':
+                return 'wood_%_adder'
             else:
                 return 'all_fuels_%_adder'
 
@@ -161,19 +160,20 @@ def load_value_stream_groups_from_excel(
             return 'annual'
 
         else:
-            if commodity == 'Electric':
+            if impact_category == 'Electric':
                 return 'electric'
-            if commodity == 'Natural Gas':
+            if impact_category == 'Natural Gas':
                 return 'natural_gas'
 
             else:
                 return 'annual'
 
-    value_stream_groups_df['value_stream_group'] = value_stream_groups_df.apply(lambda x: assign_value_stream_group(x['calc_type'], x['commodity']), axis=1)
-    value_stream_groups_df['commodity'] = value_stream_groups_df.apply(lambda x: x['avoided_cost'] if x['avoided_cost'] in non_system_commodities else x['commodity'], axis=1)
+    value_stream_groups_df['value_stream_group'] = value_stream_groups_df.apply(lambda x: assign_value_stream_group(x['calc_type'], x['impact_category']), axis=1)
+    value_stream_groups_df['impact_category'] = value_stream_groups_df.apply(lambda x: x['avoided_cost'] if x['avoided_cost'] in non_system_commodities else x['impact_category'], axis=1)
 
     value_stream_groups_costs_dfs = []
-    for field in config_cost_name_commodity_map_dict.keys():
+    print(value_stream_groups_df.head())
+    for field in config_cost_name_impact_category_map_dict.keys():
 
         if field == 'Program Level Benefits':
             include_in_test = True
@@ -191,7 +191,7 @@ def load_value_stream_groups_from_excel(
             df = pd.DataFrame(
                 [[
                     col, 
-                    config_cost_name_commodity_map_dict[field], 
+                    config_cost_name_impact_category_map_dict[field], 
                     include_in_test, 
                     'Time Series - Annual' if col in repeating_annual_costs else 'Single Value - First Year', 
                     pd.NA, 

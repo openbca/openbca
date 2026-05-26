@@ -4,7 +4,7 @@ MODEL(
 );
 
 SELECT
-    commodity::VARCHAR AS commodity,
+    impact_category::VARCHAR AS impact_category,
     cost_treatment::VARCHAR AS cost_treatment,
     factor::VARCHAR AS factor
 FROM (
@@ -33,4 +33,4 @@ FROM (
         ('TAX INCENTIVE', 'PCT', '-1'),
         ('TAX INCENTIVE', 'RIM', '0'),
 
-) AS t(commodity, cost_treatment, factor)
+) AS t(impact_category, cost_treatment, factor)

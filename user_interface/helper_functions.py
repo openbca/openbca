@@ -5,7 +5,6 @@ from itertools import product
 
 def space_and_title(text: str) -> str:
     return ' '.join(str(text).split('_')).title().replace(
-        "Commodity", "Impact Category").replace(
         " Id", " ID").replace(
         "Of", "of").replace(
         "Hvac", "HVAC").replace(
@@ -23,7 +22,7 @@ def space_and_title(text: str) -> str:
 
 
 def reconstruct_column_name(text: str) -> str:
-    return str(text).lower().replace(" ", "_").replace("impact_category", "commodity")
+    return str(text).lower().replace(" ", "_")
 
 
 def determine_label_sig_figs(num_bars: int) -> int:

@@ -13,14 +13,14 @@ from sql_queries import (
     generate_jst_query, 
     generate_waterfall_query, 
     generate_benefit_cost_scatter_query,
-    generate_benefits_commodity_options_query, 
+    generate_benefits_impact_category_options_query, 
     generate_populated_temporal_cols_query, 
     generate_temporal_aggregation_benefits_query, 
     generate_null_aggregation_benefits_query, 
     generate_value_stream_benefits_query,
     generate_multiple_options_probe_query, 
     generate_categorical_summary_query,
-    generate_costs_commodity_query, 
+    generate_costs_impact_category_query, 
     generate_costs_value_stream_query,
     generate_summary_results_query
 )
@@ -485,30 +485,30 @@ else:
                     key = "bar_pie_fig_or_table"
                     ) 
 
-            benefits_commodity_options_df = con.execute(generate_benefits_commodity_options_query(where_sql)).df()
-            benefits_commodity_options = [space_and_title(commodity) for commodity in benefits_commodity_options_df['commodity'].tolist()]
+            benefits_impact_category_options_df = con.execute(generate_benefits_impact_category_options_query(where_sql)).df()
+            benefits_impact_category_options = [space_and_title(impact_category) for impact_category in benefits_impact_category_options_df['impact_category'].tolist()]
 
-            commodity_filter = st.radio(
+            impact_category_filter = st.radio(
                 label = "**Impact Category**", 
-                options = benefits_commodity_options, 
+                options = benefits_impact_category_options, 
                 horizontal = True,
-                index = 0 if 'Electric' not in benefits_commodity_options else benefits_commodity_options.index('Electric'), 
+                index = 0 if 'Electric' not in benefits_impact_category_options else benefits_impact_category_options.index('Electric'), 
                 )
 
-            if commodity_filter == 'Electric':
+            if impact_category_filter == 'Electric':
                 unit = 'kWh'
-            elif commodity_filter in ['Natural Gas', 'Propane', 'Oil', 'Diesel']:
+            elif impact_category_filter in ['Natural Gas', 'Propane', 'Oil', 'Diesel', 'Wood']:
                 unit = 'MMBtu'
             else:
                 unit = ''
             
             temporal_cols = ['hour_of_day', 'month', 'year']
-            commodity_filter = commodity_filter.upper()
+            impact_category_filter = impact_category_filter.upper()
 
             populated_temporal_cols = []
             for col in temporal_cols:
                 if len(
-                    con.execute(generate_populated_temporal_cols_query(where_sql, commodity_filter, col)).df()
+                    con.execute(generate_populated_temporal_cols_query(where_sql, impact_category_filter, col)).df()
                 ) > 0:
                     populated_temporal_cols.append(col)
 
@@ -532,7 +532,7 @@ else:
 
                     temporal_aggregation_filter = reconstruct_column_name(temporal_aggregation_filter)
                         
-                    null_aggregation_benefits_df = con.execute(generate_null_aggregation_benefits_query(where_sql, commodity_filter, temporal_aggregation_filter)).df()
+                    null_aggregation_benefits_df = con.execute(generate_null_aggregation_benefits_query(where_sql, impact_category_filter, temporal_aggregation_filter)).df()
                     lower_granularity_value_streams = null_aggregation_benefits_df.query("value_stream != 'total'")['value_stream'].tolist()
                     if len(null_aggregation_benefits_df) > 0:
                         null_aggregation_benefits = null_aggregation_benefits_df.query("value_stream == 'total'")['final_dollar_value'].values[0]
@@ -542,13 +542,13 @@ else:
 
                 # Use widget key "isolate_peak" for current value (updated at run start); fallback to isolate_peak_filter
                 isolate_peak_active = (
-                    commodity_filter.upper() == 'ELECTRIC'
+                    impact_category_filter.upper() == 'ELECTRIC'
                     and temporal_aggregation_filter == 'hour_of_day'
                     and st.session_state.get("isolate_peak", st.session_state.isolate_peak_filter)
                 )
 
                 # Reset peak filters when they don't apply
-                if not (commodity_filter.upper() == 'ELECTRIC' and temporal_aggregation_filter == 'hour_of_day'):
+                if not (impact_category_filter.upper() == 'ELECTRIC' and temporal_aggregation_filter == 'hour_of_day'):
                     st.session_state.isolate_peak_filter = False
                     if "isolate_peak" in st.session_state:
                         st.session_state["isolate_peak"] = False
@@ -564,7 +564,7 @@ else:
                 temporal_aggregation_results_df = con.execute(
                     generate_temporal_aggregation_benefits_query(
                         where_sql, 
-                        commodity_filter, 
+                        impact_category_filter, 
                         temporal_aggregation_filter, 
                         peak_months=st.session_state.get("peak_months_filter", []) if isolate_peak_active else [], 
                         group_by_value_stream=False
@@ -577,7 +577,7 @@ else:
                 temporal_aggregation_value_stream_results_df = con.execute(
                     generate_temporal_aggregation_benefits_query(
                         where_sql, 
-                        commodity_filter, 
+                        impact_category_filter, 
                         temporal_aggregation_filter, 
                         peak_months=st.session_state.get("peak_months_filter", []) if isolate_peak_active else [], 
                         group_by_value_stream=True
@@ -593,7 +593,7 @@ else:
                 if len(value_streams) > 1:
                     value_streams_filter = st.session_state.get("value_streams_filter", [])
 
-                if commodity_filter.upper() == 'ELECTRIC' and temporal_aggregation_filter == 'hour_of_day':
+                if impact_category_filter.upper() == 'ELECTRIC' and temporal_aggregation_filter == 'hour_of_day':
                     st.session_state.isolate_peak_filter = st.checkbox(
                         label = f"**Isolate Peak Period**",
                         value = False,
@@ -654,9 +654,9 @@ else:
 
                 else:
                     savings_label = ''
-                    if commodity_filter.upper() == 'ELECTRIC':
+                    if impact_category_filter.upper() == 'ELECTRIC':
                         savings_label = ' (kWh)'
-                    elif commodity_filter.upper() in ['NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL']:
+                    elif impact_category_filter.upper() in ['NATURAL GAS', 'PROPANE', 'OIL', 'DIESEL', 'WOOD']:
                         savings_label = ' (MMBtu)'
 
                     st.dataframe(
@@ -686,11 +686,11 @@ else:
                     peak_hours: list[int] = [],
                 ):
                     st.write(f"")
-                    value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, commodity_filter, peak_months=peak_months, peak_hours=peak_hours)).df()
+                    value_stream_benefits_df = con.execute(generate_value_stream_benefits_query(where_sql, impact_category_filter, peak_months=peak_months, peak_hours=peak_hours)).df()
                     value_stream_benefits_df['value_stream'] = value_stream_benefits_df['value_stream'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
                     pos_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value > 0")
                     neg_value_stream_benefits_df = value_stream_benefits_df.query("final_dollar_value < 0")
-                    st.markdown(f"##### {'Peak ' if isolate_peak else 'Total '}{space_and_title(commodity_filter)} Benefit Value Streams (${value_stream_benefits_df['final_dollar_value'].sum():,.0f})")
+                    st.markdown(f"##### {'Peak ' if isolate_peak else 'Total '}{space_and_title(impact_category_filter)} Benefit Value Streams (${value_stream_benefits_df['final_dollar_value'].sum():,.0f})")
 
                     if len(value_stream_benefits_df) == 1:
                         value_stream_benefits = value_stream_benefits_df['final_dollar_value'].values[0]
@@ -698,7 +698,7 @@ else:
                         for i in range(6):
                             st.write(f"")
                         
-                        st.markdown(f"#### {space_and_title(commodity_filter)} Benefits = **${value_stream_benefits:,.0f}**")
+                        st.markdown(f"#### {space_and_title(impact_category_filter)} Benefits = **${value_stream_benefits:,.0f}**")
 
                     else:
                         if bar_pie_fig_or_table == 'Figures':
@@ -714,7 +714,7 @@ else:
                                 col = 'final_dollar_value',
                                 label_col = 'value_stream',
                                 figsize = (9, 5),
-                                title = f"{space_and_title(commodity_filter)} Benefits{pos_value_stream_benefits_unit_labels[0] if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_unit_labels[0]}"
+                                title = f"{space_and_title(impact_category_filter)} Benefits{pos_value_stream_benefits_unit_labels[0] if len(pos_value_stream_benefits_df) > 0 else neg_value_stream_benefits_unit_labels[0]}"
                             )
 
                             st.pyplot(pie_chart_fig, clear_figure=True)
@@ -765,7 +765,7 @@ else:
 
         category_filters = con.execute(
             generate_multiple_options_probe_query(
-                where_sql, column_names=[filter for filter in filters if filter != 'id']+['commodity']
+                where_sql, column_names=[filter for filter in filters if filter != 'id']+['impact_category']
                 )
                 ).df().query("distinct_values > 1")['field'].tolist()
 
@@ -840,7 +840,7 @@ else:
                 category = category_filter,
                 groupings = None if grouping_option == 'None' else grouping_option,
                 figsize = (10, 6),
-                single_bar_color = "darkolivegreen",
+                #single_bar_color = "darkolivegreen",
                 space_fraction = 0.65,
                 sort_by = None,
                 sort_ascending = True,
@@ -891,14 +891,14 @@ else:
         col1, col2 = st.columns(spec=[0.6, 0.4], gap="medium", border=False)
         
         with col1:
-            costs_commoidty_results_df = con.execute(generate_costs_commodity_query(where_sql)).df()
+            costs_commoidty_results_df = con.execute(generate_costs_impact_category_query(where_sql)).df()
             costs_commoidty_results_df, costs_commoidty_results_df_unit_labels = determine_dollar_magnitude(costs_commoidty_results_df, x_col='final_dollar_value', y_col=None)
-            costs_commoidty_results_df['commodity'] = costs_commoidty_results_df['commodity'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+            costs_commoidty_results_df['impact_category'] = costs_commoidty_results_df['impact_category'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
             
             costs_bar_fig = numeric_bar_fig(
                 df = costs_commoidty_results_df,
                 col = 'final_dollar_value',
-                category = 'commodity',
+                category = 'impact_category',
                 figsize= (9, 5),
                 pin_yaxis_zeros = True,
                 single_bar_color="indianred",

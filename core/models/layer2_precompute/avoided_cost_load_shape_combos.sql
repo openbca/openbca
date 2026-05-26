@@ -37,12 +37,12 @@ JOIN core_layer0_base.load_shapes_ts ls ON
     ac.hour_of_year = ls.hour_of_year
 JOIN core_layer0_base.value_stream_groups vsg ON
     ac.avoided_cost = vsg.avoided_cost
-    AND ls.commodity = vsg.commodity
+    AND ls.impact_category = vsg.impact_category
 JOIN year_range_by_ac y ON  
     ac.avoided_cost = y.avoided_cost  
     AND ac.avoided_cost_subset = y.avoided_cost_subset
 WHERE 
-    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.commodity_load_shape_by_id)
+    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.impact_category_load_shape_by_id)
     AND vsg.include_in_test
     AND value_stream_group IN ('electric', 'natural_gas')
     AND ac.hour_of_year IS NOT NULL
@@ -73,12 +73,12 @@ UNION ALL
     ac.day_of_year = ls.day_of_year
     JOIN core_layer0_base.value_stream_groups vsg ON
     ac.avoided_cost = vsg.avoided_cost
-    AND ls.commodity = vsg.commodity
+    AND ls.impact_category = vsg.impact_category
     JOIN year_range_by_ac y ON  
     ac.avoided_cost = y.avoided_cost  
     AND ac.avoided_cost_subset = y.avoided_cost_subset
     WHERE 
-    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.commodity_load_shape_by_id)
+    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.impact_category_load_shape_by_id)
     AND vsg.include_in_test
     AND value_stream_group IN ('electric', 'natural_gas')
     AND ac.hour_of_year IS NULL
@@ -119,12 +119,12 @@ UNION ALL
     ac.month = ls.month
     JOIN core_layer0_base.value_stream_groups vsg ON
     ac.avoided_cost = vsg.avoided_cost
-    AND ls.commodity = vsg.commodity
+    AND ls.impact_category = vsg.impact_category
     JOIN year_range_by_ac y ON  
     ac.avoided_cost = y.avoided_cost  
     AND ac.avoided_cost_subset = y.avoided_cost_subset
     WHERE 
-    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.commodity_load_shape_by_id)
+    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.impact_category_load_shape_by_id)
     AND vsg.include_in_test
     AND vsg.value_stream_group IN ('electric', 'natural_gas')
     AND ac.hour_of_year IS NULL
@@ -163,12 +163,12 @@ UNION ALL
     JOIN core_layer0_base.value_stream_groups vsg ON
     ac.avoided_cost = vsg.avoided_cost
     JOIN core_layer0_base.load_shapes_ts ls ON
-    ls.commodity = vsg.commodity
+    ls.impact_category = vsg.impact_category
     JOIN year_range_by_ac y ON  
     ac.avoided_cost = y.avoided_cost  
     AND ac.avoided_cost_subset = y.avoided_cost_subset
     WHERE 
-    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.commodity_load_shape_by_id)
+    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.impact_category_load_shape_by_id)
     AND vsg.include_in_test
     AND vsg.value_stream_group IN ('electric', 'natural_gas')
     AND ac.hour_of_year IS NULL
@@ -240,12 +240,12 @@ UNION ALL
     JOIN core_layer0_base.value_stream_groups vsg ON
     ac.avoided_cost = vsg.avoided_cost
     JOIN core_layer0_base.load_shapes_ts ls ON
-    ls.commodity = vsg.commodity
+    ls.impact_category = vsg.impact_category
     JOIN year_range_by_ac y ON  
     ac.avoided_cost = y.avoided_cost  
     AND ac.avoided_cost_subset = y.avoided_cost_subset
     WHERE 
-    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.commodity_load_shape_by_id)
+    load_shape IN (SELECT DISTINCT load_shape FROM core_layer1_mappings.impact_category_load_shape_by_id)
     AND vsg.include_in_test
     AND vsg.value_stream_group = 'capacity'
     AND ac.hour_of_year IS NULL

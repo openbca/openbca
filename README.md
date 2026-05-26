@@ -91,9 +91,9 @@ Benefit-cost analysis for distributed energy resources is conducted using the fo
 
 **Annual Savings** - The amount per year that an intervention saves. Savings are tied to specific **commodities**. An intervention can save across multiple commodities and can be negative. For instance, a heat pump electrification measure will decrease natural gas consumption (positive savings), increase electricity consumption (negative savings), and enhance societal resiliance and host-customer reliability. In this example "savings" are generated across four commodities: natural gas, electricity, societal resiliance, and host-customer reliability.
 
-**Avoided Costs** - Within each commodity, there may be one or more avoided costs. Each avoided cost represents a specific, quantifiable dollar value tied to an effect that can be isolated. For example, electricity savings may avoid energy procurement costs, GHG emissions, various capacity costs and more. The NSPM defines many common utility system and non-system avoided costs that should be accounted for in a JST. Avoided costs should represent **marginal** values. For instance, if a program saves 1 MWh, the avoided costs should reflect the dollar value from that specific MWh instead of the average of all electricity generated during the time the savings occured. Marginal values can be higher or lower than average values depending on the context. If a program saves a MWh during a peak period, then that savings will direclty reduce reliance on an expensive peaker plant. In contrast, if that MWh were saved during a period of renewable curtailment, the dollar value may be zero or even negative.
+**Avoided Costs** - Within each impact_category, there may be one or more avoided costs. Each avoided cost represents a specific, quantifiable dollar value tied to an effect that can be isolated. For example, electricity savings may avoid energy procurement costs, GHG emissions, various capacity costs and more. The NSPM defines many common utility system and non-system avoided costs that should be accounted for in a JST. Avoided costs should represent **marginal** values. For instance, if a program saves 1 MWh, the avoided costs should reflect the dollar value from that specific MWh instead of the average of all electricity generated during the time the savings occured. Marginal values can be higher or lower than average values depending on the context. If a program saves a MWh during a peak period, then that savings will direclty reduce reliance on an expensive peaker plant. In contrast, if that MWh were saved during a period of renewable curtailment, the dollar value may be zero or even negative.
 
-**Savings Load Shapes** - Encode the distribution of savigns over time. The OpenBCA supports natural gas and electric savings load shapes of annual, monthly, daily, or hourly granularities. Other commodities are limited to annual values. The _maximum_ granularity of avoided cost profiles per commodity establishes the _minimum_ granularity that a savings load shape must meet. Savings load shapes can be entered as dimensioned or normalized values. If normalized the load shape acts to distribute annual savings across the year. If dimensioned, the load shape is expected to sum to an annual savings value and a value of 1 should be entered for the corresponding annual savings for that commodity.
+**Savings Load Shapes** - Encode the distribution of savigns over time. The OpenBCA supports natural gas and electric savings load shapes of annual, monthly, daily, or hourly granularities. Other commodities are limited to annual values. The _maximum_ granularity of avoided cost profiles per impact_category establishes the _minimum_ granularity that a savings load shape must meet. Savings load shapes can be entered as dimensioned or normalized values. If normalized the load shape acts to distribute annual savings across the year. If dimensioned, the load shape is expected to sum to an annual savings value and a value of 1 should be entered for the corresponding annual savings for that impact_category.
 
 **Discount Rate and Cadence** - The calculation of benefits and costs is conducted via a net-present-value (NPV) computation over the lifecycle of impacts from an intervention. The annual discount rate determines the degree to which future benefits are eroded relative to the opportunity cost of the capital invested in the project. The discount cadence determines how many time periods will be included in the NPV calculation. Currently the OpenBCA supports annual and quarterly discounting.
 
@@ -188,7 +188,7 @@ flowchart LR
    avoided_cost_ts["`**<u>avoided_cost_ts</u>**`"]
   
    avoided_cost_subsets_by_id["`**<u>avoided_cost_subsets_by_id</u>**`"]
-   commodity_load_shape_by_id["`**<u>commodity_load_shape_by_id</u>**`"]
+   impact_category_load_shape_by_id["`**<u>impact_category_load_shape_by_id</u>**`"]
    cost_components_by_id["`**<u>cost_components_by_id</u>**`"]
 
    avoided_cost_load_shape_combos["`**<u>avoided_cost_load_shape_combos</u>**`"]
@@ -200,7 +200,7 @@ measures-->avoided_cost_subsets_by_id
 avoided_cost_ts-->avoided_cost_subsets_by_id
 value_stream_groups-->avoided_cost_subsets_by_id
 
-measures-->commodity_load_shape_by_id
+measures-->impact_category_load_shape_by_id
 
 measures-->cost_components_by_id
 value_stream_groups-->cost_components_by_id
@@ -209,7 +209,7 @@ program_value_streams-->cost_components_by_id
 avoided_cost_ts-->avoided_cost_load_shape_combos
 load_shape_ts-->avoided_cost_load_shape_combos
 value_stream_groups-->avoided_cost_load_shape_combos
-commodity_load_shape_by_id-->avoided_cost_load_shape_combos
+impact_category_load_shape_by_id-->avoided_cost_load_shape_combos
 avoided_cost_subsets_by_id-->avoided_cost_load_shape_combos
 
 measures-->savings_factors
@@ -218,7 +218,7 @@ global_parameters-->savings_factors
 global_parameters-->final_value_calculations
 value_stream_groups-->final_value_calculations
 program_value_streams-->final_value_calculations
-commodity_load_shape_by_id-->final_value_calculations
+impact_category_load_shape_by_id-->final_value_calculations
 avoided_cost_subsets_by_id-->final_value_calculations
 avoided_cost_load_shape_combos-->final_value_calculations
 cost_components_by_id-->final_value_calculations
@@ -234,7 +234,7 @@ savings_factors-->final_value_calculations
    style avoided_cost_ts fill:#90caf9,stroke:#42a5f5
    %% Mappings
    style avoided_cost_subsets_by_id fill:#b39ddb,stroke:#9575cd
-   style commodity_load_shape_by_id fill:#b39ddb,stroke:#9575cd
+   style impact_category_load_shape_by_id fill:#b39ddb,stroke:#9575cd
    style cost_components_by_id fill:#b39ddb,stroke:#9575cd
    %% Precompute
    style avoided_cost_load_shape_combos fill:#ffcc80,stroke:#ff9800
@@ -258,10 +258,10 @@ Layer | Table | Contents |
 | **Base** | **load_shape_ts** | Savings load shapes time series |
 | **Base** | **avoided_cost_ts** | Avoided costs time series |
 | **Mapping** | **avoided_cost_subsets_by_id** | Mapping between ID, avoided cost, and avoided cost subset |
-| **Mapping** | **commodity_load_shape_by_id** | Mapping between ID, commodity, and load shape |
+| **Mapping** | **impact_category_load_shape_by_id** | Mapping between ID, impact_category, and load shape |
 | **Mapping** | **cost_components_by_id** | Establishes costs and multiplicative factors by ID for row-level inputs and by program name for program-level inputs |
 | **Precompute** | **avoided_cost_load_shape_combos** | Calculates avoided cost x savings load shape across the EUL for all necessary combinations of avoided cost, savings load shape and year |
-| **Precompute** | **savings_factors** | Calculates discount and inflation factors across the full EUL for every row-level input. Applies those factors along with unit quantity, NTG, EUL, line losses as appropriate for every commodity |
+| **Precompute** | **savings_factors** | Calculates discount and inflation factors across the full EUL for every row-level input. Applies those factors along with unit quantity, NTG, EUL, line losses as appropriate for every impact_category |
 | **Finalization** | **final_value_calculations** | Combines the precomputed values from _avoided_cost_load_shape_combos_, _savings_factors_, and _cost_components_by_id_, along with information from several other tables, into full time-series vectors of final net savings and value streams for benefits and costs |
 
 *Note that a few additional tables are generated as part of the Finalization step but are not listed here.
@@ -270,7 +270,7 @@ Layer | Table | Contents |
 
 There are ten computational pathways supported by the OpenBCA to properly handle different types of value streams. The flow diagram and equation reference below provide details on the logic and mathematics.
 
-To determine which pathway a value stream will follow the OpenBCA first checks the calculation type. In the Standalone pathway this is a required field entered in the Configuration input template for each value stream. If the calculation type is some form of time series (including custom period or single value), then the commodity is referenced and the pathway is assigned as Electric, Natural Gas, or Annual accordingly.
+To determine which pathway a value stream will follow the OpenBCA first checks the calculation type. In the Standalone pathway this is a required field entered in the Configuration input template for each value stream. If the calculation type is some form of time series (including custom period or single value), then the impact_category is referenced and the pathway is assigned as Electric, Natural Gas, or Annual accordingly.
 
 If the calculation type is Capacity then the corresponding pathway is assigned.
 
@@ -290,10 +290,10 @@ Variable | Definition |
 | **DY** | Dollar Year - the year to pin the calculation of real dollars when adjusting for inflation |
 | **EUL** | Expected Useful Life (years) |
 | **N** | The number of temporal increments in a year for a particular value stream. For example N = 12 for monthly data. |
-| **Avoided Cost<sub>y,t</sub>** | Marginal avoided cost (\$/commodity unit) for year y and time period t. For instance, $/kWh for hour 7354 of 2035 |
-| **Avoided Cost<sub>y</sub>** | Marginal avoided cost (\$/commodity unit) for year y. For instance, \$/kWh for 2035 |
-| **Annual Savings** | Annual savings (1.0 or commodity unit) for an intervention. For instance, kWh. If the load shape is dimensioned then Annual Savings should be set to 1.0 |
-| **Load Shpae<sub>t</sub>** | Load Shape (commodity unit or fraction) for time period t. For instance, \$/kWh for hour 7354 of the year or 0.001 for hour 7354, which assigns 0.1% of the annual savings to that hour. |
+| **Avoided Cost<sub>y,t</sub>** | Marginal avoided cost (\$/impact_category unit) for year y and time period t. For instance, $/kWh for hour 7354 of 2035 |
+| **Avoided Cost<sub>y</sub>** | Marginal avoided cost (\$/impact_category unit) for year y. For instance, \$/kWh for 2035 |
+| **Annual Savings** | Annual savings (1.0 or impact_category unit) for an intervention. For instance, kWh. If the load shape is dimensioned then Annual Savings should be set to 1.0 |
+| **Load Shpae<sub>t</sub>** | Load Shape (impact_category unit or fraction) for time period t. For instance, \$/kWh for hour 7354 of the year or 0.001 for hour 7354, which assigns 0.1% of the annual savings to that hour. |
 | **L<sub>E</sub>** | Line loss factor using the electric line loss rate |
 | **L<sub>G</sub>** | Line loss factor using the natural gas line loss rate |
 | **L<sub>P</sub>** | Line loss factor using the peak period electric line loss rate (used only in the Capacity pathway) |
@@ -310,7 +310,8 @@ It is important to note that for each % Adder value stream, there is a more fund
 | **Propane** | Propane Supply |
 | **Diesel** | Diesel Supply |
 | **Oil** | Oil Supply |
-| **All Fuels** | Energy + Fuel Cost and O&M + Propane Supply + Diesel Supply + Oil Supply |
+| **Wood** | Wood Supply |
+| **All Fuels** | Energy + Fuel Cost and O&M + Propane Supply + Diesel Supply + Oil Supply + Wood Supply |
 
 ### Avoided Cost Subsets
 For some or many value streams, avoided costs may be different depending on region, population, or other factors. For instance, if a utility's grid has a segment with more frequent and expensive periods of constraint, then several value streams would be more accurately calculated if:
@@ -388,8 +389,8 @@ Table | Column | Requirements |
 | **measures** | **unit_quantity** | required field |
 | **measures** | **estimated_useful_life** | required field |
 | **measures** | **net_to_gross_ratio** | required field |
-| **measures** | **electric_savings_load_shape** | must match a load shape provided in the load_shapes_ts table for the ELECTRIC commodity |
-| **measures** | **natural_gas_savings_load_shape** | must match a load shape provided in the load_shapes_ts table for the NATURAL GAS commodity |
+| **measures** | **electric_savings_load_shape** | must match a load shape provided in the load_shapes_ts table for the ELECTRIC impact_category |
+| **measures** | **natural_gas_savings_load_shape** | must match a load shape provided in the load_shapes_ts table for the NATURAL GAS impact_category |
 | **program_value_streams** | **program_name** | recommend matchihng to the program_name field of the measures table |
 | **global_parameters** | **inflation_rate** | requited field - should be set to 0 if nominal dollar outputs are desired |
 | **global_parameters** | **dollar_year** | required field - can be set to any integer if using nominal outputs |
@@ -400,7 +401,7 @@ Table | Column | Requirements |
 | **global_parameters** | **natural_gas_line_loss** | required field if natural gas value streams are included |
 | **global_parameters** | **cost_treatment** | required field - accepted values include 'UCT', 'TRC', and 'CA TRC' |
 | **value_stream_groups** | **avoided_cost** | required field |
-| **value_stream_groups** | **commodity** | required field |
+| **value_stream_groups** | **impact_category** | required field |
 | **value_stream_groups** | **include_in_test** | required field |
 | **value_stream_groups** | **calc_type** | required field - accepted values include 'electric', 'natural_gas', 'annual', 'capacity', 'electric_%\_adder', 'natural_gas_%\_adder', 'propane_%\_adder', 'diesel_%\_adder', 'oil_%\_adder', 'all_fuels_%_adder'|
 | **value_stream_groups** | **pct_adder** | required field for any % adder value streams|
@@ -411,7 +412,7 @@ Table | Column | Requirements |
 | **avoided_costs_ts** | **day_of_year** | required field if corresponding avoided_cost temporal granularity is daily |
 | **avoided_costs_ts** | **hour_of_day** | required field if corresponding avoided_cost temporal granularity is hourly |
 | **avoided_costs_ts** | **avoided_cost_value** | required field |
-| **load_shapes_ts** | **commodity** | required field |
+| **load_shapes_ts** | **impact_category** | required field |
 | **load_shapes_ts** | **month** | required field if corresponding load_shape temporal granularity is hourly |
 | **load_shapes_ts** | **day_of_year** | required field if corresponding load_shape temporal granularity is daily |
 | **load_shapes_ts** | **hour_of_day** | required field if corresponding load_shape temporal granularity is hourly |

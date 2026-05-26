@@ -24,6 +24,8 @@ SELECT
     net_to_gross_ratio::FLOAT AS net_to_gross_ratio,
     admin_cost_upfront_dollar::FLOAT AS admin_cost_upfront_dollar,
     admin_cost_annual_dollar_per_year::FLOAT AS admin_cost_annual_dollar_per_year,
+    utility_direct_investment_in_ders_dollar::FLOAT AS utility_direct_investment_in_ders_dollar,
+    credit_and_collection_cost_dollar::FLOAT AS credit_and_collection_cost_dollar,
     utility_incentive_upfront_dollar::FLOAT AS utility_incentive_upfront_dollar,
     utility_incentive_annual_dollar_per_year::FLOAT AS utility_incentive_annual_dollar_per_year,
     incremental_cost_upfront_dollar::FLOAT AS incremental_cost_upfront_dollar,
@@ -41,24 +43,22 @@ SELECT
     annual_diesel_savings_mmbtu::FLOAT AS annual_diesel_savings_mmbtu,
     host_customer_non_energy_impacts_dollar::FLOAT AS host_customer_non_energy_impacts_dollar,
     host_customer_non_energy_impacts_low_income_dollar::FLOAT AS host_customer_non_energy_impacts_low_income_dollar,
-    change_in_host_customer_risk::FLOAT AS change_in_host_customer_risk,
-    change_in_host_customer_reliability::FLOAT AS change_in_host_customer_reliability,
     change_in_host_customer_resilience::FLOAT AS change_in_host_customer_resilience,
     change_in_societal_resilience::FLOAT AS change_in_societal_resilience,
     custom_1_value_stream_name::VARCHAR AS custom_1_value_stream_name,
-    custom_1_value_stream_commodity::VARCHAR AS custom_1_value_stream_commodity,
+    custom_1_value_stream_impact_category::VARCHAR AS custom_1_value_stream_impact_category,
     custom_1_annual_savings::FLOAT AS custom_1_annual_savings,
     custom_2_value_stream_name::VARCHAR AS custom_2_value_stream_name,
-    custom_2_value_stream_commodity::VARCHAR AS custom_2_value_stream_commodity,
+    custom_2_value_stream_impact_category::VARCHAR AS custom_2_value_stream_impact_category,
     custom_2_annual_savings::FLOAT AS custom_2_annual_savings,
     custom_3_value_stream_name::VARCHAR AS custom_3_value_stream_name,
-    custom_3_value_stream_commodity::VARCHAR AS custom_3_value_stream_commodity,
+    custom_3_value_stream_impact_category::VARCHAR AS custom_3_value_stream_impact_category,
     custom_3_annual_savings::FLOAT AS custom_3_annual_savings,
     custom_4_value_stream_name::VARCHAR AS custom_4_value_stream_name,
-    custom_4_value_stream_commodity::VARCHAR AS custom_4_value_stream_commodity,
+    custom_4_value_stream_impact_category::VARCHAR AS custom_4_value_stream_impact_category,
     custom_4_annual_savings::FLOAT AS custom_4_annual_savings,
     custom_5_value_stream_name::VARCHAR AS custom_5_value_stream_name,
-    custom_5_value_stream_commodity::VARCHAR AS custom_5_value_stream_commodity,
+    custom_5_value_stream_impact_category::VARCHAR AS custom_5_value_stream_impact_category,
     custom_5_annual_savings::FLOAT AS custom_5_annual_savings,
     MAP(
         [
@@ -67,17 +67,17 @@ SELECT
           'PROPANE', 
           'DIESEL', 
           'OIL',
-          'HOST CUSTOMER RISK',
-          'HOST CUSTOMER RELIABILITY', 
+          'WOOD',
           'HOST CUSTOMER RESILIENCE',
           'HOST CUSTOMER NEIs',
           'HOST CUSTOMER NEIs - LI',
           'SOCIETAL RESILIENCE',
-          UPPER(custom_1_value_stream_commodity), 
-          UPPER(custom_2_value_stream_commodity), 
-          UPPER(custom_3_value_stream_commodity), 
-          UPPER(custom_4_value_stream_commodity), 
-          UPPER(custom_5_value_stream_commodity)
+          'UTILITY CREDIT & COLLECTION',
+          UPPER(custom_1_value_stream_impact_category), 
+          UPPER(custom_2_value_stream_impact_category), 
+          UPPER(custom_3_value_stream_impact_category), 
+          UPPER(custom_4_value_stream_impact_category), 
+          UPPER(custom_5_value_stream_impact_category)
         ], 
         [
           annual_electric_savings_kwh,
@@ -85,19 +85,19 @@ SELECT
           annual_propane_savings_mmbtu,
           annual_diesel_savings_mmbtu,
           annual_oil_savings_mmbtu,
-          change_in_host_customer_risk,
-          change_in_host_customer_reliability,
+          annual_wood_savings_mmbtu
           change_in_host_customer_resilience,
           host_customer_non_energy_impacts_dollar,
           host_customer_non_energy_impacts_low_income_dollar,
           change_in_societal_resilience,
+          credit_and_collection_cost_dollar,
           custom_1_annual_savings,
           custom_2_annual_savings,
           custom_3_annual_savings,
           custom_4_annual_savings,
           custom_5_annual_savings
         ]
-        )::MAP<VARCHAR, FLOAT> AS energy_savings_by_commodity,
+        )::MAP<VARCHAR, FLOAT> AS energy_savings_by_impact_category,
         [
           'ADMIN',
           'UTILITY INCENTIVE',
@@ -108,6 +108,7 @@ SELECT
         [
           'admin_cost_upfront_dollar',
           'admin_cost_annual_dollar_per_year',
+          'utility_direct_investment_in_ders_dollar',
           'utility_incentive_upfront_dollar',
           'utility_incentive_annual_dollar_per_year',
           'incremental_cost_upfront_dollar',
@@ -119,6 +120,7 @@ SELECT
         [
           admin_cost_upfront_dollar,
           admin_cost_annual_dollar_per_year,
+          utility_direct_investment_in_ders_dollar,
           utility_incentive_upfront_dollar,
           utility_incentive_annual_dollar_per_year,
           incremental_cost_upfront_dollar,
@@ -137,6 +139,6 @@ SELECT
           UPPER(electric_savings_load_shape),
           UPPER(natural_gas_savings_load_shape)
         ]
-    )::MAP<VARCHAR, VARCHAR> AS load_shape_mapping_by_commodity,
+    )::MAP<VARCHAR, VARCHAR> AS load_shape_mapping_by_impact_category,
 FROM 
   openbca_input.measures m, openbca_input.global_parameters gp

@@ -52,7 +52,7 @@ MODEL(
         id 
         , smc.avoided_cost
         , avoided_cost_subset
-        , vsg.commodity
+        , vsg.impact_category
         , start_year
         , start_quarter
         , estimated_useful_life
@@ -67,7 +67,7 @@ MODEL(
         id 
         , smc.avoided_cost
         , available_avoided_cost_subset AS avoided_cost_subset
-        , vsg.commodity
+        , vsg.impact_category
         , start_year
         , start_quarter
         , estimated_useful_life

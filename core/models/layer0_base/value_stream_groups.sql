@@ -6,7 +6,7 @@ MODEL(
 
 SELECT
     avoided_cost::VARCHAR AS avoided_cost,
-    UPPER(commodity)::VARCHAR AS commodity,
+    UPPER(impact_category)::VARCHAR AS impact_category,
     include_in_test::BOOLEAN AS include_in_test,
     calc_type::VARCHAR AS calc_type,
     pct_adder::FLOAT AS pct_adder,

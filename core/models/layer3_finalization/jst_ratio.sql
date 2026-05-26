@@ -8,12 +8,12 @@ WITH measure_costs_benefits AS (
 	SELECT 
 		SUM(
 			CASE 
-			WHEN commodity IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
+			WHEN impact_category IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
 			THEN final_dollar_value END
 		) AS dollar_costs
 		, SUM(
 			CASE 
-			WHEN commodity NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
+			WHEN impact_category NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
 			THEN final_dollar_value END
 		) AS dollar_benefits
 	FROM

@@ -1,23 +1,23 @@
 MODEL(
     name core_layer0_base.load_shapes_ts,
     kind VIEW,
-    grain (commodity, load_shape, hour_of_year),
+    grain (impact_category, load_shape, hour_of_year),
 );
 
 WITH other_commodities as (
 SELECT
-    DISTINCT commodity
+    DISTINCT impact_category
 FROM 
     core_layer0_base.measures 
-CROSS JOIN UNNEST(map_keys(energy_savings_by_commodity)) AS k(commodity)
+CROSS JOIN UNNEST(map_keys(energy_savings_by_impact_category)) AS k(impact_category)
 WHERE 
-    commodity NOT IN ('ELECTRIC', 'NATURAL GAS')
-    AND commodity NOT LIKE 'STANDARD%'
+    impact_category NOT IN ('ELECTRIC', 'NATURAL GAS')
+    AND impact_category NOT LIKE 'STANDARD%'
 )
 
 SELECT
     UPPER(load_shape)::VARCHAR AS load_shape,
-    UPPER(commodity)::VARCHAR AS commodity,
+    UPPER(impact_category)::VARCHAR AS impact_category,
     COALESCE(
         quarter, 
         CASE 
@@ -84,7 +84,7 @@ UNION ALL
 
 SELECT
     'ANNUAL'::VARCHAR AS load_shape 
-    , commodity::VARCHAR
+    , impact_category::VARCHAR
     , NULL::INTEGER AS quarter
     , NULL::INTEGER AS month
     , NULL::INTEGER AS day_of_year

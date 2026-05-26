@@ -7,7 +7,7 @@ from config.paths import get_input_templates_dir
 
 
 ID_COLUMNS = [
-    "commodity", "quarter", "month", "day", "hour_of_year" # Need Quarter?
+    "impact_category", "quarter", "month", "day", "hour_of_year" # Need Quarter?
 ]
 
 @model(
@@ -15,7 +15,7 @@ ID_COLUMNS = [
     kind="FULL",
     grain=ID_COLUMNS,
     columns={
-        "commodity": "string",
+        "impact_category": "string",
         "quarter": "int",
         "month": "int",
         "day_of_year": "int",
@@ -50,7 +50,8 @@ def load_load_shapes_from_excel(
                 continue
             
             df = pd.read_excel(xls, sheet_name=sheet, header=None, skiprows=skiprows, engine="calamine")
-            df = df.dropna(how="all").dropna(axis=1, how="all")
+            df = df.fillna(0)
+            #df = df.dropna(how="all").dropna(axis=1, how="all")
             if df.empty:
                 continue
 
@@ -66,9 +67,9 @@ def load_load_shapes_from_excel(
             df.columns = cleaned_headers
             df = df[1:]  # drop header row
 
-            # Add commodity (trim "Loadshape Mapping")
-            commodity_name = sheet.replace(" Load Shapes", "").strip()
-            df["commodity"] = commodity_name
+            # Add impact_category (trim "Loadshape Mapping")
+            impact_category_name = sheet.replace(" Load Shapes", "").strip()
+            df["impact_category"] = impact_category_name
 
             all_frames.append(df)
 
@@ -84,7 +85,7 @@ def load_load_shapes_from_excel(
             combined_df[col] = pd.NA
 
     # --- Pivot to long format ---
-    id_cols = ["commodity", "quarter", "month", "day", "hour_of_year"]
+    id_cols = ["impact_category", "quarter", "month", "day", "hour_of_year"]
     value_vars = [c for c in combined_df.columns if c not in id_cols]
 
     long_df = combined_df.melt(

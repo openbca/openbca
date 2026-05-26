@@ -98,6 +98,7 @@ FROM
             'admin_cost_upfront_dollar',
             'admin_cost_annual_dollar_per_year',
             'program_admin_cost_dollar_per_year',
+            'utility_direct_investment_in_ders_dollar',
             'utility_incentive_upfront_dollar',
             'utility_incentive_annual_dollar_per_year',
             'program_incentive_utility_to_customer_dollar_per_year',
