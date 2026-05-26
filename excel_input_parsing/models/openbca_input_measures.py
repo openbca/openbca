@@ -51,6 +51,7 @@ MEASURES_SCHEMA_COLUMN_ORDER = [
     "annual_propane_savings_mmbtu",
     "annual_oil_savings_mmbtu",
     "annual_diesel_savings_mmbtu",
+    "annual_wood_savings_mmbtu",
     "host_customer_non_energy_impacts_dollar",
     "host_customer_non_energy_impacts_low_income_dollar",
     "change_in_host_customer_resilience",
@@ -105,6 +106,7 @@ columns={
     "annual_propane_savings_mmbtu": "float",
     "annual_oil_savings_mmbtu": "float",
     "annual_diesel_savings_mmbtu": "float",
+    "annual_wood_savings_mmbtu": "float",
     "host_customer_non_energy_impacts_dollar": "float",
     "host_customer_non_energy_impacts_low_income_dollar": "float",
     "change_in_host_customer_resilience": "float",
@@ -208,7 +210,7 @@ def load_measure_inputs_from_excel(
         for i, (name, impact_category) in enumerate(value_stream_names_impact_category_dict.items()):
             df[f"custom_{i+1}_value_stream_name"] = name
             
-            if impact_category.upper() in ['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'OIL', 'WOOD','NON-SYSTEM', 'ALL FUELS', 'NAN']:
+            if impact_category.upper() in ['ELECTRIC', 'NATURAL GAS', 'PROPANE', 'DIESEL', 'OIL', 'WOOD', 'NON-SYSTEM', 'ALL FUELS', 'NAN']:
                 df[f"custom_{i+1}_value_stream_impact_category"] = f"STANDARD_{i+1}"
                 df[f"custom_{i+1}_annual_savings"] = None
             else:

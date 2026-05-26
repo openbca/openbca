@@ -40,6 +40,7 @@ SELECT
     annual_natural_gas_savings_mmbtu::FLOAT AS annual_natural_gas_savings_mmbtu,
     annual_propane_savings_mmbtu::FLOAT AS annual_propane_savings_mmbtu,
     annual_oil_savings_mmbtu::FLOAT AS annual_oil_savings_mmbtu,
+    annual_wood_savings_mmbtu::FLOAT AS annual_wood_savings_mmbtu,
     annual_diesel_savings_mmbtu::FLOAT AS annual_diesel_savings_mmbtu,
     host_customer_non_energy_impacts_dollar::FLOAT AS host_customer_non_energy_impacts_dollar,
     host_customer_non_energy_impacts_low_income_dollar::FLOAT AS host_customer_non_energy_impacts_low_income_dollar,
@@ -85,7 +86,7 @@ SELECT
           annual_propane_savings_mmbtu,
           annual_diesel_savings_mmbtu,
           annual_oil_savings_mmbtu,
-          annual_wood_savings_mmbtu
+          annual_wood_savings_mmbtu,
           change_in_host_customer_resilience,
           host_customer_non_energy_impacts_dollar,
           host_customer_non_energy_impacts_low_income_dollar,
