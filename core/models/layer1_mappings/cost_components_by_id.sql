@@ -32,7 +32,6 @@ SELECT
     , p.avoided_cost AS avoided_cost
     , p.avoided_cost_value AS cost_value
     , vsg.calc_type
-	 
 FROM 
 	core_layer0_base.program_value_streams p
 	JOIN core_layer0_base.value_stream_groups vsg ON 

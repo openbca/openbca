@@ -49,7 +49,7 @@ config_measure_cost_fields_map_dict = {
     'Utility Program Admin Costs': [
             'admin_cost_upfront_dollar',
             'admin_cost_annual_dollar_per_year',
-            'program_admin_costs_dollar_per_year',
+            'program_admin_costs_dollar',
         ],
     'Utility Direct Investment in DERs': [
             'utility_direct_investment_in_ders_dollar',
@@ -57,7 +57,7 @@ config_measure_cost_fields_map_dict = {
     'Utility Financial Incentives': [
             'utility_incentive_upfront_dollar',
             'utility_incentive_annual_dollar_per_year',
-            'program_incentive_utility_to_customer_dollar_per_year',
+            'program_utility_incentive_dollar',
         ],
     'Host Customer Incremental Cost': [
             'incremental_cost_upfront_dollar',
@@ -73,8 +73,8 @@ config_measure_cost_fields_map_dict = {
             'host_customer_tax_incentive_upfront_dollar',
         ],
     'Program Level Benefits': [
-        'program_performance_incentive_govt_to_utility_dollar_per_year',
-        'program_federal_incentive_dollar_per_year'
+        'program_performance_incentive_to_utility_dollar',
+        'program_federal_incentive_dollar'
     ]
 }
 
@@ -83,9 +83,6 @@ repeating_annual_costs = [
     'program_admin_costs_dollar_per_year', 
     'utility_incentive_annual_dollar_per_year',
     'incremental_cost_annual_dollar_per_year',
-    'program_incentive_utility_to_customer_dollar_per_year',
-    'program_performance_incentive_govt_to_utility_dollar_per_year',
-    'program_federal_incentive_dollar_per_year'
     ]
 
 marginal_ghg_value_streams = [
