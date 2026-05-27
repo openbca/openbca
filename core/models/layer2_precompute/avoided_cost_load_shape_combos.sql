@@ -21,6 +21,7 @@ SELECT
     false::BOOLEAN AS coincident_peak_capacity_calc
     , ac.avoided_cost
     , ac.avoided_cost_subset 
+    , vsg.marginal_ghg
     , ac.year  
     , ac.quarter  
     , ac.month  
@@ -57,6 +58,7 @@ UNION ALL
     false::BOOLEAN AS coincident_peak_capacity_calc
     , ac.avoided_cost
     , ac.avoided_cost_subset 
+    , vsg.marginal_ghg
     , ac.year  
     , ac.quarter  
     , ac.month  
@@ -88,6 +90,7 @@ UNION ALL
     GROUP BY 
     ac.avoided_cost
     , ac.avoided_cost_subset 
+    , vsg.marginal_ghg
     , ac.year  
     , ac.quarter  
     , ac.month  
@@ -103,6 +106,7 @@ UNION ALL
     false::BOOLEAN AS coincident_peak_capacity_calc
     , ac.avoided_cost
     , ac.avoided_cost_subset 
+    , vsg.marginal_ghg
     , ac.year  
     , ac.quarter  
     , ac.month  
@@ -134,6 +138,7 @@ UNION ALL
     GROUP BY 
     ac.avoided_cost
     , ac.avoided_cost_subset 
+    , vsg.marginal_ghg
     , ac.year  
     , ac.quarter  
     , ac.month    
@@ -148,6 +153,7 @@ UNION ALL
     false::BOOLEAN AS coincident_peak_capacity_calc
     , ac.avoided_cost
     , ac.avoided_cost_subset 
+    , vsg.marginal_ghg
     , ac.year  
     , NULL AS quarter
     , NULL AS month   
@@ -178,6 +184,7 @@ UNION ALL
     GROUP BY 
     ac.avoided_cost
     , ac.avoided_cost_subset 
+    , vsg.marginal_ghg
     , ac.year     
     , ac.avoided_cost_value  
     , ls.load_shape
@@ -190,6 +197,7 @@ UNION ALL
     false::BOOLEAN AS coincident_peak_capacity_calc
     , ac.avoided_cost
     , ac.avoided_cost_subset 
+    , vsg.marginal_ghg
     , ac.year  
     , NULL AS quarter  
     , ac.month  
@@ -225,6 +233,7 @@ UNION ALL
     true::BOOLEAN AS coincident_peak_capacity_calc
     , ac.avoided_cost
     , ac.avoided_cost_subset 
+    , vsg.marginal_ghg
     , ac.year  
     , NULL AS quarter  
     , ac.month  

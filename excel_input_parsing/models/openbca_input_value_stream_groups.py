@@ -16,7 +16,8 @@ ID_COLUMNS = ['avoided_cost', 'impact_category', 'include_in_test', 'calc_type',
         'include_in_test': 'boolean',
         'calc_type': 'string',
         'pct_adder': 'float',
-        'value_stream_group': 'string'
+        'value_stream_group': 'string',
+        'marginal_ghg': 'boolean',
     },
 )
 
@@ -87,6 +88,15 @@ repeating_annual_costs = [
     'program_federal_incentive_dollar_per_year'
     ]
 
+marginal_ghg_value_streams = [
+    'GHG Intensity (E)',
+    'GHG Intensity (NG)',
+    'GHG Intensity (Propane)',
+    'GHG Intensity (Oil)',
+    'GHG Intensity (Diesel)',
+    'GHG Intensity (Wood)',
+]
+
 _VALUE_STREAM_GROUP_COLS = [
     'avoided_cost',
     'impact_category',
@@ -94,6 +104,7 @@ _VALUE_STREAM_GROUP_COLS = [
     'calc_type',
     'pct_adder',
     'value_stream_group',
+    'marginal_ghg',
 ]
 
 
@@ -164,15 +175,15 @@ def load_value_stream_groups_from_excel(
                 return 'electric'
             if impact_category == 'Natural Gas':
                 return 'natural_gas'
-
             else:
                 return 'annual'
 
     value_stream_groups_df['value_stream_group'] = value_stream_groups_df.apply(lambda x: assign_value_stream_group(x['calc_type'], x['impact_category']), axis=1)
     value_stream_groups_df['impact_category'] = value_stream_groups_df.apply(lambda x: x['avoided_cost'] if x['avoided_cost'] in non_system_commodities else x['impact_category'], axis=1)
+    value_stream_groups_df['marginal_ghg'] = value_stream_groups_df.apply(lambda x: True if x['avoided_cost'] in marginal_ghg_value_streams else False, axis=1)
 
     value_stream_groups_costs_dfs = []
-    print(value_stream_groups_df.head())
+
     for field in config_cost_name_impact_category_map_dict.keys():
 
         if field == 'Program Level Benefits':
@@ -195,7 +206,8 @@ def load_value_stream_groups_from_excel(
                     include_in_test, 
                     'Time Series - Annual' if col in repeating_annual_costs else 'Single Value - First Year', 
                     pd.NA, 
-                    'annual' if col in repeating_annual_costs else 'first_year'
+                    'annual' if col in repeating_annual_costs else 'first_year',
+                    False,
                 ]], 
                 columns=_VALUE_STREAM_GROUP_COLS,
             )

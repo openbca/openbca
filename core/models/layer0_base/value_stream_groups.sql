@@ -11,5 +11,6 @@ SELECT
     calc_type::VARCHAR AS calc_type,
     pct_adder::FLOAT AS pct_adder,
     value_stream_group::VARCHAR AS value_stream_group,
+    marginal_ghg::BOOLEAN AS marginal_ghg,
 FROM 
     openbca_input.value_stream_groups

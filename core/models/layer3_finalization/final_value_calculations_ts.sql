@@ -14,6 +14,7 @@ SELECT
     , ac_ls.day_of_year 
     , ac_ls.hour_of_year
 	, ac_ls.hour_of_day
+	, ac_ls.marginal_ghg
 	, CASE
 		WHEN ac_ls.coincident_peak_capacity_calc THEN 0	
 		ELSE factors.annual_net_energy_savings * ac_ls.load_shape_value 
@@ -48,9 +49,10 @@ JOIN core_layer2_precompute.avoided_cost_load_shape_combos ac_ls ON
 		, month
 		, hour_of_day
 		, SUM(net_energy_savings) AS net_energy_savings
-		, SUM(final_dollar_value) AS final_dollar_value
+		, SUM(CASE WHEN NOT marginal_ghg THEN final_dollar_value ELSE NULL END) AS final_dollar_value
+		, SUM(CASE WHEN marginal_ghg THEN final_dollar_value ELSE NULL END) AS marginal_ghg_savings
 	FROM 
-		standard_value_stream_hourly
+		standard_value_stream_hourly 
 	GROUP BY 
 		id
 		, impact_category
@@ -84,6 +86,7 @@ SELECT
 	, svs.hour_of_day
 	, NULL AS net_energy_savings
 	, -c.cost_value * cost_treatment_factor / (POW(1.0 + gp.inflation_rate, (year - gp.dollar_year))) AS final_dollar_value --leaving out discount factor as costs are accrued on an ongoing basis.
+	, NULL AS marginal_ghg_savings
 FROM 
 	standard_value_streams svs 
 JOIN core_layer1_mappings.cost_components_by_id c ON  
@@ -96,6 +99,8 @@ WHERE
     (c.calc_type = 'Single Value - First Year' AND svs.year = c.start_year)
     OR c.calc_type = 'Time Series - Annual'
 	)
+	AND svs.impact_category IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
+
 
 UNION ALL
 
@@ -112,6 +117,7 @@ SELECT
 	, svs.hour_of_day
 	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
+	, NULL AS marginal_ghg_savings
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
@@ -136,6 +142,7 @@ SELECT
 	, svs.hour_of_day
 	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
+	, NULL AS marginal_ghg_savings
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
@@ -160,6 +167,7 @@ SELECT
 	, svs.hour_of_day 
 	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
+	, NULL AS marginal_ghg_savings
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
@@ -184,6 +192,7 @@ SELECT
 	, svs.hour_of_day 
 	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
+	, NULL AS marginal_ghg_savings
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
@@ -208,6 +217,7 @@ SELECT
 	, svs.hour_of_day
 	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
+	, NULL AS marginal_ghg_savings
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
@@ -232,6 +242,7 @@ SELECT
 	, svs.hour_of_day
 	, svs.net_energy_savings
 	, svs.final_dollar_value * vsg.pct_adder AS final_dollar_value
+	, NULL AS marginal_ghg_savings
 FROM 
 	standard_value_streams svs
 JOIN openbca.core_layer0_base.value_stream_groups vsg ON 
@@ -256,6 +267,7 @@ SELECT
 	, NULL AS hour_of_day
 	, NULL AS net_energy_savings -- Convert kWh to MMBtu and create sum of all fuels metric?
 	, SUM(svs.final_dollar_value) * vsg.pct_adder AS final_dollar_value -- Check if null values in sum
+	, NULL AS marginal_ghg_savings
 FROM 
 	standard_value_streams svs
 	, openbca.core_layer0_base.value_stream_groups vsg  
@@ -285,12 +297,13 @@ SELECT
 	, NULL AS hour_of_day
 	, NULL AS net_energy_savings
 	, avoided_cost_value / (POW(1.0 + gp.inflation_rate, (p.program_year - gp.dollar_year))) AS final_dollar_value 
+	, NULL AS marginal_ghg_savings
 FROM core_layer0_base.program_value_streams p
 JOIN core_layer0_base.value_stream_groups vsg ON 
  	p.avoided_cost = vsg.avoided_cost
-	, openbca.core_layer0_base.global_parameters gp
+	, core_layer0_base.global_parameters gp
 WHERE 
-	vsg.impact_category NOT IN ['ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE']
+	vsg.impact_category NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
 
 UNION ALL
 
@@ -307,12 +320,13 @@ SELECT
 	, NULL AS hour_of_day
 	, NULL AS net_energy_savings
 	, -c.cost_value * cost_treatment_factor / (POW(1.0 + gp.inflation_rate, (c.start_year - gp.dollar_year))) AS final_dollar_value 
+	, NULL AS marginal_ghg_savings
 FROM 
 	core_layer1_mappings.cost_components_by_id c  
 JOIN core_layer0_base.program_value_streams p ON 
 	c.id = p.program_name
 	AND c.avoided_cost = p.avoided_cost 
 	AND c.start_year = p.program_year 
-	, openbca.core_layer0_base.global_parameters gp
+	, core_layer0_base.global_parameters gp
 WHERE 
 	c.cost_treatment = gp.cost_treatment
