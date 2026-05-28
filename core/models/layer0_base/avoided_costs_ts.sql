@@ -97,18 +97,18 @@ FROM
         [			
             'admin_cost_upfront_dollar',
             'admin_cost_annual_dollar_per_year',
-            'program_admin_cost_dollar_per_year',
+            'program_admin_cost_dollar',
             'utility_direct_investment_in_ders_dollar',
             'utility_incentive_upfront_dollar',
             'utility_incentive_annual_dollar_per_year',
-            'program_incentive_utility_to_customer_dollar_per_year',
+            'program_utility_incentive_dollar',
             'incremental_cost_upfront_dollar',
             'incremental_cost_annual_dollar_per_year',
             'host_customer_transaction_cost_dollar',
             'host_customer_interconnection_cost_dollar',
             'host_customer_tax_incentive_upfront_dollar',
-            'program_performance_incentive_govt_to_utility_dollar_per_year',
-            'program_federal_incentive_dollar_per_year'
+            'program_performance_incentive_to_utility_dollar',
+            'program_federal_incentive_dollar'
         ]
         ) AS k(avoided_cost)
 	CROSS JOIN GENERATE_SERIES(min_year, max_year) AS y(year)

@@ -164,8 +164,9 @@ def load_value_stream_groups_from_excel(
         elif calc_type == 'Peak Capacity - Annual':
             return 'capacity'
 
-        elif calc_type == 'Single Value - First Year': 
-            return 'annual'
+        elif calc_type == 'Measure-specific':#'Single Value - First Year': 
+            print(f"impact_category: {impact_category}, calc_type: {calc_type}")
+            return 'single_value_first_year'#'annual'
 
         else:
             if impact_category == 'Electric':

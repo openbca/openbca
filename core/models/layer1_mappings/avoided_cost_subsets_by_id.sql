@@ -32,7 +32,6 @@ MODEL(
     CROSS JOIN ac_subsets
     )
 
-
     , first_assignments as (
     SELECT 
         id 
