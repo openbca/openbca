@@ -30,17 +30,19 @@ ID_COLUMNS = [
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_avoided_costs_from_excel(
         input_file="OpenBCA Configuration.xlsm",
+        first_year_avoided_costs_input_file="OpenBCA Program Input.xlsm",
         skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary", "User Tips"},
         skiprows=3
     )
 
 def load_avoided_costs_from_excel(
     input_file: str,
+    first_year_avoided_costs_input_file: str,
     skip_sheets: set,
     skiprows: int = 2
 ) -> pd.DataFrame:
     """
-    Load and consolidate timeseries data from an Excel workbook, enforce schema, and pivot to long format.
+    Load and consolidate time series data from an Excel workbook, enforce schema, and pivot to long format.
     """
     file_path = get_input_templates_dir() / input_file
     xls = pd.ExcelFile(file_path, engine="calamine")
@@ -128,17 +130,17 @@ def load_avoided_costs_from_excel(
     combined = pd.concat(aligned_frames, ignore_index=True)
 
     # ✅ Enforce required column order
-    desired_order = [
+    temporal_cols_order = [
         "year", "quarter", "month", "day_of_year", "type_of_day",
         "hour_of_day", "hour_of_year"
     ]
-    for col in desired_order:
+    for col in temporal_cols_order:
         if col not in combined.columns:
             combined[col] = pd.NA
 
     # Final order = desired + other inputs + avoided_cost
-    other_cols = [c for c in combined.columns if c not in desired_order and c not in ["avoided_cost"]]
-    final_order = ["avoided_cost"] + desired_order + other_cols 
+    other_cols = [c for c in combined.columns if c not in temporal_cols_order and c not in ["avoided_cost"]]
+    final_order = ["avoided_cost"] + temporal_cols_order + other_cols 
     combined = combined.reindex(columns=final_order)
 
     # ✅ Pivot to long format
@@ -154,5 +156,38 @@ def load_avoided_costs_from_excel(
     
     # Adjust hour_of_year from 1 - 8760 to 0 - 8759
     long_df['hour_of_year'] = long_df['hour_of_year'] - 1
-    
+
+    # print('long_df')
+    # print(long_df.head())
+
+    # print('columns')
+    # print(long_df.columns)
+
+    """
+    Add benefits for first year avoided costs to long_df.
+    """
+    first_year_avoided_costs_config_program_dict = {
+        'Host Customer Resilience':'Change in Host Customer Resilience',
+        'Host Customer NEIs':'Host Customer Non-Energy Impacts  ($)',
+        'Host Customer NEIs - LI':'Host Customer Non-Energy Impacts - Low-Income ($)',
+    }
+
+    first_year_avoided_costs_file_path = get_input_templates_dir() / first_year_avoided_costs_input_file
+    first_year_avoided_costs_xls = pd.ExcelFile(first_year_avoided_costs_file_path, engine="calamine")
+
+    first_year_avoided_costs_df = pd.read_excel(
+        first_year_avoided_costs_xls,
+        sheet_name='Measure Inputs',
+        skiprows=3,
+        engine="calamine",
+    )[['Unique ID', 'Start Year']+list(first_year_avoided_costs_config_program_dict.values())].rename(
+        columns={v: k for k, v in first_year_avoided_costs_config_program_dict.items()}
+    )
+
+    # print('list test')
+    # print([list(first_year_avoided_costs_config_program_dict.keys())])
+
+    print('first_year_avoided_costs_df')
+    print(first_year_avoided_costs_df.head(3))
+
     return long_df

@@ -73,6 +73,27 @@ WHERE
 
 UNION ALL  
 
+-- First year avoided costs
+SELECT  
+	fy.id
+	, 'NON-SYSTEM' as impact_category
+	, value_stream
+	, year
+	, NULL AS quarter
+	, NULL AS month  
+	--, NULL AS day_of_year 
+	--, NULL AS hour_of_year 
+	, NULL AS hour_of_day
+	, NULL AS net_energy_savings 
+	, net_to_gross_ratio * gross_dollar_value AS final_dollar_value
+	, NULL AS marginal_ghg_savings
+FROM
+	core_layer0_base.first_year_avoided_costs_by_id fy  
+JOIN core_layer0_base.measures m ON 
+	fy.id = m.id
+
+UNION ALL
+
 -- Measure-level cost components
 SELECT 
 	svs.id  

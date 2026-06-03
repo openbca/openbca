@@ -12,6 +12,7 @@ from models.openbca_input_avoided_costs_ts import load_avoided_costs_from_excel
 from models.openbca_input_value_stream_groups import load_value_stream_groups_from_excel
 from models.openbca_input_global_parameters import compile_global_parameters_from_excel
 from models.openbca_input_program_value_streams import load_program_value_streams_from_excel
+from models.first_year_avoided_costs_by_id import load_first_year_avoided_costs_from_excel
 
 
 def test_measures_parsing():
@@ -52,6 +53,7 @@ def test_avoided_costs_parsing():
     try:
         df = load_avoided_costs_from_excel(
             input_file="OpenBCA Configuration.xlsm",
+            first_year_avoided_costs_input_file="OpenBCA Program Input.xlsm",
             skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary", "User Tips"},
             skiprows=3
         )
@@ -103,6 +105,19 @@ def test_program_value_streams_parsing():
         print(f"  ✗ Failed to parse program value streams: {e}")
         return False
 
+def test_first_year_avoided_costs_parsing():
+    print("\nTesting first year avoided costs parsing...")
+    try:
+        df = load_first_year_avoided_costs_from_excel(
+            input_file='OpenBCA Configuration.xlsm',
+            first_year_avoided_costs_input_file='OpenBCA Program Input.xlsm',
+        )
+        print(f"  ✓ Successfully parsed first year avoided costs: {len(df)} rows")
+        return True
+    except Exception as e:
+        print(f"  ✗ Failed to parse first year avoided costs: {e}")
+        return False
+
 
 def main():
     """Run all parsing tests."""
@@ -112,10 +127,11 @@ def main():
     results = []
     # results.append(test_measures_parsing())
     # results.append(test_load_shapes_parsing())
-    #results.append(test_avoided_costs_parsing())
-    results.append(test_value_stream_groups_parsing())
+    # results.append(test_avoided_costs_parsing())
+    # results.append(test_value_stream_groups_parsing())
     # results.append(test_global_parameters_parsing())
     # results.append(test_program_value_streams_parsing())
+    results.append(test_first_year_avoided_costs_parsing())
     
     print("=" * 60)
     passed = sum(results)
