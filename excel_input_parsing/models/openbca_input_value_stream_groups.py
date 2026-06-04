@@ -23,7 +23,7 @@ ID_COLUMNS = ['avoided_cost', 'impact_category', 'include_in_test', 'calc_type',
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_value_stream_groups_from_excel(
-        input_file='OpenBCA Configuration.xlsm'
+        input_file='OpenBCA_Configuration.xlsm'
     )
 
 non_system_commodities = [

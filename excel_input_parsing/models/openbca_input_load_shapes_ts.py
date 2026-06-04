@@ -27,7 +27,7 @@ ID_COLUMNS = [
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_load_shapes_from_excel(
-        input_file="OpenBCA Program Input.xlsm",
+        input_file="OpenBCA_Program_Input.xlsm",
         skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Dictionary", "Updates & Improvements", "User Tips"},
         skiprows=1,
     )

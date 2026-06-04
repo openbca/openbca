@@ -29,8 +29,8 @@ ID_COLUMNS = [
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_avoided_costs_from_excel(
-        input_file="OpenBCA Configuration.xlsm",
-        first_year_avoided_costs_input_file="OpenBCA Program Input.xlsm",
+        input_file="OpenBCA_Configuration.xlsm",
+        first_year_avoided_costs_input_file="OpenBCA_Program_Input.xlsm",
         skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary", "User Tips"},
         skiprows=3
     )
@@ -156,38 +156,5 @@ def load_avoided_costs_from_excel(
     
     # Adjust hour_of_year from 1 - 8760 to 0 - 8759
     long_df['hour_of_year'] = long_df['hour_of_year'] - 1
-
-    # print('long_df')
-    # print(long_df.head())
-
-    # print('columns')
-    # print(long_df.columns)
-
-    """
-    Add benefits for first year avoided costs to long_df.
-    """
-    first_year_avoided_costs_config_program_dict = {
-        'Host Customer Resilience':'Change in Host Customer Resilience',
-        'Host Customer NEIs':'Host Customer Non-Energy Impacts  ($)',
-        'Host Customer NEIs - LI':'Host Customer Non-Energy Impacts - Low-Income ($)',
-    }
-
-    first_year_avoided_costs_file_path = get_input_templates_dir() / first_year_avoided_costs_input_file
-    first_year_avoided_costs_xls = pd.ExcelFile(first_year_avoided_costs_file_path, engine="calamine")
-
-    first_year_avoided_costs_df = pd.read_excel(
-        first_year_avoided_costs_xls,
-        sheet_name='Measure Inputs',
-        skiprows=3,
-        engine="calamine",
-    )[['Unique ID', 'Start Year']+list(first_year_avoided_costs_config_program_dict.values())].rename(
-        columns={v: k for k, v in first_year_avoided_costs_config_program_dict.items()}
-    )
-
-    # print('list test')
-    # print([list(first_year_avoided_costs_config_program_dict.keys())])
-
-    print('first_year_avoided_costs_df')
-    print(first_year_avoided_costs_df.head(3))
 
     return long_df

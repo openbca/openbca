@@ -20,7 +20,7 @@ def test_measures_parsing():
     print("\nTesting measures parsing...")
     try:
         df = load_measure_inputs_from_excel(
-            input_file="OpenBCA Program Input.xlsm",
+            input_file="OpenBCA_Program_Input.xlsm",
             sheet_name="Measure Inputs",
             skiprows=3
         )
@@ -36,7 +36,7 @@ def test_load_shapes_parsing():
     print("\nTesting load shapes parsing...")
     try:
         df = load_load_shapes_from_excel(
-            input_file="OpenBCA Program Input.xlsm",
+            input_file="OpenBCA_Program_Input.xlsm",
             skip_sheets={"Front Page", "Program Inputs", "Measure Inputs", "Define Load Shape Names", "Updates & Improvements", "User Tips"},
             skiprows=1,
         )
@@ -52,8 +52,8 @@ def test_avoided_costs_parsing():
     print("\nTesting avoided costs parsing...")
     try:
         df = load_avoided_costs_from_excel(
-            input_file="OpenBCA Configuration.xlsm",
-            first_year_avoided_costs_input_file="OpenBCA Program Input.xlsm",
+            input_file="OpenBCA_Configuration.xlsm",
+            first_year_avoided_costs_input_file="OpenBCA_Program_Input.xlsm",
             skip_sheets={"Front Page", "Updates & Improvements", "Common Data", "Validations", "Configuration Data", "Dictionary", "User Tips"},
             skiprows=3
         )
@@ -69,7 +69,7 @@ def test_value_stream_groups_parsing():
     print("\nTesting value stream groups parsing...")
     try:
         df = load_value_stream_groups_from_excel(
-            input_file='OpenBCA Configuration.xlsm'
+            input_file='OpenBCA_Configuration.xlsm'
         )
         print(f"  ✓ Successfully parsed value stream groups: {len(df)} rows")
         return True
@@ -83,7 +83,7 @@ def test_global_parameters_parsing():
     print("\nTesting global parameters parsing...")
     try:
         df = compile_global_parameters_from_excel(
-            input_file='OpenBCA Configuration.xlsm'
+            input_file='OpenBCA_Configuration.xlsm'
         )
         print(f"  ✓ Successfully parsed global parameters: {len(df)} rows")
         return True
@@ -97,7 +97,7 @@ def test_program_value_streams_parsing():
     print("\nTesting program value streams parsing...")
     try:
         df = load_program_value_streams_from_excel(
-            input_file='OpenBCA Program Input.xlsm'
+            input_file='OpenBCA_Program_Input.xlsm'
         )
         print(f"  ✓ Successfully parsed program value streams: {len(df)} rows")
         return True
@@ -109,8 +109,8 @@ def test_first_year_avoided_costs_parsing():
     print("\nTesting first year avoided costs parsing...")
     try:
         df = load_first_year_avoided_costs_from_excel(
-            input_file='OpenBCA Configuration.xlsm',
-            first_year_avoided_costs_input_file='OpenBCA Program Input.xlsm',
+            input_file='OpenBCA_Configuration.xlsm',
+            first_year_avoided_costs_input_file='OpenBCA_Program_Input.xlsm',
         )
         print(f"  ✓ Successfully parsed first year avoided costs: {len(df)} rows")
         return True

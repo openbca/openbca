@@ -21,14 +21,14 @@ ID_COLUMNS = ['program_name', 'year']
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_program_value_streams_from_excel(
-        input_file='OpenBCA Program Input.xlsm'
+        input_file='OpenBCA_Program_Input.xlsm'
     )
 
 def load_program_value_streams_from_excel(
     input_file: str,
 ) -> pd.DataFrame:
     '''
-    Generate dataframe to scrape program-level value streams grouping from the Program Inputs sheet in the OpenBCA Program Input.xlsm file.
+    Generate dataframe to scrape program-level value streams grouping from the Program Inputs sheet in the OpenBCA_Program_Input.xlsm file.
     '''
     file_path =  get_input_templates_dir() / input_file
     xls = pd.ExcelFile(file_path, engine="calamine")

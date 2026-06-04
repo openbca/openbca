@@ -21,7 +21,7 @@ from config.paths import get_input_templates_dir
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return compile_global_parameters_from_excel(
-        input_file='OpenBCA Configuration.xlsm'
+        input_file='OpenBCA_Configuration.xlsm'
     )
 
 real_nominal_row = 9

@@ -18,8 +18,8 @@ from config.paths import get_input_templates_dir
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     return load_first_year_avoided_costs_from_excel(
-        input_file="OpenBCA Configuration.xlsm",
-        first_year_avoided_costs_input_file="OpenBCA Program Input.xlsm",
+        input_file="OpenBCA_Configuration.xlsm",
+        first_year_avoided_costs_input_file="OpenBCA_Program_Input.xlsm",
     )
 
 def load_first_year_avoided_costs_from_excel(

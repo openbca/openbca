@@ -8,7 +8,7 @@ from config.paths import get_input_templates_dir
 
 ID_COLUMNS = ["id", "measure_id", "project_id"]
 
-input_file = "OpenBCA Program Input.xlsm"
+input_file = "OpenBCA_Program_Input.xlsm"
 sheet_name = "Measure Inputs"
 file_path = get_input_templates_dir() / input_file
 skiprows = 3
@@ -191,7 +191,7 @@ def load_measure_inputs_from_excel(
         '''
         Generate dataframe to classify value stream grouping from the Configuration Data sheet in the OpenBCA CONFIG file.
         '''
-        file_path_config = get_input_templates_dir() / 'OpenBCA Configuration.xlsm'
+        file_path_config = get_input_templates_dir() / 'OpenBCA_Configuration.xlsm'
         xls_config = pd.ExcelFile(file_path_config, engine="calamine")
         
         custom_avoided_cost_names_df = pd.read_excel(

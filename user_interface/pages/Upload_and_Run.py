@@ -102,8 +102,8 @@ with st.expander("Runtime path diagnostics", expanded=False):
         language="text",
     )
 
-program_input_file_name = "OpenBCA Program Input.xlsm"
-configuration_file_name = "OpenBCA Configuration.xlsm"
+program_input_file_name = "OpenBCA_Program_Input.xlsm"
+configuration_file_name = "OpenBCA_Configuration.xlsm"
 
 # Check if input files and output database already exist in the input templates directory.
 program_input_file_path = INPUT_TEMPLATES_DIR / program_input_file_name
