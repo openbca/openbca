@@ -177,7 +177,8 @@ def load_value_stream_groups_from_excel(
                 return 'annual'
 
     value_stream_groups_df['value_stream_group'] = value_stream_groups_df.apply(lambda x: assign_value_stream_group(x['calc_type'], x['impact_category']), axis=1)
-    value_stream_groups_df['impact_category'] = value_stream_groups_df.apply(lambda x: x['avoided_cost'] if x['avoided_cost'] in non_system_commodities else x['impact_category'], axis=1)
+    #value_stream_groups_df['impact_category'] = value_stream_groups_df.apply(lambda x: x['avoided_cost'] if x['avoided_cost'] in non_system_commodities else x['impact_category'], axis=1)
+    value_stream_groups_df['impact_category'] = value_stream_groups_df.apply(lambda x: x['avoided_cost'] if x['impact_category'] == 'Non-System' and x['avoided_cost'] in non_system_commodities else x['impact_category'], axis=1)
     value_stream_groups_df['marginal_ghg'] = value_stream_groups_df.apply(lambda x: True if x['avoided_cost'] in marginal_ghg_value_streams else False, axis=1)
 
     value_stream_groups_costs_dfs = []

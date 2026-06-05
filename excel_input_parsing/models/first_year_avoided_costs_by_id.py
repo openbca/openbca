@@ -17,10 +17,14 @@ from config.paths import get_input_templates_dir
 )
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
-    return load_first_year_avoided_costs_from_excel(
+    df = load_first_year_avoided_costs_from_excel(
         input_file="OpenBCA_Configuration.xlsm",
         first_year_avoided_costs_input_file="OpenBCA_Program_Input.xlsm",
     )
+    if df.empty:
+        yield from ()
+    else:
+        yield df
 
 def load_first_year_avoided_costs_from_excel(
     input_file: str,
@@ -90,5 +94,8 @@ def load_first_year_avoided_costs_from_excel(
         long_dfs.append(df[['id', 'year', 'value_stream', 'gross_dollar_value']])
 
     first_year_avoided_costs_df = pd.concat(long_dfs).query('~gross_dollar_value.isnull()')
+
+    if len(first_year_avoided_costs_df) == 0:
+        first_year_avoided_costs_df = pd.DataFrame(columns=['id', 'year', 'value_stream', 'gross_dollar_value'])
 
     return first_year_avoided_costs_df

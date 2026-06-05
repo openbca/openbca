@@ -588,9 +588,9 @@ else:
                 temporal_aggregation_value_stream_results_df['final_dollar_value'] = temporal_aggregation_value_stream_results_df['final_dollar_value'] / 10**(temporal_aggregation_results_scale_exponent)
                 temporal_aggregation_value_stream_results_df['value_stream'] = temporal_aggregation_value_stream_results_df['value_stream'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
 
-                value_streams = sorted(temporal_aggregation_value_stream_results_df['value_stream'].unique().tolist())
+                value_streams = sorted([v for v in temporal_aggregation_value_stream_results_df['value_stream'].unique().tolist() if 'GHG Intensity' not in v])
                 value_streams_filter = []
-                if len(value_streams) > 1:
+                if len(value_streams) > 0:
                     value_streams_filter = st.session_state.get("value_streams_filter", [])
 
                 if impact_category_filter.upper() == 'ELECTRIC' and temporal_aggregation_filter == 'hour_of_day':
@@ -644,7 +644,7 @@ else:
 
                     st.pyplot(temporal_aggregation_bar_fig, clear_figure=True)
 
-                    if len(value_streams) > 1:
+                    if len(value_streams) > 0:
                         st.multiselect(
                             label = f"**Show Specific Value Streams:**",
                             options = value_streams,
@@ -816,7 +816,7 @@ else:
                 if len(categorical_bar_radio_options.keys()) > 1:
                     grouping_option = st.radio(
                         label = "**Break Out Results By**",
-                        options = categorical_bar_radio_options.keys(),
+                        options = [c for c in categorical_bar_radio_options.keys() if c != 'Impact Category'],
                         index = 0,
                         horizontal = True,
                     )

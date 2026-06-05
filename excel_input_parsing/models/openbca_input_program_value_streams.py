@@ -20,9 +20,13 @@ ID_COLUMNS = ['program_name', 'year']
 )
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
-    return load_program_value_streams_from_excel(
+    df = load_program_value_streams_from_excel(
         input_file='OpenBCA_Program_Input.xlsm'
     )
+    if df.empty:
+        yield from ()
+    else:
+        yield df
 
 def load_program_value_streams_from_excel(
     input_file: str,
