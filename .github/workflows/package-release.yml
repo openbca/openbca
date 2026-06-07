@@ -1,0 +1,65 @@
+name: Package and Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  package-and-release:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact-suffix: win-x86_64
+        #   - os: macos-latest
+        #     artifact-suffix: macos-arm64
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: cicd-release-test
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+
+      - name: Install project and dependencies
+        run: uv sync --locked --all-extras --dev
+
+      - name: Build package
+        run: make build-pyinstaller-package
+
+      - name: Zip package (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          Compress-Archive -Path "dist/openbca-app/*" -DestinationPath "dist/openbca-app-${{ matrix.artifact-suffix }}.zip"
+
+      - name: Zip package (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          zip -r "dist/openbca-app-${{ matrix.artifact-suffix }}.zip" dist/openbca-app/*
+      
+      - name: Upload to Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} "dist/openbca-app-${{ matrix.artifact-suffix }}.zip" --clobber
+
+      - name: Upload Excel
+        if: matrix.os == 'windows-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} "demo_input_files/*.xlsm" --clobber
