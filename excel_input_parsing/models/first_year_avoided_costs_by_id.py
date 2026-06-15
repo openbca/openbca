@@ -37,9 +37,9 @@ def load_first_year_avoided_costs_from_excel(
 
     first_year_avoided_costs_config_program_dict = {
         #'Host Customer Resilience':'Change in Host Customer Resilience',
-        'Host Customer NEIs':'Host Customer Non-Energy Impacts  ($)',
-        'Host Customer NEIs - LI ':'Host Customer Non-Energy Impacts - Low-Income ($)',
-        'Host Customer NEIs - LI':'Host Customer Non-Energy Impacts - Low-Income ($)',
+        'Host Customer NEIs':'Host Customer Non-Energy Impacts Upfront ($)',
+        'Host Customer NEIs - LI ':'Host Customer Non-Energy Impacts - Low-Income Upfront ($)',
+        'Host Customer NEIs - LI':'Host Customer Non-Energy Impacts - Low-Income Upfront ($)',
     }
 
     # Beginning with the Configuration Data sheet, filter for only the Value Streams that included in the test and are not adder (%) and with a calculation type of Measure-specific.
