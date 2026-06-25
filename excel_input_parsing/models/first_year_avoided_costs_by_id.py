@@ -38,7 +38,7 @@ def load_first_year_avoided_costs_from_excel(
     first_year_avoided_costs_config_program_dict = {
         #'Host Customer Resilience':'Change in Host Customer Resilience',
         'Host Customer NEIs':'Host Customer Non-Energy Impacts Upfront ($)',
-        'Host Customer NEIs - LI ':'Host Customer Non-Energy Impacts - Low-Income Upfront ($)',
+        #'Host Customer NEIs - LI ':'Host Customer Non-Energy Impacts - Low-Income Upfront ($)',
         'Host Customer NEIs - LI':'Host Customer Non-Energy Impacts - Low-Income Upfront ($)',
     }
 

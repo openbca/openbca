@@ -1,6 +1,6 @@
 # OpenBCA
 
-This library provides aggregators, program administrators, utilities, and regulators a means to configure and execute Jurisdiction-Specific Tests (JSTs) for demand side programs/portfolios in accordance to guidance in the National Standard Practice Manual.
+This library provides aggregators, program administrators, utilities, and regulators a means to configure and execute Jurisdiction-Specific Tests (JSTs) for demand side programs/portfolios in accordance with guidance in the National Standard Practice Manual.
 
 Accurate cost-effectiveness tests that account for energy impacts and progress toward other policy objectives are critical for optimal demand side program design and informed decision making. However, traditional cost effectiveness tests (e.g., Total Resource Cost test, Utility Cost Test etc.) are often too restrictive, utilize non-transparent inputs, and do not fully reflect the goals and objectives of a jurisdiction. In such cases, benefit-cost testing can lead to poor demand side program design and ultimately unbalanced investment across energy resources. To help address these shortcomings, E4TheFuture’s [National Energy Screening Project](https://www.nationalenergyscreeningmeasure.org/) (NESP) published the [National Standard Practice Manual](https://www.nationalenergyscreeningmeasure.org/national-standard-practice-manual/) for Benefit-Cost Analysis of DERs (NSPM) in 2020. The NSPM provides a set of core principles and a process for developing complete and symmetric JSTs for demand side programs. Following the NSPM guidance, a regulator, utility, and/or other party can develop a JST that properly accounts for the utility system costs and benefits of a DER program or investment strategy, as well as any non-utility system impacts applicable to the jurisdiction’s priority policy goals and objectives.
 
@@ -14,22 +14,22 @@ Defining characteristics of the Standalone pathway include:
 - Use of the Excel input templates
 - Use of the user interface to upload completed input templates, launch the model, and explore and download results.
 
-The amount of data that can be processed and computational speed to run the OpenBCA model will be limited by the user's hardware. Generally it is recommended users have at least 16 GB of RAM, though for smaller jobs less will suffice.
+The amount of data that can be processed and computational speed to run the OpenBCA model will be limited by the user's hardware. Generally it is recommended users have at least 16 GB of RAM, though for smaller jobs less will suffice. Extremely large jobs may ultimately need cloud infrastructure and implementation via the Integrated pathway.
 
 ### 2. Integrated Pathway
-This mode is intended for inclusion of the OpenBCA in existing sofware systems and technical workflows. For instance, if a user needs to leverage cloud computing or data storage resources or wishes to automate benefit-cost analysis as part of a larger analytics pipeline. The integrated pathway is most appropriate for users who:
+This mode is intended for inclusion of the OpenBCA in existing sofware systems and technical workflows. For instance, if a user needs to leverage cloud computing or data storage resources or wishes to automate benefit-cost analysis as part of a larger analytics pipeline. The Integrated pathway is most appropriate for users who:
 
 - Need to scale analysis across very large datasets
 - Need maximum flexibility for novel use cases
 - Need to embed OpenBCA in existing data pipelines and workflows
 - Wish to develop custom user interfaces
 
-Users of the integrated pathway will need to input data as defined by the schemas resulting from the input parsing step of the Standalone pathway (and reproduced below for reference).
+Users of the Integrated pathway will need to input data as defined by the schemas resulting from the input parsing step of the Standalone pathway (and reproduced below for reference).
 
 Generally speaking, the Integrated pathway is for expert users and will not be explicity supported by the development team.
 
-## Prerequisite Installations
-The OpenBCA requires the following packages to be installed on your local machine:
+## Integrated Pathway Prerequisite Installations
+The OpenBCA Integrated Pathway requires the following packages to be installed on your local machine. Depending on your local hardware other packages may also need to be installed:
 
 - git ([mac](https://git-scm.com/install/mac) or [windows](https://git-scm.com/install/windows))
 - uv [mac](https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_1) or [windows](https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_2)
@@ -37,7 +37,7 @@ The OpenBCA requires the following packages to be installed on your local machin
 
 ## Running OpenBCA
 
-To run the OpenBCA, use the following commands
+To run the OpenBCA from a terminal, use the following commands
 
 #### Launching the UI:
 ```bash
@@ -89,13 +89,13 @@ The repository contains three main related systems housed in the following folde
 ## 🧱 BCA Basic Components
 Benefit-cost analysis for distributed energy resources is conducted using the following information and data:
 
-**Annual Savings** - The amount per year that an intervention saves. Savings are tied to specific **commodities**. An intervention can save across multiple commodities and can be negative. For instance, a heat pump electrification measure will decrease natural gas consumption (positive savings), increase electricity consumption (negative savings), and enhance societal resiliance and host-customer reliability. In this example "savings" are generated across four commodities: natural gas, electricity, societal resiliance, and host-customer reliability.
+**Annual Savings** - The amount per year that an intervention saves. Savings are tied to specific **impact categories**. An intervention can save across multiple impact categories and can be negative. For instance, a heat pump electrification measure will decrease natural gas consumption (positive savings), increase electricity consumption (negative savings), and may enhance societal resiliance and host-customer reliability. In this example "savings" are generated across four impact categories: natural gas, electricity, societal resiliance, and host-customer reliability.
 
-**Avoided Costs** - Within each impact_category, there may be one or more avoided costs. Each avoided cost represents a specific, quantifiable dollar value tied to an effect that can be isolated. For example, electricity savings may avoid energy procurement costs, GHG emissions, various capacity costs and more. The NSPM defines many common utility system and non-system avoided costs that should be accounted for in a JST. Avoided costs should represent **marginal** values. For instance, if a program saves 1 MWh, the avoided costs should reflect the dollar value from that specific MWh instead of the average of all electricity generated during the time the savings occured. Marginal values can be higher or lower than average values depending on the context. If a program saves a MWh during a peak period, then that savings will direclty reduce reliance on an expensive peaker plant. In contrast, if that MWh were saved during a period of renewable curtailment, the dollar value may be zero or even negative.
+**Avoided Costs** - Within each impact_category, there may be one or more avoided costs. Each avoided cost represents a specific, quantifiable dollar value tied to an effect that can be isolated. For example, electricity savings may avoid energy procurement costs, GHG emissions, various capacity costs and more. The NSPM defines many common utility system and non-system avoided costs that should be accounted for in a JST. Avoided costs should represent **marginal** values. For instance, if a program saves 1 MWh, the avoided costs should reflect the dollar value from that specific MWh instead of the average of all electricity generated during the time the savings occured. Marginal values can be higher or lower than average values depending on the context. If a program saves a MWh during a peak period, then those savings will direclty reduce reliance on an expensive peaker plant. In contrast, if that MWh were saved during a period of renewable curtailment, the dollar value may be zero or even negative.
 
-**Savings Load Shapes** - Encode the distribution of savigns over time. The OpenBCA supports natural gas and electric savings load shapes of annual, monthly, daily, or hourly granularities. Other commodities are limited to annual values. The _maximum_ granularity of avoided cost profiles per impact_category establishes the _minimum_ granularity that a savings load shape must meet. Savings load shapes can be entered as dimensioned or normalized values. If normalized the load shape acts to distribute annual savings across the year. If dimensioned, the load shape is expected to sum to an annual savings value and a value of 1 should be entered for the corresponding annual savings for that impact_category.
+**Savings Load Shapes** - Encode the distribution of savigns over time. The OpenBCA supports natural gas and electric savings load shapes of annual, monthly, daily, or hourly granularities. Other impact categories are limited to annual values. The _maximum_ granularity of avoided cost profiles per impact_category establishes the _minimum_ granularity that a savings load shape must meet. Savings load shapes can be entered as dimensioned or normalized values. If normalized, the load shape acts to distribute annual savings across the year. If dimensioned, the load shape is expected to sum to an annual savings value and nothing should be entered for the corresponding annual savings for that impact_category.
 
-**Discount Rate and Cadence** - The calculation of benefits and costs is conducted via a net-present-value (NPV) computation over the lifecycle of impacts from an intervention. The annual discount rate determines the degree to which future benefits are eroded relative to the opportunity cost of the capital invested in the project. The discount cadence determines how many time periods will be included in the NPV calculation. Currently the OpenBCA supports annual and quarterly discounting.
+**Discount Rate and Cadence** - The calculation of benefits and costs is conducted via a net-present-value (NPV) computation over the lifecycle of impacts. The annual discount rate determines the degree to which future benefits are eroded relative to the opportunity cost of the capital invested in the project. The discount cadence determines how many time periods will be included in the NPV calculation. Currently the OpenBCA supports annual and quarterly discounting.
 
 **Inflation Rate** - Users can choose whether to report results in real or nominal dollars. If real dollars are desired then the user can enter a base year and inflation rate to adjust dollars to the base year. The base year can be before, during, or after a program's impacts.
 
@@ -180,6 +180,7 @@ flowchart LR
 flowchart LR
 
    measures["`**<u>measures</u>**`"]
+   first_year_avoided_costs["`**<u>first_year_avoided_costs</u>**`"]
    global_parameters["`**<u>global_parameters</u>**`"]
    cost_treatment_factors["`**<u>cost_treatment_factors</u>**`"]
    program_value_streams["`**<u>program_value_streams</u>**`"]
@@ -215,6 +216,7 @@ avoided_cost_subsets_by_id-->avoided_cost_load_shape_combos
 measures-->savings_factors
 global_parameters-->savings_factors
 
+first_year_avoided_costs-->final_value_calculations
 global_parameters-->final_value_calculations
 value_stream_groups-->final_value_calculations
 program_value_streams-->final_value_calculations
@@ -226,6 +228,7 @@ savings_factors-->final_value_calculations
 
    %% Base
    style measures fill:#90caf9,stroke:#42a5f5
+   style first_year_avoided_costs fill:#90caf9,stroke:#42a5f5
    style global_parameters fill:#90caf9,stroke:#42a5f5
    style cost_treatment_factors fill:#90caf9,stroke:#42a5f5
    style program_value_streams fill:#90caf9,stroke:#42a5f5
@@ -256,7 +259,8 @@ Layer | Table | Contents |
 | **Base** | **program_value_streams** | Program-level costs and benefits by year |
 | **Base** | **value_stream_groups** | Info to shepherd each value stream into a specific computational treatment |
 | **Base** | **load_shape_ts** | Savings load shapes time series |
-| **Base** | **avoided_cost_ts** | Avoided costs time series |
+| **Base** | **avoided_cost_ts** | Avoided costs time series. Marginal GHG time series can also be included |
+| **Base** | **first_year_avoided_costs_by_id** | "Upfront avoided costs, typically NEIs, that are realized in the first year of an intervention and whose total values are thus not computed over the full EUL |
 | **Mapping** | **avoided_cost_subsets_by_id** | Mapping between ID, avoided cost, and avoided cost subset |
 | **Mapping** | **impact_category_load_shape_by_id** | Mapping between ID, impact_category, and load shape |
 | **Mapping** | **cost_components_by_id** | Establishes costs and multiplicative factors by ID for row-level inputs and by program name for program-level inputs |
@@ -268,9 +272,11 @@ Layer | Table | Contents |
 
 ## 📱 Value Stream Calculation
 
-There are ten computational pathways supported by the OpenBCA to properly handle different types of value streams. The flow diagram and equation reference below provide details on the logic and mathematics.
+There are eleven computational pathways supported by the OpenBCA to properly handle different types of value streams. The flow diagram and equation reference below provide details on the logic and mathematics.
 
-To determine which pathway a value stream will follow the OpenBCA first checks the calculation type. In the Standalone pathway this is a required field entered in the Configuration input template for each value stream. If the calculation type is some form of time series (including custom period or single value), then the impact_category is referenced and the pathway is assigned as Electric, Natural Gas, or Annual accordingly.
+To determine which pathway a value stream will follow, the OpenBCA first checks the calculation type. In the Standalone pathway this is a required field entered in the Configuration input template for each value stream. If the calculation type is some form of time series (including custom period or single value), then the impact_category is referenced and the pathway is assigned as Electric, Natural Gas, or Annual accordingly.
+
+If the calculation type is Measure-specific then the OpenBCA checks if the impact category is NEIs or Low Income NEIs. If so then the First Year pathway is assigned. If not then the impact category is ignored.
 
 If the calculation type is Capacity then the corresponding pathway is assigned.
 
@@ -292,6 +298,7 @@ Variable | Definition |
 | **N** | The number of temporal increments in a year for a particular value stream. For example N = 12 for monthly data. |
 | **Avoided Cost<sub>y,t</sub>** | Marginal avoided cost (\$/impact_category unit) for year y and time period t. For instance, $/kWh for hour 7354 of 2035 |
 | **Avoided Cost<sub>y</sub>** | Marginal avoided cost (\$/impact_category unit) for year y. For instance, \$/kWh for 2035 |
+| **Upfront Value** | The raw upfront value of an intervention used in the First Year pathway. Currentl only NEIs and Low Income NEIs are supported in this pathway. |
 | **Annual Savings** | Annual savings (1.0 or impact_category unit) for an intervention. For instance, kWh. If the load shape is dimensioned then Annual Savings should be set to 1.0 |
 | **Load Shpae<sub>t</sub>** | Load Shape (impact_category unit or fraction) for time period t. For instance, \$/kWh for hour 7354 of the year or 0.001 for hour 7354, which assigns 0.1% of the annual savings to that hour. |
 | **L<sub>E</sub>** | Line loss factor using the electric line loss rate |
@@ -319,14 +326,13 @@ For some or many value streams, avoided costs may be different depending on regi
 1. Avoided cost data were grouped into "constrained" and "non-constrained" subsets.
 2. Project tracking indicated in which of these regions an intervention occured.
 
-
 With its Avoided Cost Subset feature, the OpenBCA enables users to enter distinct avoided cost data by divisions they define.
 
 This functionality operates as follows:
 
 For any value stream with defined subsets, distinct avoided cost data can be tied to the specific subset (see the _avoided_cost_ts_ table spec below). Then, the user can assign any project to a subset via the _measures_ table.
 
-Not all avoided costs need to be assigned to a subset. For example, a user may have different subsets for avoided gnergy costs but only system-wide values for avoided RPS compliance costs. In this case, the user should enter only "System-wide" avoided cost data for the latter. The OpenBCA will automatically probe for and assign projects to specific subsets for the avoided costs that have those subsets, and to a default "System-wide" subset for the remaining avoided costs.
+Not all avoided costs need to be assigned to a subset. For example, a user may have different subsets for avoided energy costs, but only system-wide values for avoided RPS compliance costs. In this case, the user should enter only "System-wide" avoided cost data for the latter. The OpenBCA will automatically probe for and assign projects to specific subsets for the avoided costs that have those subsets, and to a default "System-wide" subset for the remaining avoided costs.
 
 ## 📜 Data Granularity
 
@@ -337,9 +343,9 @@ Given different temporal granularity in avoided cost and savings data - both bet
 - Monthly
 - Yearly
 
-Other commodities (delivered fuels, host-customer benefits, costs, and custom commodities) must be yearly inputs.
+Other impact categories (delivered fuels, host-customer benefits, costs, and custom impact categories) must be yearly inputs.
 
-Within the natural gas and electric commodities, individual avoided cost streams may have different granularities. For example, a jurisdiction may have hourly marginal electric avoided costs compiled for energy procurement, montly for GHG emissions, and annual for RPS compliance.
+Within the natural gas and electric impact categories, individual avoided cost streams may have different granularities. For example, a jurisdiction may have hourly marginal electric avoided costs compiled for energy procurement, montly for GHG emissions, and annual for RPS compliance.
 
 The OpenBCA handles each case, retaining the granularity of the original avoided cost data throughout.
 

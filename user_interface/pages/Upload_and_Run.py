@@ -32,10 +32,16 @@ LOGOS_DIR = get_streamlit_app_dir() / "logos"
 with col1:
     logo_col, _spacer_col = st.columns([2, 1])
     with logo_col:
-        naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
-        naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
+        # naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
+        # naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
+        # st.markdown(
+        #     f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:100%;height:auto;"/>](https://naseo.org/)',
+        #     unsafe_allow_html=True,
+        # )
+        lbnl_logo_path = LOGOS_DIR / "LBNL.jpg"
+        lbnl_logo_b64 = base64.b64encode(lbnl_logo_path.read_bytes()).decode()
         st.markdown(
-            f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:100%;height:auto;"/>](https://naseo.org/)',
+            f'[<img src="data:image/jpeg;base64,{lbnl_logo_b64}" style="max-width:75%;height:auto;"/>](https://www.lbl.gov/)',
             unsafe_allow_html=True,
         )
 with col2:

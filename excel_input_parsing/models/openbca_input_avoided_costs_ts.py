@@ -5,7 +5,7 @@ import pandas as pd
 from config.paths import get_input_templates_dir
 
 ID_COLUMNS = [
-    "avoided_cost", "year", "quarter", "month", "day_of_year", "type_of_day",
+    "avoided_cost", "year", "quarter", "month", "day_of_year", #"type_of_day",
     "hour_of_day", "hour_of_year"
 ]
 
@@ -20,7 +20,7 @@ ID_COLUMNS = [
         "quarter": "int",
         "month": "int",
         "day_of_year": "int",
-        "type_of_day": "string",
+        #"type_of_day": "string",
         "hour_of_day": "int",
         "hour_of_year": "int",
         "avoided_cost_value": "float",
@@ -108,6 +108,8 @@ def load_avoided_costs_from_excel(
                 cleaned_headers.append(str(col).strip().lower().replace(" ", "_").replace("-", "_"))
 
         df.columns = cleaned_headers
+        if "type_of_day" in df.columns:
+            df = df.drop("type_of_day", axis=1)
         df = df[1:]
 
         if 'custom_period' in df.columns:
@@ -131,7 +133,7 @@ def load_avoided_costs_from_excel(
 
     # ✅ Enforce required column order
     temporal_cols_order = [
-        "year", "quarter", "month", "day_of_year", "type_of_day",
+        "year", "quarter", "month", "day_of_year", #"type_of_day",
         "hour_of_day", "hour_of_year"
     ]
     for col in temporal_cols_order:
