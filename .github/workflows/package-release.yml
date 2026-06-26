@@ -51,7 +51,8 @@ jobs:
       - name: Zip package (Unix)
         if: matrix.os != 'windows-latest'
         run: |
-          zip -r "dist/openbca-app-${{ matrix.artifact-suffix }}.zip" dist/openbca-app/*
+          zip -r "../openbca-app-${{ matrix.artifact-suffix }}.zip" *
+        working-directory: dist/openbca-app
       
       - name: Upload Zipped App to Draft Release
         uses: softprops/action-gh-release@v3
