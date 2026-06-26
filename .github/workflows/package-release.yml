@@ -13,8 +13,8 @@ jobs:
         include:
           - os: windows-latest
             artifact-suffix: win-x86_64
-        #   - os: macos-latest
-        #     artifact-suffix: macos-arm64
+          - os: macos-latest
+            artifact-suffix: macos-arm64
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
