@@ -374,17 +374,20 @@ Therefore, it is the user's responsibility to:
 <table>
 <tr>
 <td><strong>measures</strong><br/><img src="readme_images/input_schema/openbca_input_schema_measures.png" alt="measures" style="max-width: 100%; height: auto;"/></td>
-<td><strong>program_value_streams</strong><br/><img src="readme_images/input_schema/openbca_input_program_value_streams.png" alt="program_value_streams" style="max-width: 100%; height: auto;"/></td>
+<td><strong>program_value_streams</strong><br/><img src="readme_images/input_schema/openbca_input_schema_program_value_streams.png" alt="program_value_streams" style="max-width: 100%; height: auto;"/></td>
 <td><strong>global_parameters</strong><br/><img src="readme_images/input_schema/openbca_input_schema_global_parameters.png" alt="global_parameters" style="max-width: 100%; height: auto;"/></td>
 </tr>
+<table>
+<table>
 <tr>
+<td><strong>first_year_avcsts</strong><br/><img src="readme_images/input_schema/openbca_input_schema_first_year_avoided_costs_by_id.png" alt="first_year_avoided_costs" style="max-width: 100%; height: auto;"/></td>
 <td><strong>value_stream_groups</strong><br/><img src="readme_images/input_schema/openbca_input_schema_value_stream_groups.png" alt="value_stream_groups" style="max-width: 100%; height: auto;"/></td>
 <td><strong>avoided_costs_ts</strong><br/><img src="readme_images/input_schema/openbca_input_schema_avoided_costs_ts.png" alt="avoided_costs_ts" style="max-width: 100%; height: auto;"/></td>
 <td><strong>load_shapes_ts</strong><br/><img src="readme_images/input_schema/openbca_input_schema_load_shapes_ts.png" alt="load_shapes_ts" style="max-width: 100%; height: auto;"/></td>
 </tr>
 </table>
 
-This table details requirements for columns in the OpenBCA schema. Not all columns are inclused as many do not have specific requirements beyond data type.
+This table details requirements for columns in the OpenBCA schema. Not all columns are included as many do not have specific requirements beyond data type.
 
 Table | Column | Requirements |
 |--|------|----------|
