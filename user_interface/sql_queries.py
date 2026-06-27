@@ -294,7 +294,7 @@ def generate_costs_value_stream_query(where_sql):
     return costs_value_stream_query
 
 
-def generate_categorical_summary_query(where_sql, category_filter, grouping_filter = None):
+def generate_categorical_summary_query(where_sql, category_filter, grouping_filter = None, include_costs = False):
     
     category_filter_coalesce = category_filter
     if category_filter == 'program_name':
@@ -303,6 +303,10 @@ def generate_categorical_summary_query(where_sql, category_filter, grouping_filt
     grouping_filter_coalesce = grouping_filter
     if grouping_filter == 'program_name':
         grouping_filter_coalesce = "coalesce(m.program_name, fvc.id)"
+
+    costs_filter = ''
+    if not include_costs:
+        costs_filter = "AND impact_category NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')"
 
     categorical_summary_query = f"""
         SELECT 
@@ -315,6 +319,7 @@ def generate_categorical_summary_query(where_sql, category_filter, grouping_filt
         FULL OUTER JOIN openbca.core_layer0_base.measures m ON 
         fvc.id = m.id
         {where_sql} 
+        {costs_filter}
         GROUP BY 
         {category_filter_coalesce}
         {f", {grouping_filter_coalesce}" if grouping_filter is not None else ''}

@@ -120,6 +120,8 @@ with quit_col:
         # Get current pid and send SIGTERM to gracefully shut down the Streamlit server process
         os.kill(os.getpid(), signal.SIGTERM)
 
+cost_impact_categories = ['Admin', 'Utility Incentive', 'Measure Cost', 'Tax Incentive']
+
 st.markdown("#### Explore the results of your Jurisdiction Specific Test")
 db_exists_now = db_path.exists()
 
@@ -801,7 +803,7 @@ else:
 
                 category_filter_sql = f"{reconstruct_column_name(category_filter)}"
 
-                categorical_summary_df = con.execute(generate_categorical_summary_query(where_sql, category_filter_sql)).df().query(f"not {category_filter_sql}.isnull()")
+                categorical_summary_df = con.execute(generate_categorical_summary_query(where_sql, category_filter_sql, include_costs = True)).df().query(f"not {category_filter_sql}.isnull()")
                 categorical_summary_df, categorical_summary_unit_labels = determine_dollar_magnitude(categorical_summary_df, x_col=bar_col, y_col=None)        
                 categorical_summary_df[f"{category_filter_sql}"] = categorical_summary_df[f"{category_filter_sql}"].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
                 
@@ -812,7 +814,7 @@ else:
             with col2:    
                 for grouping_filter in remaining_category_filters:
 
-                    categorical_grouping_summary_df = con.execute(generate_categorical_summary_query(where_sql, category_filter_sql, grouping_filter = grouping_filter)).df().query(f"not {grouping_filter}.isnull()")
+                    categorical_grouping_summary_df = con.execute(generate_categorical_summary_query(where_sql, category_filter_sql, grouping_filter = grouping_filter, include_costs = True)).df().query(f"not {grouping_filter}.isnull()")
                     if len(categorical_grouping_summary_df) > len(categorical_summary_df):
                         categorical_grouping_summary_df, categorical_grouping_summary_unit_labels = determine_dollar_magnitude(categorical_grouping_summary_df, x_col=bar_col, y_col=None)
                         categorical_grouping_summary_df[f"{grouping_filter}"] = categorical_grouping_summary_df[f"{grouping_filter}"].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
@@ -841,7 +843,7 @@ else:
                     plot_df = plot_df.rename(columns={reconstruct_column_name(grouping_option): grouping_option})
 
                 categorical_summary_bar_fig = categorical_bar_fig(
-                df = plot_df,
+                df = plot_df[~plot_df[category_filter].isin(cost_impact_categories)],
                 col = bar_col,
                 category = category_filter,
                 groupings = None if grouping_option == 'None' else grouping_option,
@@ -870,7 +872,7 @@ else:
                     plot_df['final_dollar_value_original'] = plot_df['final_dollar_value'] 
                 
                 st.dataframe(
-                    plot_df[[category_filter] + grouping_column + ['final_dollar_value_original', 'jst_ratio']].query("final_dollar_value_original != 0"), 
+                    plot_df[~plot_df[category_filter].isin(cost_impact_categories)][[category_filter] + grouping_column + ['final_dollar_value_original', 'jst_ratio']].query("final_dollar_value_original != 0"), 
                     width='stretch', 
                     hide_index=True,
                     column_config={

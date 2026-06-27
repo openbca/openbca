@@ -36,7 +36,8 @@ def determine_label_sig_figs(num_bars: int) -> int:
         return 0
 
 def determine_dollar_magnitude(df:pd.DataFrame, x_col: str = None, y_col: str = None, return_scale_exponent: bool = False) -> tuple[pd.DataFrame, list[str]]:
-    
+    df = df.copy()
+
     dollar_magnitude_dict = {0:'', 1:'k', 2:'M', 3:'B', 4:'T'}
     dollar_magnitude_dict_reverse = {v: k for k, v in dollar_magnitude_dict.items()}
     unit_labels = []
@@ -59,7 +60,8 @@ def determine_dollar_magnitude(df:pd.DataFrame, x_col: str = None, y_col: str = 
 
     
 def determine_savings_magnitude(df:pd.DataFrame, x_col: str = None, y_col: str = None, unit: str = '') -> tuple[pd.DataFrame, list[str]]:
-    
+    df = df.copy()
+
     savings_magnitude_dict = {0:'', 1:'k', 2:'M', 3:'B', 4:'T'}
     electric_savings_magnitude_dict = {0:'kWh', 1:'MWh', 2:'GWh', 3:'TWh'}
     unit_labels = []

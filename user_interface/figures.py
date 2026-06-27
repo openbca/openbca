@@ -1017,6 +1017,7 @@ def categorical_bar_fig(
     legend: bool = True,
     legend_loc: "str" = None,
     ):
+    df = df.copy()
 
     if sort_by is None:
         sort_by = [category]
@@ -1043,14 +1044,14 @@ def categorical_bar_fig(
 
     if y2_col != None:
         if min_y2_counts is not None:
-            df = df[df[y2_col] >= min_y2_counts]
+            df = df[df[y2_col] >= min_y2_counts].copy()
         ax1 = ax.twinx()  
 
     groups = df[groupings].unique()
     num_bars = len(groups)
     bar_width = space_fraction / num_bars
 
-    df.sort_values(by=sort_by, inplace=True, ascending=sort_ascending)
+    df = df.sort_values(by=sort_by, ascending=sort_ascending)
     for i, group in enumerate(sorted(list(groups), reverse=True)):
         
         x1 = pd.Series(
