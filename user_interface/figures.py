@@ -833,6 +833,7 @@ def scatter_fig(
     marker_size: int = 10,
     include_line: bool = False,
     vlines: list = [None],
+    hline_y_position: int = None,
     marker: str = markers_open[0],
     marker_color: str = colors[3],
     color_by_col: str = None,
@@ -937,8 +938,9 @@ def scatter_fig(
     if include_45_degree_line:
         ax.plot([min(xmin, ymin), max(xmax, ymax)], [min(xmin, ymin), max(xmax, ymax)], linestyle="--", color="dimgray")
 
-    # Horizontal dashed line at y=0
-    ax.axhline(0, linestyle="--", color="dimgray")
+    # Horizontal dashed line 
+    if hline_y_position != None:
+        ax.axhline(hline_y_position, linestyle="--", color="dimgray")
 
     # Set axis limits set_axis_lims(ylims, ymin, ymax, multiplier)
     try:

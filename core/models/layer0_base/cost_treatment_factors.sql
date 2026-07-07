@@ -12,7 +12,7 @@ FROM (
         ('ADMIN', 'UCT', '1'),
         ('ADMIN', 'TRC', '1'),
         ('ADMIN', 'CA TRC', '1'),
-        ('ADMIN', 'PCT', '1'),
+        ('ADMIN', 'PCT', '0'),
         ('ADMIN', 'RIM', '1'),
 
         ('UTILITY INCENTIVE', 'UCT', '1'),

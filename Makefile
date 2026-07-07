@@ -9,24 +9,6 @@ install:
 run-openbca:
 	uv run streamlit run user_interface/Entrypoint.py
 
-run-ca-electric-acc:
-	@echo "Starting ACC Electric Model data scraping..."
-	@echo ""
-	@mkdir -p ca_acc/output
-	@DB=ca_acc/output/ca_electric_acc.db uv run sqlmesh -p ca_acc/electric plan --auto-apply
-	@echo "Exporting electric ACC table to CSV..."
-	@time DB=ca_acc/output/ca_electric_acc.db uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM ca_electric_acc.ca_acc_layer1_smoothing.electric_acc_smoothed) TO 'ca_acc/output/full_ca_avoided_costs_acc_smoothed.csv' (HEADER, DELIMITER ',');\"); con.close()"
-	@echo "CSV file saved to: ca_acc/output/full_ca_avoided_costs_acc_smoothed.csv"
-
-run-ca-gas-acc:
-	@echo "Starting ACC Gas Model data scraping..."
-	@echo ""
-	@mkdir -p ca_acc/output
-	@DB=ca_acc/output/ca_gas_acc.db uv run sqlmesh -p ca_acc/gas plan --auto-apply
-	@echo "Exporting gas ACC table to CSV..."
-	@time DB=ca_acc/output/ca_gas_acc.db uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM ca_gas_acc.gas.acc_gas_model_ts) TO 'ca_acc/output/full_ca_avoided_costs_acc_gas.csv' (HEADER, DELIMITER ',');\"); con.close()"
-	@echo "CSV file saved to: ca_acc/output/full_ca_avoided_costs_acc_gas.csv"
-
 run-input-transform-validations:
 	@echo "Running parsing scripts and validating input data..."
 # Note: we use a separate DuckDB instance and gateway for validation of initial parsing and ingestion steps

@@ -60,42 +60,35 @@ if 'show_value_streams_filter' not in st.session_state:
 if 'isolate_peak_filter' not in st.session_state:
     st.session_state.isolate_peak_filter = False
 
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3, col4 = st.columns(4)
 
 LOGOS_DIR = get_streamlit_app_dir() / "logos"
 with col1:
-    logo_col, _spacer_col = st.columns([2, 1])
-    with logo_col:
-        # naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
-        # naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
-        # st.markdown(
-        #     f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:100%;height:auto;"/>](https://naseo.org/)',
-        #     unsafe_allow_html=True,
-        # )
-        lbnl_logo_path = LOGOS_DIR / "LBNL.jpg"
-        lbnl_logo_b64 = base64.b64encode(lbnl_logo_path.read_bytes()).decode()
-        st.markdown(
-            f'[<img src="data:image/jpeg;base64,{lbnl_logo_b64}" style="max-width:75%;height:auto;"/>](https://www.lbl.gov/)',
-            unsafe_allow_html=True,
-        )
+    lbnl_logo_path = LOGOS_DIR / "LBNL.jpg"
+    lbnl_logo_b64 = base64.b64encode(lbnl_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{lbnl_logo_b64}" style="max-width:40%;height:auto;display:block;margin:0;margin-right:auto;"/>](https://www.lbl.gov/)',
+        unsafe_allow_html=True,
+    )
 with col2:
-    _spacer_col = st.columns([1, 1])
+    naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
+    naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:58%;height:auto;display:block;margin-right:auto;"/>](https://naseo.org/)',
+        unsafe_allow_html=True,
+    )
 with col3:
-    logo_col, _spacer_col = st.columns([1, 1])
-    with logo_col:
-        icf_logo_path = LOGOS_DIR / "ICF.jpg"
-        icf_logo_b64 = base64.b64encode(icf_logo_path.read_bytes()).decode()
-        st.markdown(
-            f'[<img src="data:image/jpeg;base64,{icf_logo_b64}" style="max-width:100%;height:auto;"/>](https://icf.com/)',
-            unsafe_allow_html=True,
-        )
+    icf_logo_path = LOGOS_DIR / "ICF.jpg"
+    icf_logo_b64 = base64.b64encode(icf_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{icf_logo_b64}" style="max-width:36%;height:auto;display:block;margin:0 auto;"/>](https://icf.com/)',
+        unsafe_allow_html=True,
+    )
 with col4:
-    _spacer_col = st.columns([1, 1])
-with col5:
     recurve_logo_path = LOGOS_DIR / "RECURVE.jpg"
     recurve_logo_b64 = base64.b64encode(recurve_logo_path.read_bytes()).decode()
     st.markdown(
-        f'[<img src="data:image/jpeg;base64,{recurve_logo_b64}" style="max-width:100%;height:auto;"/>](https://recurve.com/)',
+        f'[<img src="data:image/jpeg;base64,{recurve_logo_b64}" style="max-width:75%;height:auto;display:block;margin:0;margin-left:auto;"/>](https://recurve.com/)',
         unsafe_allow_html=True,
     )
 
@@ -419,6 +412,7 @@ else:
                             },
                         marker_size = marker_size,
                         include_45_degree_line = True if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else False,
+                        hline_y_position = 0 if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs' else 1,
                         color_by_col = None if len(catalog_by_filter) == 0 else reconstruct_column_name(catalog_by_filter),
                         label_points = True if show_id_labels else False,
                         labels = benefit_cost_scatter_df['id'].tolist(),

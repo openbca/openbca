@@ -26,42 +26,35 @@ from validation_functions import (
     validate_avoided_cost_load_shape_granularity,
 )
 
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3, col4 = st.columns(4)
 
 LOGOS_DIR = get_streamlit_app_dir() / "logos"
 with col1:
-    logo_col, _spacer_col = st.columns([2, 1])
-    with logo_col:
-        # naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
-        # naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
-        # st.markdown(
-        #     f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:100%;height:auto;"/>](https://naseo.org/)',
-        #     unsafe_allow_html=True,
-        # )
-        lbnl_logo_path = LOGOS_DIR / "LBNL.jpg"
-        lbnl_logo_b64 = base64.b64encode(lbnl_logo_path.read_bytes()).decode()
-        st.markdown(
-            f'[<img src="data:image/jpeg;base64,{lbnl_logo_b64}" style="max-width:75%;height:auto;"/>](https://www.lbl.gov/)',
-            unsafe_allow_html=True,
-        )
+    lbnl_logo_path = LOGOS_DIR / "LBNL.jpg"
+    lbnl_logo_b64 = base64.b64encode(lbnl_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{lbnl_logo_b64}" style="max-width:40%;height:auto;display:block;margin:0;margin-right:auto;"/>](https://www.lbl.gov/)',
+        unsafe_allow_html=True,
+    )
 with col2:
-    _spacer_col = st.columns([1, 1])
+    naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
+    naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:58%;height:auto;display:block;margin-right:auto;"/>](https://naseo.org/)',
+        unsafe_allow_html=True,
+    )
 with col3:
-    logo_col, _spacer_col = st.columns([1, 1])
-    with logo_col:
-        icf_logo_path = LOGOS_DIR / "ICF.jpg"
-        icf_logo_b64 = base64.b64encode(icf_logo_path.read_bytes()).decode()
-        st.markdown(
-            f'[<img src="data:image/jpeg;base64,{icf_logo_b64}" style="max-width:100%;height:auto;"/>](https://icf.com/)',
-            unsafe_allow_html=True,
-        )
+    icf_logo_path = LOGOS_DIR / "ICF.jpg"
+    icf_logo_b64 = base64.b64encode(icf_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{icf_logo_b64}" style="max-width:36%;height:auto;display:block;margin:0 auto;"/>](https://icf.com/)',
+        unsafe_allow_html=True,
+    )
 with col4:
-    _spacer_col = st.columns([1, 1])
-with col5:
     recurve_logo_path = LOGOS_DIR / "RECURVE.jpg"
     recurve_logo_b64 = base64.b64encode(recurve_logo_path.read_bytes()).decode()
     st.markdown(
-        f'[<img src="data:image/jpeg;base64,{recurve_logo_b64}" style="max-width:100%;height:auto;"/>](https://recurve.com/)',
+        f'[<img src="data:image/jpeg;base64,{recurve_logo_b64}" style="max-width:75%;height:auto;display:block;margin:0;margin-left:auto;"/>](https://recurve.com/)',
         unsafe_allow_html=True,
     )
 
