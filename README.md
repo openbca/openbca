@@ -1,32 +1,48 @@
+*** Copyright Notice ***
+
+Open Benefit Cost Analysis (OpenBCA) Copyright (c) 2026, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy). All rights reserved.
+
+If you have questions about your rights to use or distribute this software,
+please contact Berkeley Lab's Intellectual Property Office at
+IPO@lbl.gov.
+
+NOTICE.  This Software was developed under funding from the U.S. Department
+of Energy and the U.S. Government consequently retains certain rights.  As
+such, the U.S. Government has been granted for itself and others acting on
+its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the
+Software to reproduce, distribute copies to the public, prepare derivative 
+works, and perform publicly and display publicly, and to permit others to do
+
 # OpenBCA
 
-This library provides aggregators, program administrators, utilities, and regulators a means to configure and execute Jurisdiction-Specific Tests (JSTs) for demand side programs/portfolios in accordance with guidance in the National Standard Practice Manual.
+The OpenBCA software library provides users a means to configure and execute Jurisdiction-Specific Tests (JSTs) for demand side measures, programs, and portfolios in accordance with guidance in the National Standard Practice Manual (NSPM).
 
-Accurate cost-effectiveness tests that account for energy impacts and progress toward other policy objectives are critical for optimal demand side program design and informed decision making. However, traditional cost effectiveness tests (e.g., Total Resource Cost test, Utility Cost Test etc.) are often too restrictive, utilize non-transparent inputs, and do not fully reflect the goals and objectives of a jurisdiction. In such cases, benefit-cost testing can lead to poor demand side program design and ultimately unbalanced investment across energy resources. To help address these shortcomings, E4TheFuture’s National Energy Screening Project (NESP) published the National Standard Practice Manual for Benefit-Cost Analysis of DERs (NSPM) in 2020. The NSPM provides a set of core principles and a process for developing complete and symmetric JSTs for demand side programs. Following the NSPM guidance, a regulator, utility, and/or other party can develop a JST that properly accounts for the utility system costs and benefits of a DER program or investment strategy, as well as any non-utility system impacts applicable to the jurisdiction’s priority policy goals and objectives.
+Accurate cost-effectiveness tests that account for energy impacts and a jurisdiction's applicable energy policy objectives are critical for optimal DER design and informed decision making. However, traditional cost effectiveness tests (e.g., Total Resource Cost test, Utility Cost Test etc.) are often too restrictive, utilize non-transparent inputs, and do not fully reflect a jurisdiction's goals. In such cases, benefit-cost testing can lead to poor DER design and suboptimal investment across energy resources. To help address these shortcomings, the NSPM — a publication of the National Association of State Energy Offices’ (NASEO) [National Energy Screening Project](https://naseo.org/topics/nesp) (NESP) - sets forth a set of core principles and a process to guide jurisdictions in the development and implementation of a Jursidiction Specific Test (JST). By following NSPM guidance, regulators, energy planners, utilities, and other parties can develop a JST that properly accounts for the utility system benefits and costs of DER programs or investment strategies, as well as any applicable non-utility system impacts. 
 
 To support a balanced and comprehensive BCA architecture, this library enables comprehenseive and flexible configuration and computation required for the formulation of JSTs. The OpenBCA is designed to be used in one of two main ways:
 
 ### 1. Standalone Pathway
-This mode is intended for non-technical users. It is designed to run exclusively using local hardware and operate end-to-end without the need for users to write code, use terminal applications, or manage databases.
+This option is intended for general users. It is designed to run exclusively using local hardware and operate end-to-end without the need for users to write code, use terminal applications, or manage databases.
 
 Defining characteristics of the Standalone pathway include:
 
 - Use of the Excel input templates
 - Use of the user interface to upload completed input templates, launch the model, and explore and download results.
 
-The amount of data that can be processed and computational speed to run the OpenBCA model will be limited by the user's hardware. Generally it is recommended users have at least 16 GB of RAM, though for smaller jobs less will suffice. Extremely large jobs may ultimately need cloud infrastructure and implementation via the Integrated pathway.
+The amount of data that can be processed and computational speed to run the OpenBCA model will be limited by the user's hardware. Generally it is recommended users have at least 16 GB of RAM, though for smaller jobs less will suffice. 
 
 ### 2. Integrated Pathway
-This mode is intended for inclusion of the OpenBCA in existing sofware systems and technical workflows. For instance, if a user needs to leverage cloud computing or data storage resources or wishes to automate benefit-cost analysis as part of a larger analytics pipeline. The Integrated pathway is most appropriate for users who:
+This option is intended for expert technical users who may need to integrate OpenBCA source code in existing sofware systems and technical workflows. For instance, if a user needs to leverage cloud computing or data storage resources or wishes to automate benefit-cost analysis as part of a larger analytics pipeline. The Integrated pathway is most appropriate for users who:
 
 - Need to scale analysis across very large datasets
+- Have many custom value streams and/or avoided cost subsets (see below)
 - Need maximum flexibility for novel use cases
 - Need to embed OpenBCA in existing data pipelines and workflows
 - Wish to develop custom user interfaces
 
 Users of the Integrated pathway will need to input data as defined by the schemas resulting from the input parsing step of the Standalone pathway (and reproduced below for reference).
 
-Generally speaking, the Integrated pathway is for expert users and will not be explicity supported by the development team.
+**Generally speaking, the Integrated pathway is for expert users and will not be explicity supported by the development team.**
 
 ## Integrated Pathway Prerequisite Installations
 The OpenBCA Integrated Pathway requires the following packages to be installed on your local machine. Depending on your local hardware other packages may also need to be installed:
@@ -89,7 +105,7 @@ The repository contains three main related systems housed in the following folde
 ## 🧱 BCA Basic Components
 Benefit-cost analysis for distributed energy resources is conducted using the following information and data:
 
-**Annual Savings** - The amount per year that an intervention saves. Savings are tied to specific **impact categories**. An intervention can save across multiple impact categories and can be negative. For instance, a heat pump electrification measure will decrease natural gas consumption (positive savings), increase electricity consumption (negative savings), and may enhance societal resiliance and host-customer reliability. In this example "savings" are generated across four impact categories: natural gas, electricity, societal resiliance, and host-customer reliability.
+**Annual Savings** - The amount per year that an intervention saves. Savings are tied to specific **impact categories**. An intervention can save energy across multiple impact categories. Savings and can be negative. For instance, a heat pump electrification measure will decrease natural gas consumption (positive savings), increase electricity consumption (negative savings), and may enhance societal resiliance and host-customer reliability. In this example "savings" are generated across four impact categories: natural gas, electricity, societal resiliance, and host-customer reliability.
 
 **Avoided Costs** - Within each impact_category, there may be one or more avoided costs. Each avoided cost represents a specific, quantifiable dollar value tied to an effect that can be isolated. For example, electricity savings may avoid energy procurement costs, GHG emissions, various capacity costs and more. The NSPM defines many common utility system and non-system avoided costs that should be accounted for in a JST. Avoided costs should represent **marginal** values. For instance, if a program saves 1 MWh, the avoided costs should reflect the dollar value from that specific MWh instead of the average of all electricity generated during the time the savings occured. Marginal values can be higher or lower than average values depending on the context. If a program saves a MWh during a peak period, then those savings will direclty reduce reliance on an expensive peaker plant. In contrast, if that MWh were saved during a period of renewable curtailment, the dollar value may be zero or even negative.
 
@@ -106,7 +122,7 @@ Benefit-cost analysis for distributed energy resources is conducted using the fo
 **Net-to-Gross (NTG)** - Intended to account for free ridership, this metric is used in some jurisdicitons to represent the fraction of program benefits and host customer costs that occured _because of the program_. NTG values typically range between 0 and 1 and 1 - NTG is interpreted as freeridership, the fraction of program impacts tied to customers who would have undertaken the interventions even in the abscence of the program. NTG values above 1.0 are allowed as some jurisdictions will assume some benefits occur outside the program _but on account of the program_. This is referred to as "spillover" or "market effects."
 
 ## ❯❯❯❯ OpenBCA Process Flow
-This diagram shows the execution flow of the OpenBCA across three main phases: data input, computation, and user interface functionality
+The diagram below shows the execution flow of the OpenBCA across three main phases: data input, computation, and user interface functionality
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'fontSize': '18px', 'primaryTextColor': '#000000', 'secondaryTextColor': '#000000', 'tertiaryTextColor': '#000000', 'primaryBorderColor': '#37474f', 'lineColor': '#37474f'}}}%%
 flowchart TD
@@ -272,7 +288,7 @@ Layer | Table | Contents |
 
 ## 📱 Value Stream Calculation
 
-There are eleven computational pathways supported by the OpenBCA to properly handle different types of value streams. The flow diagram and equation reference below provide details on the logic and mathematics.
+There are eleven computational pathways supported by the OpenBCA to properly handle different types of value streams. The flow diagram and equation reference below provide details on the logic and mathematics of the computational pathways.
 
 To determine which pathway a value stream will follow, the OpenBCA first checks the calculation type. In the Standalone pathway this is a required field entered in the Configuration input template for each value stream. If the calculation type is some form of time series (including custom period or single value), then the impact_category is referenced and the pathway is assigned as Electric, Natural Gas, or Annual accordingly.
 
@@ -285,6 +301,7 @@ Finally, if the calculation type is % Adder, then Commodity is again checked and
 ![Value stream groups](readme_images/value_stream_groups.png)
 
 Equations for the calulcation of benefits and costs tied to each pathway are given below.
+
 ![Value Stream Equations](readme_images/equations.png)
 
 Variable | Definition |
