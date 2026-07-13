@@ -32,6 +32,8 @@ build-pyinstaller-package:
 		--name openbca-app \
 		--pyinstaller-options \
 			--onedir \
+			--icon=user_interface/app_icons/openbca.ico \
+			--icon=user_interface/app_icons/openbca.icns \
 			--noconfirm \
 			--add-data excel_input_parsing:excel_input_parsing \
 			--add-data core/models:core/models \

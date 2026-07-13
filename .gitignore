@@ -13,6 +13,7 @@ excel_input_parsing/input_templates/*
 # Ignore PyInstaller files
 dist/
 build/
+openbca-app.spec
 
 __pycache__
 .DS_Store
