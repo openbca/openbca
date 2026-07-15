@@ -115,7 +115,7 @@ Benefit-cost analysis for distributed energy resources is conducted using the fo
 
 **Inflation Rate** - Users can choose whether to report results in real or nominal dollars. If real dollars are desired then the user can enter a base year and inflation rate to adjust dollars to the base year. The base year can be before, during, or after a program's impacts.
 
-**Cost Treatment** - Determines whether certain quantities are treated as costs or transfer payments within a JST. If the user selects "TRC" then incentives paid from utilities to customers are treated as transfer payments and are effectively eliminated from the calculation. If "UCT" is selected then incentives are treated as costs. Similarly, host customer tax incentives act to reduce total costs in a TRC framework, but are ignored in a UCT framework. In general, if host customer benefits are to be included in a test then it is recommended to use the TRC framework. If only the utility's perspective is the subject of a JST then the UCT framework is recommended and the user should take care to not include host customer benefits in the configuration of the JST.
+**Cost Treatment** - Determines whether certain quantities are treated as costs or transfer payments within a JST. If the user selects "USI + Non-USI" then incentives paid from utilities to customers are treated as transfer payments and are effectively eliminated from the calculation. If "USI" is selected then incentives are treated as costs. Similarly, host customer tax incentives act to reduce total costs in a USI + Non-USI framework, but are ignored in a USI framework. In general, if host customer benefits are to be included in a test then it is recommended to use the USI + Non-USI framework. If only the utility's perspective is the subject of a JST then the USI framework is recommended and the user should take care to not include host customer benefits in the configuration of the JST.
 
 **Expected Useful Life (EUL)** - The number of years that a project is expected to deliver impacts.
 
@@ -271,7 +271,7 @@ Layer | Table | Contents |
 |--|------|----------|
 | **Base** | **measures** | Row-level inputs: unique ID, metadata, EUL, NTG, annual savings and costs, load shape assignments |
 | **Base** | **global_parameters** | Dollar year, NPV parameters, symmetry treatment, line loss factors |
-| **Base** | **cost_treatment_factors** | Establishes cost and benefit multipliers for specific test frameworks (TRC, UCT etc.) |
+| **Base** | **cost_treatment_factors** | Establishes cost and benefit multipliers for specific test frameworks (USI + Non-USI (TRC), USI (UCT) etc.) |
 | **Base** | **program_value_streams** | Program-level costs and benefits by year |
 | **Base** | **value_stream_groups** | Info to shepherd each value stream into a specific computational treatment |
 | **Base** | **load_shape_ts** | Savings load shapes time series |
@@ -425,7 +425,7 @@ Table | Column | Requirements |
 | **global_parameters** | **electric_line_loss** | required field if electric value streams are included |
 | **global_parameters** | **peak_capacity_line_loss** | required field if peak capacity value streams are included |
 | **global_parameters** | **natural_gas_line_loss** | required field if natural gas value streams are included |
-| **global_parameters** | **cost_treatment** | required field - accepted values include 'UCT', 'TRC', and 'CA TRC' |
+| **global_parameters** | **cost_treatment** | required field - accepted values include 'USI + Non-USI', 'USI', and 'CA TRC' |
 | **value_stream_groups** | **avoided_cost** | required field |
 | **value_stream_groups** | **impact_category** | required field |
 | **value_stream_groups** | **include_in_test** | required field |

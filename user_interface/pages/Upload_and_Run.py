@@ -26,35 +26,42 @@ from validation_functions import (
     validate_avoided_cost_load_shape_granularity,
 )
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5, col6 = st.columns([0.19, 0.05, 0.19, 0.19, 0.19, 0.19])
 
 LOGOS_DIR = get_streamlit_app_dir() / "logos"
 with col1:
-    lbnl_logo_path = LOGOS_DIR / "LBNL.jpg"
-    lbnl_logo_b64 = base64.b64encode(lbnl_logo_path.read_bytes()).decode()
+    openbca_logo_path = LOGOS_DIR / "OpenBCA.jpg"
+    openbca_logo_b64 = base64.b64encode(openbca_logo_path.read_bytes()).decode()
     st.markdown(
-        f'[<img src="data:image/jpeg;base64,{lbnl_logo_b64}" style="max-width:40%;height:auto;display:block;margin:0;margin-right:auto;"/>](https://www.lbl.gov/)',
-        unsafe_allow_html=True,
-    )
-with col2:
-    naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
-    naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
-    st.markdown(
-        f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:58%;height:auto;display:block;margin-right:auto;"/>](https://naseo.org/)',
+        f'[<img src="data:image/jpeg;base64,{openbca_logo_b64}" style="max-width:75%;height:auto;display:block;margin:0;margin-right:auto;"/>](https://www.naseo.org/topics/nesp/openbca)',
         unsafe_allow_html=True,
     )
 with col3:
-    icf_logo_path = LOGOS_DIR / "ICF.jpg"
-    icf_logo_b64 = base64.b64encode(icf_logo_path.read_bytes()).decode()
+    lbnl_logo_path = LOGOS_DIR / "LBNL.jpg"
+    lbnl_logo_b64 = base64.b64encode(lbnl_logo_path.read_bytes()).decode()
     st.markdown(
-        f'[<img src="data:image/jpeg;base64,{icf_logo_b64}" style="max-width:36%;height:auto;display:block;margin:0 auto;"/>](https://icf.com/)',
+        f'[<img src="data:image/jpeg;base64,{lbnl_logo_b64}" style="max-width:38%;height:auto;display:block;margin:0;margin-right:auto;"/>](https://www.lbl.gov/)',
         unsafe_allow_html=True,
     )
 with col4:
+    naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
+    naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:57%;height:auto;display:block;margin-right:auto;"/>](https://naseo.org/)',
+        unsafe_allow_html=True,
+    )
+with col5:
+    icf_logo_path = LOGOS_DIR / "ICF.jpg"
+    icf_logo_b64 = base64.b64encode(icf_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{icf_logo_b64}" style="max-width:35%;height:auto;display:block;margin:0 auto;"/>](https://icf.com/)',
+        unsafe_allow_html=True,
+    )
+with col6:
     recurve_logo_path = LOGOS_DIR / "RECURVE.jpg"
     recurve_logo_b64 = base64.b64encode(recurve_logo_path.read_bytes()).decode()
     st.markdown(
-        f'[<img src="data:image/jpeg;base64,{recurve_logo_b64}" style="max-width:75%;height:auto;display:block;margin:0;margin-left:auto;"/>](https://recurve.com/)',
+        f'[<img src="data:image/jpeg;base64,{recurve_logo_b64}" style="max-width:73%;height:auto;display:block;margin:0;margin-left:auto;"/>](https://recurve.com/)',
         unsafe_allow_html=True,
     )
 

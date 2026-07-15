@@ -60,35 +60,42 @@ if 'show_value_streams_filter' not in st.session_state:
 if 'isolate_peak_filter' not in st.session_state:
     st.session_state.isolate_peak_filter = False
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5, col6 = st.columns([0.19, 0.05, 0.19, 0.19, 0.19, 0.19])
 
 LOGOS_DIR = get_streamlit_app_dir() / "logos"
 with col1:
-    lbnl_logo_path = LOGOS_DIR / "LBNL.jpg"
-    lbnl_logo_b64 = base64.b64encode(lbnl_logo_path.read_bytes()).decode()
+    openbca_logo_path = LOGOS_DIR / "OpenBCA.jpg"
+    openbca_logo_b64 = base64.b64encode(openbca_logo_path.read_bytes()).decode()
     st.markdown(
-        f'[<img src="data:image/jpeg;base64,{lbnl_logo_b64}" style="max-width:40%;height:auto;display:block;margin:0;margin-right:auto;"/>](https://www.lbl.gov/)',
-        unsafe_allow_html=True,
-    )
-with col2:
-    naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
-    naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
-    st.markdown(
-        f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:58%;height:auto;display:block;margin-right:auto;"/>](https://naseo.org/)',
+        f'[<img src="data:image/jpeg;base64,{openbca_logo_b64}" style="max-width:75%;height:auto;display:block;margin:0;margin-right:auto;"/>](https://www.naseo.org/topics/nesp/openbca)',
         unsafe_allow_html=True,
     )
 with col3:
-    icf_logo_path = LOGOS_DIR / "ICF.jpg"
-    icf_logo_b64 = base64.b64encode(icf_logo_path.read_bytes()).decode()
+    lbnl_logo_path = LOGOS_DIR / "LBNL.jpg"
+    lbnl_logo_b64 = base64.b64encode(lbnl_logo_path.read_bytes()).decode()
     st.markdown(
-        f'[<img src="data:image/jpeg;base64,{icf_logo_b64}" style="max-width:36%;height:auto;display:block;margin:0 auto;"/>](https://icf.com/)',
+        f'[<img src="data:image/jpeg;base64,{lbnl_logo_b64}" style="max-width:38%;height:auto;display:block;margin:0;margin-right:auto;"/>](https://www.lbl.gov/)',
         unsafe_allow_html=True,
     )
 with col4:
+    naseo_logo_path = LOGOS_DIR / "NASEO.jpg"
+    naseo_logo_b64 = base64.b64encode(naseo_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{naseo_logo_b64}" style="max-width:57%;height:auto;display:block;margin-right:auto;"/>](https://naseo.org/)',
+        unsafe_allow_html=True,
+    )
+with col5:
+    icf_logo_path = LOGOS_DIR / "ICF.jpg"
+    icf_logo_b64 = base64.b64encode(icf_logo_path.read_bytes()).decode()
+    st.markdown(
+        f'[<img src="data:image/jpeg;base64,{icf_logo_b64}" style="max-width:35%;height:auto;display:block;margin:0 auto;"/>](https://icf.com/)',
+        unsafe_allow_html=True,
+    )
+with col6:
     recurve_logo_path = LOGOS_DIR / "RECURVE.jpg"
     recurve_logo_b64 = base64.b64encode(recurve_logo_path.read_bytes()).decode()
     st.markdown(
-        f'[<img src="data:image/jpeg;base64,{recurve_logo_b64}" style="max-width:75%;height:auto;display:block;margin:0;margin-left:auto;"/>](https://recurve.com/)',
+        f'[<img src="data:image/jpeg;base64,{recurve_logo_b64}" style="max-width:73%;height:auto;display:block;margin:0;margin-left:auto;"/>](https://recurve.com/)',
         unsafe_allow_html=True,
     )
 
@@ -134,6 +141,13 @@ else:
         num_filters_excluding_id = len([f for f in filters if f != 'id'])
 
         where_sql = "WHERE 1=1"
+        # Track explicit restrictions for the warning (not derived by parsing where_sql).
+        active_filters = []
+        # Full value sets (uncascaded) — used so cascaded option lists don't hide active filters.
+        full_options_dict = {
+            col: sorted(measure_filters_df[col].dropna().unique().tolist())
+            for col in filters
+        }
         if num_filters == 0:
             pass
         else:
@@ -148,7 +162,8 @@ else:
                     if other == exclude_category:
                         continue
                     others_selection = st.session_state.get(f"filter_{other}") or []
-                    if others_selection:
+                    # Only cascade on explicit restrictions vs the full (uncascaded) value set.
+                    if others_selection and set(others_selection) != set(full_options_dict[other]):
                         snippet = ", ".join(["'{}'".format(v) for v in others_selection])
                         sql += f" AND m.{other} IN ({snippet})"
                 return sql
@@ -177,21 +192,26 @@ else:
                             # Default = current selection restricted to currently available options
                             current_selection = st.session_state.get(f"filter_{category}") or []
                             default = [v for v in current_selection if v in options] if current_selection else []
-                            filters_dict[category] = st.multiselect(
+                            selection = st.multiselect(
                                 label=f"Limit {space_and_title(category)} to:",
                                 options=options,
                                 default=default,
                                 key=f"filter_{category}",
                             )
-                            if len(filters_dict[category]) == 0:
+                            # Empty widget = no explicit restriction on this dimension.
+                            if len(selection) == 0:
                                 filters_dict[category] = options
-                            if len(filters_dict[category]) < len(filters_options_dict[category]):
-                                where_snippet = ", ".join(["'{}'".format(value) for value in filters_dict[category]])
-                                where_sql += f" AND m.{category} IN ({where_snippet})"
+                            else:
+                                filters_dict[category] = selection
+                                # Compare against full (uncascaded) options so mutually reinforcing
+                                # filters stay in where_sql and in the active-filter warning.
+                                if set(selection) != set(full_options_dict[category]):
+                                    where_snippet = ", ".join(["'{}'".format(value) for value in selection])
+                                    where_sql += f" AND m.{category} IN ({where_snippet})"
+                                    active_filters.append(space_and_title(category))
 
-        active_filter_str = f"Active filters: {', '.join([space_and_title(word.split('.')[1]) for word in where_sql.split(' ') if word.startswith('m.')])}"
-        if active_filter_str != 'Active filters: ':
-            st.warning(active_filter_str)
+        if active_filters:
+            st.warning(f"Active filters: {', '.join(active_filters)}")
 
         jst_results_df = con.execute(generate_jst_query(where_sql)).df()
         if len(jst_results_df) == 0:
