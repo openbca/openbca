@@ -21,6 +21,6 @@ pg = st.navigation(pages, position="top")
 pg.run()
 
 st.sidebar.markdown("## OpenBCA Resources")
-st.sidebar.markdown("#### [Background](https://naseo.org/nesp/openbca-tool)")
+st.sidebar.markdown("#### [OpenBCA Website](https://www.naseo.org/topics/nesp/openbca)")
 st.sidebar.markdown("#### [National Standard Practice Manual](https://naseo.org/nesp/nspm)")
 st.sidebar.markdown("#### [Open Source GitHub Repository](https://github.com/openbca/openbca)")
