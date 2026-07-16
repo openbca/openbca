@@ -1,3 +1,5 @@
+# OpenBCA
+
 *** Copyright Notice ***
 
 Open Benefit Cost Analysis (OpenBCA) Copyright (c) 2026, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy). All rights reserved.
@@ -13,11 +15,11 @@ its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the
 Software to reproduce, distribute copies to the public, prepare derivative 
 works, and perform publicly and display publicly, and to permit others to do
 
-# OpenBCA
+## Introduction
 
 The OpenBCA software library provides users a means to configure and execute Jurisdiction-Specific Tests (JSTs) for demand side measures, programs, and portfolios in accordance with guidance in the National Standard Practice Manual (NSPM).
 
-Accurate cost-effectiveness tests that account for energy impacts and a jurisdiction's applicable energy policy objectives are critical for optimal DER design and informed decision making. However, traditional cost effectiveness tests (e.g., Total Resource Cost test, Utility Cost Test etc.) are often too restrictive, utilize non-transparent inputs, and do not fully reflect a jurisdiction's goals. In such cases, benefit-cost testing can lead to poor DER design and suboptimal investment across energy resources. To help address these shortcomings, the NSPM — a publication of the National Association of State Energy Offices’ (NASEO) [National Energy Screening Project](https://naseo.org/topics/nesp) (NESP) - sets forth a set of core principles and a process to guide jurisdictions in the development and implementation of a Jursidiction Specific Test (JST). By following NSPM guidance, regulators, energy planners, utilities, and other parties can develop a JST that properly accounts for the utility system benefits and costs of DER programs or investment strategies, as well as any applicable non-utility system impacts. 
+Accurate cost-effectiveness tests that account for energy impacts and a jurisdiction's applicable energy policy objectives are critical for optimal DER design and informed decision making. However, traditional cost effectiveness tests (e.g., Total Resource Cost test, Utility Cost Test etc.) are often too restrictive, utilize non-transparent inputs, and do not fully reflect a jurisdiction's goals. In such cases, benefit-cost testing can lead to poor DER design and suboptimal investment across energy resources. To help address these shortcomings, the NSPM — a publication of the National Association of State Energy Offices’ (NASEO) [National Energy Screening Project](https://naseo.org/nesp/openbca-tool) (NESP) - sets forth a set of core principles and a process to guide jurisdictions in the development and implementation of a Jursidiction Specific Test (JST). By following NSPM guidance, regulators, energy planners, utilities, and other parties can develop a JST that properly accounts for the utility system benefits and costs of DER programs or investment strategies, as well as any applicable non-utility system impacts. 
 
 To support a balanced and comprehensive BCA architecture, this library enables comprehenseive and flexible configuration and computation required for the formulation of JSTs. The OpenBCA is designed to be used in one of two main ways:
 
