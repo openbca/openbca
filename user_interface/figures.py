@@ -97,7 +97,8 @@ replace_elements = {
     "Rps": "RPS",
     "Nei":"NEI",
     "Ng":"NG",
-    " Dollar": ""
+    " Dollar": "",
+    "Led": "LED"
     }
 
 
@@ -1065,7 +1066,7 @@ def categorical_bar_fig(
         shift = bar_width * (-0.5 - i + num_bars / 2)
 
         # Create legend labels or use the provided mapping
-        label = space_and_title(group)
+        label = replace_multiple_string_elements(space_and_title(group), replace_elements)
 
         if horizontal:
             ax.barh(
@@ -1115,7 +1116,7 @@ def categorical_bar_fig(
     ax.tick_params(which="minor", bottom=True, left=True, length=2)
 
     unique_xtick_labels = [
-        space_and_title(cat)
+        replace_multiple_string_elements(space_and_title(cat), replace_elements)
         for cat in list(df[category].unique())
     ]
 
