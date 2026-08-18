@@ -240,6 +240,51 @@ def set_axis_lims(
     return axis_min, axis_max
 
 
+def limits_with_shared_zero(
+    y1_min: float,
+    y1_max: float,
+    y2_min: float,
+    y2_max: float,
+    ):
+    """Choose y1 and y2 limits that share a 0 and contain both data ranges.
+
+    Both axes get the same |ymin|/ymax ratio — the larger of the two
+    data-implied ratios — so 0 sits at the same relative height. The axis
+    with the smaller ratio is expanded (empty space added) as needed. If one
+    series is entirely positive and the other entirely negative, 0 is centered.
+    """
+    def include_zero(lo, hi):
+        return min(lo, 0.0), max(hi, 0.0)
+
+    y1_min, y1_max = include_zero(y1_min, y1_max)
+    y2_min, y2_max = include_zero(y2_min, y2_max)
+
+    def neg_over_pos(lo, hi):
+        if hi > 0:
+            return -lo / hi
+        if lo < 0:
+            return np.inf
+        return 0.0
+
+    r1 = neg_over_pos(y1_min, y1_max)
+    r2 = neg_over_pos(y2_min, y2_max)
+    r = max(r1, r2)
+
+    if not np.isfinite(r):
+        # At least one axis is entirely non-positive.
+        if y1_max == 0 and y2_max == 0:
+            return (y1_min, 0.0), (y2_min, 0.0)
+        finite = r1 if np.isfinite(r1) else r2
+        r = 1.0 if finite == 0 else finite
+
+    def apply(lo, hi, r):
+        if hi == 0:
+            return lo, (-lo / r if r > 0 else 0.0)
+        return -r * hi, hi
+
+    return apply(y1_min, y1_max, r), apply(y2_min, y2_max, r)
+
+
 def create_label_from_column_name(col: str, replace_elements: dict = replace_elements):
     """Generate a formatted figure label from a column name.
 
@@ -805,14 +850,11 @@ def numeric_bar_fig(
         )
 
         if pin_yaxis_zeros:
-            a = ax.get_ylim()[1] # max value of y axis
-            b = ax.get_ylim()[0] # min value of y axis
-            c = max(df[y2_col]) * 1.05 # max value of y2 data buffered by 5%
-            if c > 0:
-                ax1.set_ylim(c * (1 - (a - b) / a), c) # set y2 axis limits in case of positive maxy2 data
-            else:
-                c = min(df[y2_col]) * 1.05 # set y2 axis limits in case of negative max y2 data
-                ax1.set_ylim(c, a)
+            (y1_lo, y1_hi), (y2_lo, y2_hi) = limits_with_shared_zero(
+                *ax.get_ylim(), *ax1.get_ylim()
+            )
+            ax.set_ylim(y1_lo, y1_hi)
+            ax1.set_ylim(y2_lo, y2_hi)
 
         ax1.legend(
             ["Count Meters" if y2label is None else y2label],
@@ -1176,14 +1218,11 @@ def categorical_bar_fig(
         )
 
         if pin_yaxis_zeros:
-            a = ax.get_ylim()[1]
-            b = ax.get_ylim()[0]
-            c = max(df[(df[groupings] == groups[0])][y2_col]) * 1.05
-            if c > 0:
-                ax1.set_ylim(c * (1 - (a - b) / a), c)
-            else:
-                c = min(df[(df[groupings] == groups[0])][y2_col]) * 1.05
-                ax1.set_ylim(c, a)
+            (y1_lo, y1_hi), (y2_lo, y2_hi) = limits_with_shared_zero(
+                *ax.get_ylim(), *ax1.get_ylim()
+            )
+            ax.set_ylim(y1_lo, y1_hi)
+            ax1.set_ylim(y2_lo, y2_hi)
 
         ax1.legend(
             ["Count Meters" if y2label is None else y2label],
@@ -1277,13 +1316,14 @@ def pie_chart(
         bottom = 1
         width = 0.5
         bar_colors = plt.cm.Blues(np.linspace(0.5, 0.95, len(bar_vals)))
+        bar_alphas = np.linspace(0.1, 1.0, len(bar_vals))
         # Reversed order for stacking (top bar = last row); label index is len(bar_vals)-1-j
         bar_value_labels_rev = list(reversed(bar_value_labels))
         # Adding from the top matches the legend.
         for j, (height, legend_label) in enumerate(reversed([*zip(bar_vals, bar_legend_labels)])):
             bottom -= height
             bc = ax2.bar(0, height, width, bottom=bottom, color=bar_colors[j], label=legend_label,
-                        alpha=0.1 + 0.25 * j)
+                        alpha=bar_alphas[j])
             # Only label bars with non-zero height (zero-height bars can make get_bbox() return None)
             if height > 0:
                 ax2.bar_label(bc, labels=[bar_value_labels_rev[j]], label_type='center', fontsize=12)

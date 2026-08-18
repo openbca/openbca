@@ -260,6 +260,7 @@ else:
                     label = "**Waterfall Steps**", 
                     options = waterfall_options, 
                     horizontal = True,
+                    help = f"When filters are selected will exclude program-level costs and benefits.",
                     index = 0, 
                     )
 
@@ -421,8 +422,6 @@ else:
                             return value
 
                     label_list =[str(value) for value in sorted([_numeric_string_labeling(value) for value in benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique()])] if len(catalog_by_filter) > 0 else None
-
-                    #st.write(sorted([_numeric_string_labeling(value) for value in benefit_cost_scatter_df[f"{reconstruct_column_name(catalog_by_filter)}"].unique()]) if len(catalog_by_filter) > 0 else None)
 
                     benefit_cost_scatter_fig = scatter_fig(
                         df = benefit_cost_scatter_df,
@@ -724,7 +723,9 @@ else:
 
                     else:
                         if bar_pie_fig_or_table == 'Figures':
-                            
+                            pos_value_stream_benefits_unit_labels = ['']
+                            neg_value_stream_benefits_unit_labels = ['']
+
                             if len(pos_value_stream_benefits_df) > 0:
                                 pos_value_stream_benefits_df, pos_value_stream_benefits_unit_labels = determine_dollar_magnitude(pos_value_stream_benefits_df, x_col='final_dollar_value', y_col=None)
                             

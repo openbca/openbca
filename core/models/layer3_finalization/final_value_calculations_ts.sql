@@ -85,7 +85,7 @@ SELECT
 	--, NULL AS hour_of_year 
 	, NULL AS hour_of_day
 	, NULL AS net_energy_savings 
-	, net_to_gross_ratio * gross_dollar_value / (POW(1.0 + gp.inflation_rate, (year - gp.dollar_year))) AS final_dollar_value
+	, net_to_gross_ratio * gross_dollar_value * unit_quantity / (POW(1.0 + gp.inflation_rate, (year - gp.dollar_year))) AS final_dollar_value
 	, NULL AS marginal_ghg_savings
 FROM
 	core_layer0_base.first_year_avoided_costs_by_id fy  
