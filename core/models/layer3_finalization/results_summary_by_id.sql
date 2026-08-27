@@ -151,10 +151,10 @@ SELECT
 	, tv.id
 	, COALESCE(lc.program_name, tv.id) AS program_name
 	, COALESCE(lc.start_year, tv.start_year) AS start_year
-	, lc.* EXCEPT(id, program_name, start_year)
 	, tv.* EXCEPT(id, start_year)
 	, cv.* EXCEPT(id)
 	, vs.* EXCEPT(id)
+	, lc.* EXCEPT(id, program_name, start_year)
 	, gs.* EXCEPT(id)
 FROM
 	total_values tv 
