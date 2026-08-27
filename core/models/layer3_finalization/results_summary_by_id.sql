@@ -68,6 +68,7 @@ WITH lifecycle_savings_calc AS (
 		id
 		, value_stream
 		, final_dollar_value
+		, marginal_ghg_savings
 	FROM  
 		core_layer3_finalization.final_value_calculations_ts
 )
@@ -85,6 +86,25 @@ WITH lifecycle_savings_calc AS (
 		value_stream
 	USING 
 		SUM(final_dollar_value)
+	WHERE
+		value_stream NOT LIKE '%GHG Intensity%'
+)
+
+, ghg_savings AS (
+	PIVOT (
+		SELECT 
+			id
+			, value_stream || ' (Unit GHG)' AS value_stream
+			, marginal_ghg_savings
+		FROM 
+			value_streams_value_calc
+	)
+	ON
+		value_stream
+	USING 
+		SUM(marginal_ghg_savings)
+	WHERE
+		value_stream LIKE '%GHG Intensity%'
 )
 
 , impact_category_value_calc AS (
@@ -134,6 +154,7 @@ SELECT
 	, tv.* EXCEPT(id, start_year)
 	, cv.* EXCEPT(id)
 	, vs.* EXCEPT(id)
+	, gs.* EXCEPT(id)
 FROM
 	total_values tv 
 FULL OUTER JOIN impact_category_values cv ON
@@ -144,6 +165,8 @@ FULL OUTER JOIN lifecycle_savings lc ON
 	tv.id = lc.id
 FULL OUTER JOIN core_layer0_base.measures m ON
 	tv.id = m.id
+FULL OUTER JOIN ghg_savings gs ON
+	tv.id = gs.id
 ORDER BY  
 	type
 	, id
