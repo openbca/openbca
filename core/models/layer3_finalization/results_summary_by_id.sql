@@ -81,13 +81,13 @@ WITH lifecycle_savings_calc AS (
 			, final_dollar_value
 		FROM 
 			value_streams_value_calc
+		WHERE
+			value_stream NOT LIKE '%GHG Intensity%'
 	)
 	ON
 		value_stream
 	USING 
 		SUM(final_dollar_value)
-	WHERE
-		value_stream NOT LIKE '%GHG Intensity%'
 )
 
 , ghg_savings AS (
@@ -98,13 +98,13 @@ WITH lifecycle_savings_calc AS (
 			, marginal_ghg_savings
 		FROM 
 			value_streams_value_calc
+		WHERE
+			value_stream LIKE '%GHG Intensity%'
 	)
 	ON
 		value_stream
 	USING 
 		SUM(marginal_ghg_savings)
-	WHERE
-		value_stream LIKE '%GHG Intensity%'
 )
 
 , impact_category_value_calc AS (
