@@ -28,7 +28,7 @@ WITH lifecycle_savings_calc AS (
 		cls.id = m.id
 	WHERE 
 		cls.impact_category NOT IN ('ADMIN', 'UTILITY INCENTIVE', 'MEASURE COST', 'TAX INCENTIVE')
-		AND cls.value_stream NOT LIKE '%NEI%'
+		AND cls.impact_category NOT LIKE '%NEI%'
 )
 
 , lifecycle_savings AS (
