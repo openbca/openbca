@@ -151,10 +151,38 @@ SELECT
 	, tv.id
 	, COALESCE(lc.program_name, tv.id) AS program_name
 	, COALESCE(lc.start_year, tv.start_year) AS start_year
+	, lc.measure_id
+	, lc.measure_name
+	, lc.project_id
+	, lc.label_1
+	, lc.label_2
+	, lc.label_3
+	, lc.label_4
+	, lc.label_5
+	, lc.avoided_cost_subset
+	, lc.net_to_gross_ratio 
+	, lc.estimated_useful_life
+	, lc.unit_quantity 
 	, tv.* EXCEPT(id, start_year)
 	, cv.* EXCEPT(id)
 	, vs.* EXCEPT(id)
-	, lc.* EXCEPT(id, program_name, start_year)
+	, lc.* EXCEPT(
+	id 
+	, program_name 
+	, start_year 	
+	, measure_id
+	, measure_name 
+	, project_id 
+	, label_1
+	, label_2 	
+	, label_3
+	, label_4
+	, label_5
+	, avoided_cost_subset
+	, net_to_gross_ratio 
+	, estimated_useful_life
+	, unit_quantity 
+	)
 	, gs.* EXCEPT(id)
 FROM
 	total_values tv 
