@@ -34,6 +34,7 @@ from figures import (
 )
 from helper_functions import (
     space_and_title,
+    clean_column_name,
     reconstruct_column_name,
     determine_label_sig_figs, 
     determine_dollar_magnitude,
@@ -956,6 +957,7 @@ else:
         st.divider()
         
         summary_results_df = con.execute(generate_summary_results_query()).df()
+        summary_results_df.columns = [clean_column_name(col) for col in summary_results_df.columns]
         st.markdown("### Summary Results Table:")
         st.dataframe(summary_results_df, width='stretch', hide_index=True)
         

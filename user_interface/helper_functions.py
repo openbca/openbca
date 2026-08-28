@@ -21,6 +21,10 @@ def space_and_title(text: str) -> str:
         "Vs", "vs")
 
 
+def clean_column_name(text: str) -> str:
+    return str(text).replace('_', ' ').title().replace('Id', 'ID').replace('Ng', 'NG').replace('Nei', 'NEI').replace(' Li', ' LI').replace(' Dollar', '').replace('Mmbtu', 'MMBtu').replace('Ghg', 'GHG')
+
+
 def reconstruct_column_name(text: str) -> str:
     return str(text).lower().replace(" ", "_")
 

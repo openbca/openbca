@@ -52,7 +52,7 @@ config_measure_cost_fields_map_dict = {
             'program_admin_costs_dollar',
         ],
     'Utility Direct Investment in DERs': [
-            'utility_direct_investment_in_ders_dollar',
+            'utility_direct_investment_in_ders_upfront_dollar',
         ],
     'Utility Financial Incentives': [
             'utility_incentive_upfront_dollar',
@@ -64,10 +64,10 @@ config_measure_cost_fields_map_dict = {
             'incremental_cost_annual_dollar_per_year'
         ],
     'Host Customer Transaction Cost': [
-        'host_customer_transaction_cost_dollar'
+        'host_customer_transaction_cost_upfront_dollar'
     ],        
     'Host Customer Interconnection Cost': [
-        'host_customer_interconnection_cost_dollar'
+        'host_customer_interconnection_cost_upfront_dollar'
     ],
     'Host Customer Tax Incentives': [
             'host_customer_tax_incentive_upfront_dollar',
