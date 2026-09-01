@@ -22,7 +22,17 @@ def space_and_title(text: str) -> str:
 
 
 def clean_column_name(text: str) -> str:
-    return str(text).replace('_', ' ').title().replace('Id', 'ID').replace('Ng', 'NG').replace('Nei', 'NEI').replace(' Li', ' LI').replace(' Dollar', '').replace('Mmbtu', 'MMBtu').replace('Ghg', 'GHG')
+    return str(text).replace('_', ' ').title().replace(
+        'Kwh', 'kWh').replace(
+        'Mwh', 'MWh').replace(
+        'Id', 'ID').replace(
+        'Ng', 'NG').replace(
+        'Nei', 'NEI').replace(
+        '- Li', '- LI').replace(
+        ' Dollar', '').replace(
+        'Mmbtu', 'MMBtu').replace(
+        'Ghg', 'GHG').replace(
+        'Per Year', 'Over Lifecycle')
 
 
 def reconstruct_column_name(text: str) -> str:
