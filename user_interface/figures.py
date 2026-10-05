@@ -425,9 +425,6 @@ def waterfall_multitier_fig(
             color=[
                 colors[0] if x >= 0 else colors[3] for x in stacked_df[col]
             ],
-            # color=[
-            #     "cornflowerblue" if x >= 0 else "lightcoral" for x in stacked_df[col]
-            # ],
             zorder=3
         )
 
@@ -435,7 +432,6 @@ def waterfall_multitier_fig(
             axs[i].bar(
                 totals_dfs[i][category],
                 totals_dfs[i][col],
-                #color=colors[2],
                 color="green", 
                 alpha=0.65, 
                 zorder=3
@@ -505,7 +501,7 @@ def waterfall_multitier_fig(
                 if ylabel is not None
                 else replace_multiple_string_elements(" ".join(col.split("_")).title())
             ),
-            size=16,
+            size=18,
         )
 
         axs[i].tick_params(axis="y", labelsize=15)
@@ -524,8 +520,8 @@ def waterfall_multitier_fig(
                 )
 
     axs[0].set_title(
-        "Load Impact" if title is None else title,
-        fontsize=18,
+        title,
+        fontsize=19,
         loc="left",
     )
 
