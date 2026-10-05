@@ -9,6 +9,8 @@ def space_and_title(text: str) -> str:
         "Of", "of").replace(
         "Hvac", "HVAC").replace(
         "Ac ", "AC ").replace(
+        "Non Energy Impact", "NEI").replace(
+        "Non-Energy Impact", "NEI").replace(
         "Nei", "NEI").replace(
         "Ghg", "GHG").replace(
         " (E)", "").replace(
@@ -17,6 +19,7 @@ def space_and_title(text: str) -> str:
         " Dollar Per Unit Year", '',).replace(
         " Dollar Per Unit", '').replace(
         " Dollar Per Year", '').replace(
+        "Gwp", "GWP").replace(
         " Dollar", '').replace(
         "Vs", "vs")
 
@@ -27,7 +30,10 @@ def clean_column_name(text: str) -> str:
         'Mwh', 'MWh').replace(
         'Id', 'ID').replace(
         'Ng', 'NG').replace(
+        "Non Energy Impact", "NEI").replace(
+        "Non-Energy Impact", "NEI").replace(
         'Nei', 'NEI').replace(
+        "Gwp", "GWP").replace(
         '- Li', '- LI').replace(
         ' Dollar', '').replace(
         'Mmbtu', 'MMBtu').replace(

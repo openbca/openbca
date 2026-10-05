@@ -194,7 +194,7 @@ else:
                             current_selection = st.session_state.get(f"filter_{category}") or []
                             default = [v for v in current_selection if v in options] if current_selection else []
                             selection = st.multiselect(
-                                label=f"Limit {space_and_title(category)} to:",
+                                label=space_and_title(f"Limit {category}")+' to:',
                                 options=options,
                                 default=default,
                                 key=f"filter_{category}",
@@ -365,6 +365,12 @@ else:
                             value = False,
                             key = "show_id_labels",
                         )
+            
+                    aggregate = st.checkbox(
+                            label = "**Aggregate (Avg)**",
+                            value = False,
+                            key = "aggregate",
+                        )
 
                 if benefits_vs_costs_or_jst_ratio == 'Benefits vs Costs':
                     scatter_x_col = 'total_costs'
@@ -385,7 +391,21 @@ else:
                         return_scale_exponent=True
                         )
 
-                if waterfall_scatter_fig_or_table == 'Figures':       
+                if aggregate:
+
+                    benefit_cost_scatter_df = benefit_cost_scatter_df[[
+                        cat_col, 'total_costs', 'total_benefits', 'net_benefits'
+                    ]].groupby(cat_col).mean().reset_index()  
+                    
+                    benefit_cost_scatter_df['jst_ratio'] = benefit_cost_scatter_df['total_benefits'] / benefit_cost_scatter_df['total_costs']
+                    benefit_cost_scatter_df['id'] = benefit_cost_scatter_df[cat_col]
+                    
+                if waterfall_scatter_fig_or_table == 'Figures': 
+
+                    #st.write(cat_col)
+
+                    #st.dataframe(benefit_cost_scatter_df.head())
+                        #st.write(benefit_cost_scatter_grouped_df.head())    
 
                     padding = 0.08    
                     min_x_scatter_val = min(0, benefit_cost_scatter_df[scatter_x_col].min())     
