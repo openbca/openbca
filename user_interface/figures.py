@@ -759,7 +759,7 @@ def numeric_bar_fig(
             )
 
     ax.set_title(
-        "Load Impact" if title is None else title,
+        title,
         fontsize=19,
         loc="left",
     )
@@ -835,11 +835,11 @@ def numeric_bar_fig(
             df[y2_col],
             s=75,
             color="firebrick",
-            label="Count Meters" if y2label is None else y2label,
+            label=y2label,
         )
 
         ax1.set_ylabel(
-            "Savings" if y2label is None else y2label,
+            y2label,
             size=16,
             labelpad=20,
             rotation=-90,
@@ -995,7 +995,7 @@ def scatter_fig(
             if xlabel is not None
             else f"{'Avg. ' if 'avg' in col_list[0] else ''}{get_unit_from_column_name(col_list[0])}"
         ),
-        size=14,
+        size=16,
     )
     ax.set_ylabel(
         (
@@ -1003,7 +1003,7 @@ def scatter_fig(
             if ylabel is not None
             else f"{'Avg. ' if 'avg' in col_list[1] else ''}{get_unit_from_column_name(col_list[1])}"
         ),
-        size=14,
+        size=16,
     )
 
     # Ticks and Grid
@@ -1016,7 +1016,7 @@ def scatter_fig(
     # Set Titles, Legends, Annotations
     ax.set_title(
         "" if title is None else title,
-        fontsize=15,
+        fontsize=17,
         loc="left",
     )
 
