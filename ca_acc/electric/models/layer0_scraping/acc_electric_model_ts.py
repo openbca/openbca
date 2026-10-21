@@ -11,6 +11,7 @@ from sqlmesh import model, ExecutionContext
 import pandas as pd
 import os
 import time
+import yaml
 
 try:
     import xlwings as xw
@@ -24,57 +25,102 @@ ID_COLUMNS = ["utility", "region", "year", "hour_of_year", "month", "quarter"]
 
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file
 DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "..", "raw_acc_files"))  # adjust if needed
+ELECTRIC_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+DEFAULT_SETUP_PATH = os.path.join(ELECTRIC_DIR, "setups", "2024_acc_electric_v1b.yaml")
 
-###SETUP START###
-FILE_NAME = "2024 ACC Electric Model v1b.xlsb"
-OUTPUT_TABLE_NAME = f"full_ca_avoided_costs_acc"
 
-# First numeric data row in the Detailed Output sheet
-detailed_output_first_data_row = 9
-detailed_output_utility_validation_cell = 'H2'
-detailed_output_climate_zone_validation_cell = 'H3'
+def _resolve_setup_path() -> str:
+    configured = os.environ.get("ACC_ELECTRIC_SETUP")
+    if not configured:
+        return DEFAULT_SETUP_PATH
+    if os.path.isabs(configured):
+        return configured
+    return os.path.abspath(configured)
 
-detialed_output_years_cell_initial = 'P6'
-detialed_output_years_cell_final = 'AU6'
 
-# Utility to Climate Zone mapping
-UTILITY_CLIMATE_ZONES = {
-    'PG&E': ['CZ1'],#, 'CZ2', 'CZ3A', 'CZ3B', 'CZ4', 'CZ5', 'CZ11', 'CZ12', 'CZ13', 'CZ16'],
-    'SCE': ['CZ6'],# 'CZ8', 'CZ9', 'CZ10', 'CZ13', 'CZ14', 'CZ15', 'CZ16'],
-    #'SDG&E': ['CZ7', 'CZ10', 'CZ14', 'CZ15']
-}
+def _load_setup(path: str) -> dict:
+    """Load a scrape setup YAML. SQLMesh reads these values when it imports the model."""
+    if not os.path.isfile(path):
+        raise FileNotFoundError(
+            f"ACC electric setup file not found: {path}\n"
+            "Run make run-ca-electric-acc and choose a YAML file under ca_acc/electric/setups/, "
+            "or set ACC_ELECTRIC_SETUP to that file."
+        )
+    with open(path, encoding="utf-8") as setup_file:
+        setup = yaml.safe_load(setup_file)
+    if not isinstance(setup, dict):
+        raise ValueError(f"ACC electric setup file must be a mapping: {path}")
 
-# Check cell ranges and value stream ordering in the Detailed Output sheet
-value_stream_ranges_dict = {
-    'total': ['P', 'AU'],
-    'cap_and_trade': ['AW', 'CB'],
-    'ghg_adder': ['CD', 'DI'],
-    'ghg_rebalancing': ['DK', 'EP'],
-    'energy': ['ER', 'FW'],
-    'capacity': ['FY', 'HD'],
-    'transmission': ['HF', 'IK'],
-    'distribution': ['IM', 'JR'],
-    'ancillary_services': ['JT', 'KY'],
-    'losses': ['LA', 'MF'],
-    'methane_leakage': ['MH', 'NM'],
-    'air_quality_adder': ['NO', 'OT'],
-    'marginal_ghg': ['OW', 'QB']
-}
+    required = ("file_name", "detailed_output", "utility_climate_zones", "value_stream_ranges")
+    missing = [key for key in required if key not in setup]
+    if missing:
+        raise ValueError(f"{path} is missing required keys: {', '.join(missing)}")
 
-# Define the metadata and temporal columns for the output table
+    detailed = setup["detailed_output"]
+    detailed_required = (
+        "first_data_row",
+        "utility_validation_cell",
+        "climate_zone_validation_cell",
+        "years_cell_initial",
+        "years_cell_final",
+    )
+    if not isinstance(detailed, dict):
+        raise ValueError(f"{path}: detailed_output must be a mapping")
+    missing_detailed = [key for key in detailed_required if key not in detailed]
+    if missing_detailed:
+        raise ValueError(f"{path} detailed_output is missing: {', '.join(missing_detailed)}")
+    detailed["first_data_row"] = int(detailed["first_data_row"])
+
+    zones = setup["utility_climate_zones"]
+    if not isinstance(zones, dict) or not zones:
+        raise ValueError(f"{path}: utility_climate_zones must include at least one utility")
+    for utility, climate_zones in zones.items():
+        if not isinstance(climate_zones, list) or not all(isinstance(zone, str) for zone in climate_zones):
+            raise ValueError(f"{path}: utility_climate_zones[{utility!r}] must be a list of climate zone names")
+        if not climate_zones:
+            raise ValueError(f"{path}: utility_climate_zones[{utility!r}] is empty; omit the utility to skip it")
+
+    ranges = setup["value_stream_ranges"]
+    if not isinstance(ranges, dict) or not ranges:
+        raise ValueError(f"{path}: value_stream_ranges must include at least one value stream")
+    for name, bounds in ranges.items():
+        if (
+            not isinstance(bounds, list)
+            or len(bounds) != 2
+            or not all(isinstance(column, str) for column in bounds)
+        ):
+            raise ValueError(
+                f"{path}: value_stream_ranges[{name!r}] must be [start_column, end_column]. "
+                "Quote column letters in the YAML file."
+            )
+
+    return setup
+
+
+SETUP_PATH = _resolve_setup_path()
+_setup = _load_setup(SETUP_PATH)
+
+FILE_NAME = _setup["file_name"]
+_detailed_output = _setup["detailed_output"]
+detailed_output_first_data_row = _detailed_output["first_data_row"]
+detailed_output_utility_validation_cell = _detailed_output["utility_validation_cell"]
+detailed_output_climate_zone_validation_cell = _detailed_output["climate_zone_validation_cell"]
+detailed_output_years_cell_initial = _detailed_output["years_cell_initial"]
+detailed_output_years_cell_final = _detailed_output["years_cell_final"]
+UTILITY_CLIMATE_ZONES = _setup["utility_climate_zones"]
+value_stream_ranges_dict = _setup["value_stream_ranges"]
+
+# Fixed output columns. Value-stream columns come from the setup file.
 columns = {
-            "utility": "string",
-            "region": "string",
-            "year": "int",
-            "month": "int",
-            "quarter": "int",
-            "hour_of_year": "int",
-            "hour_of_day": "int",
-        }
+    "utility": "string",
+    "region": "string",
+    "year": "int",
+    "month": "int",
+    "quarter": "int",
+    "hour_of_year": "int",
+    "hour_of_day": "int",
+}
 
-###SETUP END###
-        
-# Add all value_stream columns as float
 for value_stream in value_stream_ranges_dict.keys():
     columns[value_stream] = "float"
 
@@ -99,12 +145,11 @@ def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
        - Scrape data after user confirms
     3. Return combined DataFrame with all combinations
     """
-    # Generate all valid combinations from the dictionary
-    all_combinations = []
-    for utility in ['PG&E', 'SCE', 'SDG&E']:
-        if utility in UTILITY_CLIMATE_ZONES:
-            for climate_zone in UTILITY_CLIMATE_ZONES[utility]:
-                all_combinations.append((utility, climate_zone))
+    all_combinations = [
+        (utility, climate_zone)
+        for utility, climate_zones in UTILITY_CLIMATE_ZONES.items()
+        for climate_zone in climate_zones
+    ]
     
     return scrape_all_combinations(
         input_file=FILE_NAME, 
@@ -188,7 +233,7 @@ def scrape_all_combinations(input_file, combinations):
         output_sheet = wb.sheets['Detailed Output']
         
         # Read years from row 6 (first range P6:AU6)
-        years_raw = output_sheet.range(f'{detialed_output_years_cell_initial}:{detialed_output_years_cell_final}').value
+        years_raw = output_sheet.range(f'{detailed_output_years_cell_initial}:{detailed_output_years_cell_final}').value
         years = [int(year) for year in years_raw]
 
         # Iterate through all combinations
@@ -196,6 +241,8 @@ def scrape_all_combinations(input_file, combinations):
         combination_num = 0
         
         print(f"\n{'='*60}")
+        print(f"Setup file: {SETUP_PATH}")
+        print(f"Workbook: {input_file}")
         print(f"Starting data scraping for {total_combinations} combinations")
         print(f"{'='*60}")
         for utility, czs in UTILITY_CLIMATE_ZONES.items():

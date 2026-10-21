@@ -1,0 +1,32 @@
+# Subset of 2024_acc_electric_v1b.yaml: PG&E CZ1 and SCE CZ6 only.
+# make run-ca-electric-acc asks for a setup file before scraping.
+
+file_name: "2024 ACC Electric Model v1b.xlsb"
+
+detailed_output:
+  first_data_row: 9
+  utility_validation_cell: "H2"
+  climate_zone_validation_cell: "H3"
+  years_cell_initial: "P6"
+  years_cell_final: "AU6"
+
+utility_climate_zones:
+  "PG&E":
+    - CZ1
+  "SCE":
+    - CZ6
+
+value_stream_ranges:
+  total: ["P", "AU"]
+  cap_and_trade: ["AW", "CB"]
+  ghg_adder: ["CD", "DI"]
+  ghg_rebalancing: ["DK", "EP"]
+  energy: ["ER", "FW"]
+  capacity: ["FY", "HD"]
+  transmission: ["HF", "IK"]
+  distribution: ["IM", "JR"]
+  ancillary_services: ["JT", "KY"]
+  losses: ["LA", "MF"]
+  methane_leakage: ["MH", "NM"]
+  air_quality_adder: ["NO", "OT"]
+  marginal_ghg: ["OW", "QB"]

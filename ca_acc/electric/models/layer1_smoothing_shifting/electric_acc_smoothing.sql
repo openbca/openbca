@@ -1,5 +1,5 @@
 MODEL(
-    name ca_acc_layer1_smoothing.electric_acc_smoothed,
+    name ca_acc_layer1_smoothing_shifting.electric_acc_smoothed,
     kind FULL,
 );
 

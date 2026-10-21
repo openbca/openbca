@@ -17,7 +17,7 @@ The SQLMesh model (`models/acc_electric_model_ts.py`) is used to load ACC data i
 
 1. Upload the CA electric ACC workbook into the ca_acc/raw_acc_files folder.
 2. Save this file with 0% entered as the discount rate.
-3. Review the ACC workbook, in particiular the Dashboard Viewer and Detailed Outputs pages. Make any necessary changes within the SETUP section of the ca_acc/models/acc_electric_model_ts.py file.
+3. Review the ACC workbook, in particular the Dashboard Viewer and Detailed Outputs pages. Workbook name, Detailed Output cells, value-stream column ranges, and the utility/climate-zone list live in a YAML file under `setups/`. Copy an existing setup file when those differ from a saved vintage.
 
 ### Usage
 
@@ -27,18 +27,28 @@ Run the model using the Makefile command:
 make run-ca-electric-acc
 ```
 
+The first prompt lists the YAML files in `setups/` and asks for a number or a path. SQLMesh starts after that choice. For example, enter `3` or `ca_acc/electric/setups/2026_acc_electric.yaml`.
+
+To skip the prompt, set the file on the command:
+
+```bash
+ACC_ELECTRIC_SETUP=ca_acc/electric/setups/2026_acc_electric.yaml make run-ca-electric-acc
+```
+
+Copy a setup file rather than editing one you want to keep. `setups/2024_acc_electric_v1b_cz1_cz6.yaml` is a saved subset (PG&E CZ1 and SCE CZ6).
+
 This command will:
 1. Create the `ca_acc/output` directory if it doesn't exist
 2. Run SQLMesh with the `ca_acc` project to scrape all combinations
 3. Output data to `ca_acc/output/ca_acc.db`
 4. Export the final table to `ca_acc/output/full_ca_avoided_costs_2024acc.csv`
 
-The model processes all combinations defined in the `UTILITY_CLIMATE_ZONES` dictionary:
+The default setup file processes these utility/climate-zone combinations:
 - **PG&E**: CZ1, CZ2, CZ3A, CZ3B, CZ4, CZ5, CZ11, CZ12, CZ13, CZ16
 - **SCE**: CZ6, CZ8, CZ9, CZ10, CZ13, CZ14, CZ15, CZ16
 - **SDG&E**: CZ7, CZ10, CZ14, CZ15
 
-**Total: 26 combinations**
+**Total: 22 combinations**
 
 ### Interactive Process
 
@@ -145,7 +155,7 @@ After running `make run-ca-acc`, the following files are created:
 
 1. Opens the Excel file using xlwings in **visible mode** so you can interact with it
 2. Reads years from row 6 (P6:AU6) in the Detailed Output sheet
-3. Iterates through all utility/climate zone combinations from `UTILITY_CLIMATE_ZONES`
+3. Iterates through all utility/climate zone combinations from the setup file
 4. For each combination:
    - Prompts you to manually set filters and discount rate in Excel
    - Waits for your confirmation (ENTER key)
@@ -165,5 +175,5 @@ After running `make run-ca-acc`, the following files are created:
 - **Manual intervention required**: You must manually set filter values and run macros in Excel for each combination. This is a limitation of Excel macros on macOS when triggered programmatically.
 - **Discount rate**: Must be manually set to 0 in the Dashboard Viewer sheet (cell G11) before scraping each combination.
 - **File must be closed**: Ensure the Excel file is closed before running the command, or Excel may refuse to open it programmatically.
-- **Process time**: With 26 combinations and manual steps, the full process can take 30-60 minutes depending on how quickly you complete each step.
+- **Process time**: With 22 combinations and manual steps, the full process can take 30-60 minutes depending on how quickly you complete each step.
 - **Chunk size**: Data is read in chunks of 8760 rows (one full year of hourly data) to avoid buffer overflow errors.

@@ -1,0 +1,62 @@
+# Default setup for the 2024 ACC Electric Model (v1b).
+#
+# Copy this file to scrape a different vintage or a subset of climate zones.
+# make run-ca-electric-acc asks for a setup file before scraping.
+#
+# Omit a utility to skip it. Column letters are quoted because some
+# (such as "NO") are boolean words in YAML.
+
+file_name: "2026 ACC Electric Model v1brev.xlsb"
+
+# Cells on the Detailed Output sheet.
+detailed_output:
+  first_data_row: 9
+  utility_validation_cell: "G2"
+  climate_zone_validation_cell: "G3"
+  years_cell_initial: "O6"
+  years_cell_final: "AR6"
+
+utility_climate_zones:
+  "PG&E":
+    - CZ1
+    - CZ2
+    - CZ3A
+    - CZ3B
+    - CZ4
+    - CZ5
+    - CZ11
+    - CZ12
+    - CZ13
+    - CZ16
+  "SCE":
+    - CZ6
+    - CZ8
+    - CZ9
+    - CZ10
+    - CZ13
+    - CZ14
+    - CZ15
+    - CZ16
+  "SDG&E":
+    - CZ7
+    - CZ10
+    - CZ14
+    - CZ15
+
+# Detailed Output column ranges, [start_column, end_column], in sheet order.
+value_stream_ranges:
+  total: ["O", "AR"]
+  cap_and_trade: ["AT", "BW"]
+  ghg_adder: ["BY", "DB"]
+  energy: ["DD", "EG"]
+  capacity: ["EI", "FL"]
+  transmission: ["FN", "GQ"]
+  distribution: ["GS", "HV"]
+  ancillary_services: ["HX", "JA"]
+  losses: ["JC", "KF"]
+  methane_leakage: ["KH", "LK"]
+  air_quality_adder: ["LM", "MP"]
+  marginal_ghg: ["MS", "NV"]
+  # The GHG Rebalancing data are not present in the 2026 ACC electric model, but are present in the 2024 ACC electric model.
+  # Using the Air Quality Adder entries, which are all 0, as a placeholder.
+  ghg_rebalancing: ["LM", "MP"]

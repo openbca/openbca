@@ -155,7 +155,7 @@ def load_avoided_costs_from_excel(
 
     # Trim "Input" text if present
     long_df["avoided_cost_subset"] = long_df["avoided_cost_subset"].str.replace(" Inputs", "", regex=False)
-    
+    print(long_df["avoided_cost_subset"].unique())
     # Adjust hour_of_year from 1 - 8760 to 0 - 8759
     long_df['hour_of_year'] = long_df['hour_of_year'] - 1
 

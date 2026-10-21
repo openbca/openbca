@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-Script to split a large CSV file into 10 equal-sized smaller CSV files.
+Script to split a large CSV file into equal-sized smaller CSV files.
 
 Usage:
-    python split_csv.py <input_file.csv>
-    python split_csv.py <input_file.csv> [output_prefix]
+    python split_csv.py <input_file.csv> [num_parts] [output_prefix]
+
+num_parts defaults to 10.
 """
 
 import csv
@@ -83,10 +84,13 @@ def main():
         sys.exit(1)
     
     input_file = sys.argv[1]
-    output_prefix = sys.argv[2] if len(sys.argv) > 2 else None
-    
+    num_parts = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+    output_prefix = sys.argv[3] if len(sys.argv) > 3 else None
+
     try:
-        split_csv(input_file, output_prefix)
+        if num_parts < 1:
+            raise ValueError(f"num_parts must be at least 1, got {num_parts}")
+        split_csv(input_file, output_prefix, num_parts)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)

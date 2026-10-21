@@ -1,0 +1,60 @@
+# Default setup for the 2024 ACC Electric Model (v1b).
+#
+# Copy this file to scrape a different vintage or a subset of climate zones.
+# make run-ca-electric-acc asks for a setup file before scraping.
+#
+# Omit a utility to skip it. Column letters are quoted because some
+# (such as "NO") are boolean words in YAML.
+
+file_name: "2024 ACC Electric Model v1b.xlsb"
+
+# Cells on the Detailed Output sheet.
+detailed_output:
+  first_data_row: 9
+  utility_validation_cell: "H2"
+  climate_zone_validation_cell: "H3"
+  years_cell_initial: "P6"
+  years_cell_final: "AU6"
+
+utility_climate_zones:
+  "PG&E":
+    - CZ1
+    - CZ2
+    - CZ3A
+    - CZ3B
+    - CZ4
+    - CZ5
+    - CZ11
+    - CZ12
+    - CZ13
+    - CZ16
+  "SCE":
+    - CZ6
+    - CZ8
+    - CZ9
+    - CZ10
+    - CZ13
+    - CZ14
+    - CZ15
+    - CZ16
+  "SDG&E":
+    - CZ7
+    - CZ10
+    - CZ14
+    - CZ15
+
+# Detailed Output column ranges, [start_column, end_column], in sheet order.
+value_stream_ranges:
+  total: ["P", "AU"]
+  cap_and_trade: ["AW", "CB"]
+  ghg_adder: ["CD", "DI"]
+  ghg_rebalancing: ["DK", "EP"]
+  energy: ["ER", "FW"]
+  capacity: ["FY", "HD"]
+  transmission: ["HF", "IK"]
+  distribution: ["IM", "JR"]
+  ancillary_services: ["JT", "KY"]
+  losses: ["LA", "MF"]
+  methane_leakage: ["MH", "NM"]
+  air_quality_adder: ["NO", "OT"]
+  marginal_ghg: ["OW", "QB"]
