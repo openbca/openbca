@@ -11,6 +11,7 @@ from sqlmesh import model, ExecutionContext
 import pandas as pd
 import os
 import time
+import yaml
 
 try:
     import xlwings as xw
@@ -24,44 +25,94 @@ ID_COLUMNS = ["utility", "region", "year", "month", "quarter"]
 
 BASE_DIR = os.path.dirname(__file__)  # directory of the model file
 DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "raw_acc_files"))  # adjust if needed
+GAS_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+DEFAULT_SETUP_PATH = os.path.join(GAS_DIR, "setups", "2024_acc_gas_v1b.yaml")
 
-###SETUP START###
-FILE_NAME = "2024 ACC Gas Model v1b_October Update_ver2.xlsx"
 
-#Class: Total Core, End Use: Small Boiler, Emission Control: Uncontrolled
-# First numeric data row in the Detailed Output sheet
-user_dashboard_first_data_column = 'E'
-user_dashboard_last_data_column = 'AJ'
-user_dashboard_years_row = 58
-emissions_sheet_marginal_ghg_cell = 'G6'
-user_dashboard_utility_validation_cell = 'C5'
+def _resolve_setup_path() -> str:
+    configured = os.environ.get("ACC_GAS_SETUP")
+    if not configured:
+        return DEFAULT_SETUP_PATH
+    if os.path.isabs(configured):
+        return configured
+    return os.path.abspath(configured)
 
-# Utilities
-UTILITIES = ['PG&E', 'Socal Gas', 'SDG&E']
 
-# Check cell ranges and value stream ordering in the User Dashboard sheet
-value_stream_ranges_dict = {
-    'total': 59,
-    'market': 77,
-    't_d': 91,
-    'environment': 105,
-    'upstream_methane': 119,
-    'btm_methane': 133,
-    'air_quality_adder': 147,
+def _load_setup(path: str) -> dict:
+    """Load a scrape setup YAML. SQLMesh reads these values when it imports the model."""
+    if not os.path.isfile(path):
+        raise FileNotFoundError(
+            f"ACC gas setup file not found: {path}\n"
+            "Run make run-ca-gas-acc and choose a YAML file under ca_acc/gas/setups/, "
+            "or set ACC_GAS_SETUP to that file."
+        )
+    with open(path, encoding="utf-8") as setup_file:
+        setup = yaml.safe_load(setup_file)
+    if not isinstance(setup, dict):
+        raise ValueError(f"ACC gas setup file must be a mapping: {path}")
+
+    required = ("file_name", "user_dashboard", "emissions", "utilities", "value_stream_ranges")
+    missing = [key for key in required if key not in setup]
+    if missing:
+        raise ValueError(f"{path} is missing required keys: {', '.join(missing)}")
+
+    dashboard = setup["user_dashboard"]
+    dashboard_required = (
+        "first_data_column",
+        "last_data_column",
+        "years_row",
+        "utility_validation_cell",
+    )
+    if not isinstance(dashboard, dict):
+        raise ValueError(f"{path}: user_dashboard must be a mapping")
+    missing_dashboard = [key for key in dashboard_required if key not in dashboard]
+    if missing_dashboard:
+        raise ValueError(f"{path} user_dashboard is missing: {', '.join(missing_dashboard)}")
+    for key in ("first_data_column", "last_data_column", "utility_validation_cell"):
+        if not isinstance(dashboard[key], str):
+            raise ValueError(f"{path}: user_dashboard.{key} must be a quoted cell or column")
+    dashboard["years_row"] = int(dashboard["years_row"])
+
+    emissions = setup["emissions"]
+    if not isinstance(emissions, dict) or not isinstance(emissions.get("marginal_ghg_cell"), str):
+        raise ValueError(f"{path}: emissions.marginal_ghg_cell must be a quoted cell")
+
+    utilities = setup["utilities"]
+    if not isinstance(utilities, list) or not utilities or not all(isinstance(name, str) for name in utilities):
+        raise ValueError(f"{path}: utilities must be a non-empty list of utility names")
+
+    ranges = setup["value_stream_ranges"]
+    if not isinstance(ranges, dict) or not ranges:
+        raise ValueError(f"{path}: value_stream_ranges must include at least one value stream")
+    for name, row in ranges.items():
+        if isinstance(row, bool) or not isinstance(row, int):
+            raise ValueError(f"{path}: value_stream_ranges[{name!r}] must be the starting row number")
+
+    return setup
+
+
+SETUP_PATH = _resolve_setup_path()
+_setup = _load_setup(SETUP_PATH)
+
+FILE_NAME = _setup["file_name"]
+_user_dashboard = _setup["user_dashboard"]
+user_dashboard_first_data_column = _user_dashboard["first_data_column"]
+user_dashboard_last_data_column = _user_dashboard["last_data_column"]
+user_dashboard_years_row = _user_dashboard["years_row"]
+user_dashboard_utility_validation_cell = _user_dashboard["utility_validation_cell"]
+emissions_sheet_marginal_ghg_cell = _setup["emissions"]["marginal_ghg_cell"]
+UTILITIES = _setup["utilities"]
+value_stream_ranges_dict = _setup["value_stream_ranges"]
+
+# Fixed output columns. Value-stream columns come from the setup file.
+columns = {
+    "utility": "string",
+    "region": "string",
+    "year": "int",
+    "month": "int",
+    "quarter": "int",
 }
 
-# Define the metadata and temporal columns for the output table
-columns = {
-            "utility": "string",
-            "region": "string",
-            "year": "int",
-            "month": "int",
-            "quarter": "int",
-        }
-
-###SETUP END###
-        
-# Add all value_stream columns as float
 for value_stream in value_stream_ranges_dict.keys():
     columns[value_stream] = "float"
 
@@ -76,15 +127,7 @@ columns['marginal_ghg'] = "float"
 
 def execute(context: ExecutionContext, **kwargs: Any) -> pd.DataFrame:
     """
-    Execute the model to scrape ACC Electric Model data.
-    
-    This function will:
-    1. Generate all valid utility/climate zone combinations from UTILITY_CLIMATE_ZONES
-    2. For each combination:
-       - Prompt user to set utility in Excel
-       - Prompt user to manually update macro (if needed) and save file
-       - Scrape data after user confirms
-    3. Return combined DataFrame with all combinations
+    Scrape ACC gas model data for each utility in the setup file.
     """
 
     return scrape_all_combinations(
@@ -174,6 +217,8 @@ def scrape_all_combinations(input_file):
         combination_num = 0
         
         print(f"\n{'='*60}")
+        print(f"Setup file: {SETUP_PATH}")
+        print(f"Workbook: {input_file}")
         print(f"Starting data scraping for {total_combinations} combinations")
         print(f"{'='*60}")
         for utility in UTILITIES:

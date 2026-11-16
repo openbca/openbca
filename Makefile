@@ -13,13 +13,7 @@ run-ca-electric-acc:
 	@bash ca_acc/electric/run_electric_acc.sh
 
 run-ca-gas-acc:
-	@echo "Starting ACC Gas Model data scraping..."
-	@echo ""
-	@mkdir -p ca_acc/output
-	@DB=ca_acc/output/ca_gas_acc.db uv run sqlmesh -p ca_acc/gas plan --auto-apply
-	@echo "Exporting gas ACC table to CSV..."
-	@time DB=ca_acc/output/ca_gas_acc.db uv run python -c "import os,duckdb; con=duckdb.connect(os.environ['DB']); con.execute(\"COPY (SELECT * FROM ca_gas_acc.gas.acc_gas_model_ts) TO 'ca_acc/output/full_ca_avoided_costs_acc_gas.csv' (HEADER, DELIMITER ',');\"); con.close()"
-	@echo "CSV file saved to: ca_acc/output/full_ca_avoided_costs_acc_gas.csv"
+	@bash ca_acc/gas/run_gas_acc.sh
 
 run-input-transform-validations:
 	@echo "Running parsing scripts and validating input data..."

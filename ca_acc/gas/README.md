@@ -1,10 +1,10 @@
-# ACC Data Scraping
+# ACC Gas Data Scraping
 
-This directory contains a SQLMesh model for scraping data from the 2024 ACC Electric Model Excel file (`2024 ACC Electric Model v1b.xlsb`).
+This directory contains a SQLMesh model for scraping data from the ACC Gas Model Excel file. The default setup uses `2024 ACC Gas Model v1b_October Update_ver2.xlsx`.
 
 ## SQLMesh Model
 
-The SQLMesh model (`models/acc_electric_model_ts.py`) is used to load ACC data into DuckDB.
+The SQLMesh model (`models/acc_gas_model_ts.py`) loads ACC gas data into DuckDB.
 
 ### Requirements
 
@@ -15,30 +15,36 @@ The SQLMesh model (`models/acc_electric_model_ts.py`) is used to load ACC data i
 
 ### Prerequesits
 
-1. Upload the CA electric ACC workbook into the ca_acc/raw_acc_files folder.
+1. Upload the CA gas ACC workbook into the ca_acc/raw_acc_files folder.
 2. Save this file with 0% entered as the discount rate.
-3. Review the ACC workbook, in particiular the Dashboard Viewer and Detailed Outputs pages. Make any necessary changes within the SETUP section of the ca_acc/models/acc_electric_model_ts.py file.
+3. Review the ACC workbook, in particular the User Dashboard and Emissions sheets. Workbook name, cell anchors, value-stream rows, and the utility list live in a YAML file under `setups/`. Copy an existing setup file when those differ from a saved vintage.
 
 ### Usage
 
 Run the model using the Makefile command:
 
 ```bash
-make run-ca-electric-acc
+make run-ca-gas-acc
+```
+
+The first prompt lists the YAML files in `setups/` and asks for a number or a path. SQLMesh starts after that choice.
+
+To skip the prompt, set the file on the command:
+
+```bash
+ACC_GAS_SETUP=ca_acc/gas/setups/2024_acc_gas_v1b.yaml make run-ca-gas-acc
 ```
 
 This command will:
 1. Create the `ca_acc/output` directory if it doesn't exist
-2. Run SQLMesh with the `ca_acc` project to scrape all combinations
-3. Output data to `ca_acc/output/ca_acc.db`
-4. Export the final table to `ca_acc/output/full_ca_avoided_costs_2024acc.csv`
+2. Run SQLMesh with the `ca_acc/gas` project to scrape the utilities in the setup file
+3. Output data to `ca_acc/output/ca_gas_acc.db`
+4. Export the final table to `ca_acc/output/full_ca_avoided_costs_acc_gas.csv`
 
-The model processes all combinations defined in the `UTILITY_CLIMATE_ZONES` dictionary:
-- **PG&E**: CZ1, CZ2, CZ3A, CZ3B, CZ4, CZ5, CZ11, CZ12, CZ13, CZ16
-- **SCE**: CZ6, CZ8, CZ9, CZ10, CZ13, CZ14, CZ15, CZ16
-- **SDG&E**: CZ7, CZ10, CZ14, CZ15
-
-**Total: 26 combinations**
+The default setup file processes these utilities:
+- **PG&E**
+- **Socal Gas**
+- **SDG&E**
 
 ### Interactive Process
 
