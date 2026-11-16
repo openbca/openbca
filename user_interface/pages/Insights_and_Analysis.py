@@ -927,54 +927,55 @@ else:
 
 
 #############################   Costs Analysis   #####################################
+        costs_commoidty_results_df = con.execute(generate_costs_impact_category_query(where_sql)).df()
 
+        if len(costs_commoidty_results_df) > 0:
 
-        st.markdown("#### Costs")
-        st.markdown("##### See Results by Impact Category and Value Stream")
-        
-        col1, col2 = st.columns(spec=[0.6, 0.4], gap="medium", border=False)
-        
-        with col1:
-            costs_commoidty_results_df = con.execute(generate_costs_impact_category_query(where_sql)).df()
-            costs_commoidty_results_df, costs_commoidty_results_df_unit_labels = determine_dollar_magnitude(costs_commoidty_results_df, x_col='final_dollar_value', y_col=None)
-            costs_commoidty_results_df['impact_category'] = costs_commoidty_results_df['impact_category'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+            st.markdown("#### Costs")
+            st.markdown("##### See Results by Impact Category and Value Stream")
             
-            costs_bar_fig = numeric_bar_fig(
-                df = costs_commoidty_results_df,
-                col = 'final_dollar_value',
-                category = 'impact_category',
-                figsize= (9, 5),
-                pin_yaxis_zeros = True,
-                single_bar_color="indianred",
-                horizontal = True,
-                space_fraction = 0.65,
-                title = f"Costs by Type",
-                xlabel = '',
-                ylabel = f'Costs{costs_commoidty_results_df_unit_labels[0]}',
-                y2label = None,
-                legend = False,
-                legend_loc = None,
-            )
-
-            st.pyplot(costs_bar_fig, clear_figure=True)
-
-        with col2:
-            st.markdown("##### Costs Table")
-            costs_value_stream_results_df = con.execute(generate_costs_value_stream_query(where_sql)).df()#.rename(columns={'final_dollar_value': 'Costs ($)'})
-            costs_value_stream_results_df['Value Stream'] = costs_value_stream_results_df['Value Stream'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
-            st.dataframe(
-                costs_value_stream_results_df, 
-                width='stretch', 
-                hide_index=True, 
-                column_config={
-                    'final_dollar_value': st.column_config.NumberColumn(
-                        label="Costs ($)",
-                        format="dollar",
-                        )
-                    }
+            col1, col2 = st.columns(spec=[0.6, 0.4], gap="medium", border=False)
+            
+            with col1:
+                costs_commoidty_results_df, costs_commoidty_results_df_unit_labels = determine_dollar_magnitude(costs_commoidty_results_df, x_col='final_dollar_value', y_col=None)
+                costs_commoidty_results_df['impact_category'] = costs_commoidty_results_df['impact_category'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+                
+                costs_bar_fig = numeric_bar_fig(
+                    df = costs_commoidty_results_df,
+                    col = 'final_dollar_value',
+                    category = 'impact_category',
+                    figsize= (9, 5),
+                    pin_yaxis_zeros = True,
+                    single_bar_color="indianred",
+                    horizontal = True,
+                    space_fraction = 0.65,
+                    title = f"Costs by Type",
+                    xlabel = '',
+                    ylabel = f'Costs{costs_commoidty_results_df_unit_labels[0]}',
+                    y2label = None,
+                    legend = False,
+                    legend_loc = None,
                 )
 
-        st.divider()
+                st.pyplot(costs_bar_fig, clear_figure=True)
+
+            with col2:
+                st.markdown("##### Costs Table")
+                costs_value_stream_results_df = con.execute(generate_costs_value_stream_query(where_sql)).df()#.rename(columns={'final_dollar_value': 'Costs ($)'})
+                costs_value_stream_results_df['Value Stream'] = costs_value_stream_results_df['Value Stream'].apply(lambda x: replace_multiple_string_elements(space_and_title(x)))
+                st.dataframe(
+                    costs_value_stream_results_df, 
+                    width='stretch', 
+                    hide_index=True, 
+                    column_config={
+                        'final_dollar_value': st.column_config.NumberColumn(
+                            label="Costs ($)",
+                            format="dollar",
+                            )
+                        }
+                    )
+
+            st.divider()
         
         summary_results_df = con.execute(generate_summary_results_query()).df()
         summary_results_df.columns = [clean_column_name(col) for col in summary_results_df.columns]

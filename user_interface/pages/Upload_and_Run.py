@@ -24,6 +24,7 @@ from validation_functions import (
     validate_unique_ids,
     validate_load_shapes,
     validate_avoided_cost_load_shape_granularity,
+    validate_load_shape_normalization
 )
 
 col1, col2, col3, col4, col5, col6 = st.columns([0.19, 0.05, 0.19, 0.19, 0.19, 0.19])
@@ -204,6 +205,8 @@ with col2:
                     unique_ids_df = con.execute(unique_ids_query).df()
                     load_shapes_query = "SELECT * FROM core_validations.load_shape_v"
                     load_shapes_df = con.execute(load_shapes_query).df()
+                    load_shape_normalization_query = "SELECT * FROM core_validations.load_shape_normalization_v"
+                    load_shape_normalization_df = con.execute(load_shape_normalization_query).df()
                     avoided_cost_load_shape_granularity_query = "SELECT * FROM core_validations.avoided_cost_load_shape_granularity_v"
                     avoided_cost_load_shape_granularity_df = con.execute(avoided_cost_load_shape_granularity_query).df()
 
@@ -211,6 +214,7 @@ with col2:
                     validate_required_parameters(global_parameters_df, "Configuration", "Global parameters")
                     validate_unique_ids(unique_ids_df, program_input_file_name, "Unique IDs")
                     validate_load_shapes(load_shapes_df, program_input_file_name, "Load Shape")
+                    validate_load_shape_normalization(load_shape_normalization_df, program_input_file_name, "Load Shape Normalization")
                     validate_avoided_cost_load_shape_granularity(avoided_cost_load_shape_granularity_df, program_input_file_name, "Agreement between avoided cost and load shape granularity")
 
 st.divider()

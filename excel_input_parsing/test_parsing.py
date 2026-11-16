@@ -13,7 +13,7 @@ from models.openbca_input_value_stream_groups import load_value_stream_groups_fr
 from models.openbca_input_global_parameters import compile_global_parameters_from_excel
 from models.openbca_input_program_value_streams import load_program_value_streams_from_excel
 from models.first_year_avoided_costs_by_id import load_first_year_avoided_costs_from_excel
-
+from models.openbca_input_load_shape_normalization import compile_ls_normalization_from_excel
 
 def test_measures_parsing():
     """Test parsing of measure inputs."""
@@ -118,6 +118,17 @@ def test_first_year_avoided_costs_parsing():
         print(f"  ✗ Failed to parse first year avoided costs: {e}")
         return False
 
+def test_ls_normalization_parsing():
+    print("\nTesting load shape normalization parsing...")
+    try:
+        df = compile_ls_normalization_from_excel(
+            input_file='OpenBCA_Program_Input.xlsm'
+        )
+        print(f"  ✓ Successfully parsed load shape normalization: {len(df)} rows")
+        return True
+    except Exception as e:
+        print(f"  ✗ Failed to parse load shape normalization: {e}")
+        return False
 
 def main():
     """Run all parsing tests."""
@@ -132,6 +143,7 @@ def main():
     # results.append(test_global_parameters_parsing())
     # results.append(test_program_value_streams_parsing())
     # results.append(test_first_year_avoided_costs_parsing())
+    # results.append(test_ls_normalization_parsing())
     
     print("=" * 60)
     passed = sum(results)

@@ -7,7 +7,7 @@ from config.paths import get_input_templates_dir
 
 
 ID_COLUMNS = [
-    "impact_category", "quarter", "month", "day", "hour_of_year" # Need Quarter?
+    "impact_category", "quarter", "month", "day_of_year", "hour_of_year" # Need Quarter?
 ]
 
 @model(
@@ -60,7 +60,7 @@ def load_load_shapes_from_excel(
             cleaned_headers = []
             for col in headers:
                 col_stripped = str(col).strip()
-                if col_stripped.lower() in {"month", "day", "hour of year"}:
+                if col_stripped.lower() in {"month", "day of year", "hour of year"}:
                     cleaned_headers.append(col_stripped.lower().replace(" ", "_"))
                 else:
                     cleaned_headers.append(col_stripped)  # keep original
@@ -79,13 +79,13 @@ def load_load_shapes_from_excel(
     combined_df = pd.concat(all_frames, ignore_index=True).rename({'Hour': 'hour_of_year'}, axis = 1)
 
     # --- Ensure required ID columns exist ---
-    for col in ["quarter", "month", "day", "hour_of_year"]:
+    for col in ["quarter", "month", "day_of_year", "hour_of_year"]:
 
         if col not in combined_df.columns:
             combined_df[col] = pd.NA
 
     # --- Pivot to long format ---
-    id_cols = ["impact_category", "quarter", "month", "day", "hour_of_year"]
+    id_cols = ["impact_category", "quarter", "month", "day_of_year", "hour_of_year"]
     value_vars = [c for c in combined_df.columns if c not in id_cols]
 
     long_df = combined_df.melt(
@@ -93,7 +93,7 @@ def load_load_shapes_from_excel(
         value_vars=value_vars,
         var_name="load_shape",
         value_name="load_shape_value",
-    ).dropna(axis=0, subset=['load_shape_value']).rename({'day': 'day_of_year'}, axis = 1)
+    ).dropna(axis=0, subset=['load_shape_value'])#.rename({'day': 'day_of_year'}, axis = 1)
 
     # Adjust hour_of_year from 1 - 8760 to 0 - 8759
     long_df['hour_of_year'] = long_df['hour_of_year'] - 1

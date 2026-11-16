@@ -62,3 +62,14 @@ def validate_avoided_cost_load_shape_granularity(df: pd.DataFrame, source_file: 
         else:
             validation_results_placeholder.markdown(f"❌ {validation_name} failed. The following load shapes were found to have lower granularity than demanded by the avoided cost profile. Please check {source_file} and ensure all load shapes are at equal or higher granularity than the avoided cost profile.")
             st.dataframe(df.query("validation_result == 'FAIL'"), hide_index=True, height="auto")
+
+
+def validate_load_shape_normalization(df: pd.DataFrame, source_file: str, validation_name: str = 'Load Shape Normalization'):
+    validation_results_placeholder = st.empty()
+    with st.spinner(f"Validating {validation_name}..."):
+        time.sleep(2)
+        if len(df.query("passed_normalization_test == 'FAIL'")) == 0:
+            validation_results_placeholder.markdown(f"✅ {validation_name} verified!")
+        else:
+            validation_results_placeholder.markdown(f"⚠️ Warning: The following load shapes were found to fall outside expected normalization thresholds (0.999 - 1.001). Please check {source_file} and ensure all load shapes are properly catalogued in the Define Load Shape Names tab and normalized as intended.")
+            st.dataframe(df.query("passed_normalization_test == 'FAIL'"), hide_index=True, height="auto")

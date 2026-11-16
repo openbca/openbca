@@ -5,7 +5,7 @@ import pandas as pd
 from config.paths import get_input_templates_dir
 
 ID_COLUMNS = [
-    "avoided_cost", "year", "quarter", "month", "day_of_year", #"type_of_day",
+    "avoided_cost", "year", "quarter", "month", "day_of_year", 
     "hour_of_day", "hour_of_year"
 ]
 
@@ -20,7 +20,6 @@ ID_COLUMNS = [
         "quarter": "int",
         "month": "int",
         "day_of_year": "int",
-        #"type_of_day": "string",
         "hour_of_day": "int",
         "hour_of_year": "int",
         "avoided_cost_value": "float",
